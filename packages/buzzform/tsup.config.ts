@@ -5,10 +5,11 @@ export default defineConfig({
         'index': 'src/index.ts',
         'rhf': 'src/adapters/rhf.ts',
         'tanstack': 'src/adapters/tanstack.ts',
+        'zod': 'src/resolvers/zod.ts',
     },
     format: ['cjs', 'esm'],
     dts: true,
     clean: true,
     sourcemap: true,
-    external: ['react', 'react-hook-form', '@tanstack/react-form'],
+    external: ['react', 'react-hook-form', '@tanstack/react-form', 'zod'],
 })

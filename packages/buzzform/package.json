@@ -51,6 +51,16 @@
         "types": "./dist/tanstack.d.ts",
         "default": "./dist/tanstack.js"
       }
+    },
+    "./zod": {
+      "import": {
+        "types": "./dist/zod.d.mts",
+        "default": "./dist/zod.mjs"
+      },
+      "require": {
+        "types": "./dist/zod.d.ts",
+        "default": "./dist/zod.js"
+      }
     }
   },
   "files": [
@@ -72,6 +82,9 @@
     "@tanstack/react-form": "^0.40.0"
   },
   "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    },
     "react-hook-form": {
       "optional": true
     },
