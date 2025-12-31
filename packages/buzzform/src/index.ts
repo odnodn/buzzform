@@ -48,6 +48,7 @@ export type {
     CheckboxField,
     SwitchField,
     RadioField,
+    TagsField,
     UploadField,
 
     // Layout fields
@@ -63,6 +64,13 @@ export type {
     FieldType,
     DataField,
     LayoutField,
+} from './types';
+
+// Types - Form configuration
+export type {
+    FormSettings,
+    FormConfig,
+    UseFormOptions,
 } from './types';
 
 // Utilities (no external dependencies)
