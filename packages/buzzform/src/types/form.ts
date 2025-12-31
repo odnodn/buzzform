@@ -1,5 +1,17 @@
 import type { ZodSchema } from 'zod';
+import type { Field } from './field';
 import type { AdapterFactory, Resolver } from './adapter';
+
+// =============================================================================
+// SCHEMA WITH FIELDS
+// =============================================================================
+
+/**
+ * A Zod schema with field definitions attached.
+ * Created by `createSchema([...])` for type inference and field rendering.
+ */
+export type BuzzFormSchema<TData = unknown, TFields extends readonly Field[] = Field[]> =
+    ZodSchema<TData> & { fields: TFields };
 
 // =============================================================================
 // FORM SETTINGS
@@ -9,34 +21,20 @@ import type { AdapterFactory, Resolver } from './adapter';
  * Form-level behavior settings.
  * These control how the form behaves during user interaction.
  */
-export interface FormSettings<TData = Record<string, unknown>> {
+export interface FormSettings {
     /**
-     * Only allow submission when form has changes.
-     * Useful for edit forms where unchanged data shouldn't be re-saved.
+     * Prevent submission when form has no changes.
+     * When true, handleSubmit is a no-op if formState.isDirty is false.
      * @default false
      */
     submitOnlyWhenDirty?: boolean;
 
     /**
      * Auto-focus first visible, enabled field on mount.
+     * Note: This is a hint to the renderer component.
      * @default false
      */
     autoFocus?: boolean;
-
-    /**
-     * Form-level validation (cross-field).
-     * Runs after field-level validation passes.
-     * Return an object of { fieldPath: errorMessage } for errors.
-     * 
-     * @example
-     * validate: (values) => {
-     *   if (values.password !== values.confirmPassword) {
-     *     return { confirmPassword: 'Passwords must match' };
-     *   }
-     *   return undefined; // No errors
-     * }
-     */
-    validate?: (values: TData) => Record<string, string> | undefined | Promise<Record<string, string> | undefined>;
 }
 
 // =============================================================================
@@ -115,14 +113,14 @@ export interface UseFormOptions<TData = Record<string, unknown>> {
 
     /**
      * Zod schema for validation.
-     * Use `createSchema([...])` to get a schema with fields attached,
-     * or pass a raw Zod schema for validation-only (manual field rendering).
+     * - Use `createSchema([...])` for schema with fields attached (recommended)
+     * - Use raw Zod schema for validation-only (manual field rendering)
      */
-    schema: ZodSchema<TData>;
+    schema: ZodSchema<TData> | BuzzFormSchema<TData>;
 
     /**
      * Default values for the form.
-     * If not provided, extracted from field definitions.
+     * If not provided and schema has fields, extracted from field definitions.
      * Can be static, sync function, or async function.
      */
     defaultValues?: TData | (() => TData) | (() => Promise<TData>);
@@ -156,5 +154,5 @@ export interface UseFormOptions<TData = Record<string, unknown>> {
     /**
      * Form behavior settings.
      */
-    settings?: FormSettings<TData>;
+    settings?: FormSettings;
 }

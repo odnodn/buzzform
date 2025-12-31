@@ -1,4 +1,5 @@
 import type { FormEvent } from 'react';
+import type { FormSettings } from './form';
 
 // =============================================================================
 // FORM STATE
@@ -230,6 +231,12 @@ export interface AdapterOptions<TData = Record<string, unknown>> {
  * }
  */
 export interface FormAdapter<TData = Record<string, unknown>> {
+    /**
+     * Form-level behavior settings.
+     * Accessible by renderers to determine behavior like autoFocus.
+     */
+    settings?: FormSettings;
+
     /**
      * The underlying form library's control/instance.
      * Used by field components to connect to form state.

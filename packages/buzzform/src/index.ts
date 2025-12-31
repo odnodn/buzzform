@@ -68,6 +68,7 @@ export type {
 
 // Types - Form configuration
 export type {
+    BuzzFormSchema,
     FormSettings,
     FormConfig,
     UseFormOptions,
@@ -75,3 +76,10 @@ export type {
 
 // Utilities (no external dependencies)
 export { createArrayHelpers } from './utils';
+
+// Provider
+export { FormProvider } from './providers/form-provider';
+export { FormConfigContext } from './context/form-context';
+
+// Hooks
+export { useForm } from './hooks/use-form';

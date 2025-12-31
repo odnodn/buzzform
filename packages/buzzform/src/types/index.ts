@@ -64,6 +64,7 @@ export type {
 
 // Form types
 export type {
+    BuzzFormSchema,
     FormSettings,
     FormConfig,
     UseFormOptions,
