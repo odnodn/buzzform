@@ -15,11 +15,44 @@
     "shadcn",
     "nextjs",
     "react-hook-form",
+    "tanstack-form",
     "zod"
   ],
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./rhf": {
+      "import": {
+        "types": "./dist/rhf.d.mts",
+        "default": "./dist/rhf.mjs"
+      },
+      "require": {
+        "types": "./dist/rhf.d.ts",
+        "default": "./dist/rhf.js"
+      }
+    },
+    "./tanstack": {
+      "import": {
+        "types": "./dist/tanstack.d.mts",
+        "default": "./dist/tanstack.mjs"
+      },
+      "require": {
+        "types": "./dist/tanstack.d.ts",
+        "default": "./dist/tanstack.js"
+      }
+    }
+  },
   "files": [
     "dist"
   ],
@@ -29,16 +62,30 @@
     "lint": "eslint .",
     "type-check": "tsc --noEmit"
   },
+  "dependencies": {
+    "nanoid": "^5.0.9"
+  },
   "peerDependencies": {
     "react": "^18 || ^19",
-    "react-hook-form": "^7.69.0",
-    "zod": "^3.25.76"
+    "react-hook-form": "^7.0.0",
+    "@tanstack/react-form": "^0.40.0"
+  },
+  "peerDependenciesMeta": {
+    "react-hook-form": {
+      "optional": true
+    },
+    "@tanstack/react-form": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/node": "^22.15.3",
+    "react": "^19.0.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "eslint": "^9.39.1",
+    "react-hook-form": "^7.69.0",
+    "@tanstack/react-form": "^0.40.0",
     "tsup": "^8.3.5",
     "typescript": "^5.9.2"
   },
