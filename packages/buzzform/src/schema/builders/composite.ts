@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import type { ArrayField, GroupField } from '../../types';
+import type { ArrayField, GroupField, Field } from '../../types';
 
 // Note: These import from the parent module to avoid circular deps
 // The fieldsToZodSchema function is passed as a parameter
 
-type SchemaGenerator = (fields: readonly any[]) => z.ZodObject<any>;
+type SchemaGenerator = (fields: readonly Field[]) => z.ZodObject<z.ZodRawShape>;
 
 /**
  * Creates Zod schema for array fields.

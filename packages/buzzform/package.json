@@ -79,10 +79,10 @@
     "nanoid": "^5.0.9"
   },
   "peerDependencies": {
+    "@tanstack/react-form": "^0.40.0",
     "react": "^18 || ^19",
-    "zod": "^3.0.0",
     "react-hook-form": "^7.0.0",
-    "@tanstack/react-form": "^0.40.0"
+    "zod": "^3.0.0"
   },
   "peerDependenciesMeta": {
     "zod": {
@@ -96,16 +96,18 @@
     }
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@tanstack/react-form": "^0.40.0",
     "@types/node": "^22.15.3",
-    "react": "^19.0.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "eslint": "^9.39.1",
+    "react": "^19.0.0",
     "react-hook-form": "^7.69.0",
-    "@tanstack/react-form": "^0.40.0",
-    "zod": "^3.25.0",
     "tsup": "^8.3.5",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.51.0",
+    "zod": "^3.25.0"
   },
   "publishConfig": {
     "access": "public"

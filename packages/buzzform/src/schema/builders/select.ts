@@ -20,7 +20,7 @@ export function createSelectFieldSchema(field: SelectField): z.ZodTypeAny {
             arraySchema = arraySchema.min(1, 'Select at least one option');
         }
 
-        let schema: z.ZodTypeAny = applyCustomValidation(arraySchema, field, field.name);
+        const schema: z.ZodTypeAny = applyCustomValidation(arraySchema, field, field.name);
 
         if (!field.required) {
             return schema.optional().default([]);

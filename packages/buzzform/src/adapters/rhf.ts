@@ -2,7 +2,15 @@
 
 import { useRef, useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import type { Control, UseFormReturn, FieldValues, DefaultValues } from 'react-hook-form';
+import type {
+    Control,
+    FieldValues,
+    Path,
+    PathValue,
+    DefaultValues,
+    FieldErrors,
+    Resolver as RhfResolver
+} from 'react-hook-form';
 import type {
     FormAdapter,
     AdapterOptions,
@@ -84,9 +92,12 @@ export function useRhf<TData extends FieldValues = FieldValues>(
     // -------------------------------------------------------------------------
 
     const form = useForm<TData>({
-        defaultValues: defaultValues as any,
+        defaultValues: defaultValues as DefaultValues<TData>,
         values: values,
-        resolver: resolver as any,
+        // We cast resolver because strict RHF types expect nested errors, but
+        // our resolvers might return flat errors (which worked in practice).
+        // This cast bridges the type gap.
+        resolver: resolver as unknown as RhfResolver<TData>,
         mode,
         reValidateMode,
         criteriaMode,
@@ -153,18 +164,18 @@ export function useRhf<TData extends FieldValues = FieldValues>(
         getValues: () => form.getValues(),
 
         setValue: (name: string, value: unknown, opts?: SetValueOptions) => {
-            form.setValue(name as any, value as any, {
+            form.setValue(name as Path<TData>, value as PathValue<TData, Path<TData>>, {
                 shouldValidate: opts?.shouldValidate,
                 shouldDirty: opts?.shouldDirty ?? true,
                 shouldTouch: opts?.shouldTouch,
             });
         },
 
-        reset: (vals) => form.reset(vals as any),
+        reset: (vals) => form.reset(vals as DefaultValues<TData>),
 
         watch: <T = unknown>(name: string): T => {
             // Note: This creates a subscription. For non-reactive reads, use getValues
-            return form.watch(name as any) as T;
+            return form.watch(name as Path<TData>) as T;
         },
 
         // --- Validation ---
@@ -172,13 +183,13 @@ export function useRhf<TData extends FieldValues = FieldValues>(
         validate: async (name) => {
             if (name) {
                 const names = Array.isArray(name) ? name : [name];
-                return form.trigger(names as any);
+                return form.trigger(names as Path<TData>[]);
             }
             return form.trigger();
         },
 
         setError: (name: string, error: FieldError) => {
-            form.setError(name as any, {
+            form.setError(name as Path<TData>, {
                 type: error.type || 'manual',
                 message: error.message,
             });
@@ -187,7 +198,7 @@ export function useRhf<TData extends FieldValues = FieldValues>(
         clearErrors: (name) => {
             if (name) {
                 const names = Array.isArray(name) ? name : [name];
-                names.forEach(n => form.clearErrors(n as any));
+                names.forEach(n => form.clearErrors(n as Path<TData>));
             } else {
                 form.clearErrors();
             }
@@ -196,8 +207,8 @@ export function useRhf<TData extends FieldValues = FieldValues>(
         // --- Arrays ---
 
         array: createArrayHelpers(
-            (path) => form.getValues(path as any) as unknown[],
-            (path, value) => form.setValue(path as any, value as any, { shouldDirty: true })
+            (path) => form.getValues(path as Path<TData>) as unknown[],
+            (path, value) => form.setValue(path as Path<TData>, value as PathValue<TData, Path<TData>>, { shouldDirty: true })
         ),
     };
 
@@ -218,11 +229,14 @@ export function useRhf<TData extends FieldValues = FieldValues>(
  * @param control - The control object from useRhf
  * @param name - Field path(s) to watch
  */
-export function useRhfWatch<TData, TValue = unknown>(
-    control: Control<TData & Record<string, any>>,
+export function useRhfWatch<TData extends FieldValues, TValue = unknown>(
+    control: Control<TData>,
     name: string | string[]
 ): TValue {
-    return useWatch({ control, name: name as any }) as TValue;
+    if (Array.isArray(name)) {
+        return useWatch({ control, name: name as unknown as Path<TData>[] }) as TValue;
+    }
+    return useWatch({ control, name: name as Path<TData> }) as TValue;
 }
 
 // =============================================================================
@@ -232,37 +246,43 @@ export function useRhfWatch<TData, TValue = unknown>(
 /**
  * Normalize RHF's nested error structure to flat string map.
  */
-function normalizeErrors(
-    errors: Record<string, any>
+function normalizeErrors<TData extends FieldValues>(
+    errors: FieldErrors<TData>
 ): Record<string, string | string[] | undefined> {
     const result: Record<string, string | string[] | undefined> = {};
 
-    function traverse(obj: Record<string, any>, prefix = '') {
+    function traverse(obj: Record<string, unknown>, prefix = '') {
         for (const key in obj) {
             const path = prefix ? `${prefix}.${key}` : key;
             const value = obj[key];
 
-            if (value?.message) {
+            if (isRecord(value) && 'message' in value && typeof value.message === 'string') {
                 // Leaf error
                 result[path] = value.message;
-            } else if (value?.root?.message) {
+            } else if (
+                isRecord(value) &&
+                'root' in value &&
+                isRecord(value.root) &&
+                'message' in value.root &&
+                typeof value.root.message === 'string'
+            ) {
                 // Array root error
                 result[path] = value.root.message;
-            } else if (typeof value === 'object' && value !== null) {
+            } else if (isRecord(value)) {
                 // Nested object, traverse deeper
                 traverse(value, path);
             }
         }
     }
 
-    traverse(errors);
+    traverse(errors as unknown as Record<string, unknown>);
     return result;
 }
 
 /**
  * Flatten nested objects to dot-notation paths.
  */
-function flattenObject(obj: Record<string, any>, prefix = ''): Record<string, boolean> {
+function flattenObject(obj: Record<string, unknown>, prefix = ''): Record<string, boolean> {
     const result: Record<string, boolean> = {};
 
     for (const key in obj) {
@@ -271,12 +291,16 @@ function flattenObject(obj: Record<string, any>, prefix = ''): Record<string, bo
 
         if (typeof value === 'boolean') {
             result[path] = value;
-        } else if (typeof value === 'object' && value !== null) {
+        } else if (isRecord(value)) {
             Object.assign(result, flattenObject(value, path));
         }
     }
 
     return result;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
 }
 
 // =============================================================================

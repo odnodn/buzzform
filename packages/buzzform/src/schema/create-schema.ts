@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { type z } from 'zod';
 import type { Field, FieldsToShape } from '../types';
 import { fieldsToZodSchema } from './fields-to-schema';
 

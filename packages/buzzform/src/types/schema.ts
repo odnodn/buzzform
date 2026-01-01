@@ -80,4 +80,6 @@ export type SchemaBuilder<TField extends Field = Field> = (field: TField) => z.Z
 /**
  * Map of field types to their schema builders.
  */
-export type SchemaBuilderMap = Partial<Record<Field['type'], SchemaBuilder<any>>>;
+export type SchemaBuilderMap = {
+    [K in Field['type']]?: SchemaBuilder<Extract<Field, { type: K }>>;
+};

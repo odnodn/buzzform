@@ -1,7 +1,9 @@
+// Form adapters inherently require `any` for compatibility with TanStack Form's generic types
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { useForm } from '@tanstack/react-form';
+import type { DeepKeys, DeepValue } from '@tanstack/react-form';
 import type {
     FormAdapter,
     AdapterOptions,
@@ -64,8 +66,8 @@ export function useTanstack<TData extends Record<string, unknown> = Record<strin
         values,
         resolver,
         mode = 'onChange',
+        validateOnMount,
         asyncDebounceMs = 300,
-        validateOnMount = false,
         onSubmit,
     } = options;
 
@@ -76,11 +78,43 @@ export function useTanstack<TData extends Record<string, unknown> = Record<strin
     const [manualErrors, setManualErrors] = useState<Record<string, FieldError>>({});
 
     // -------------------------------------------------------------------------
+    // Shared Validation Logic
+    // -------------------------------------------------------------------------
+
+    /**
+     * Runs the resolver against current values and updates manual errors.
+     * Returns true if valid, false if invalid.
+     */
+    const validateForm = useCallback(async (formValues: TData) => {
+        if (!resolver) return true;
+
+        const result = await resolver(formValues);
+
+        if (result.errors && Object.keys(result.errors).length > 0) {
+            setManualErrors((prev) => {
+                // Optimization: prevent unnecessary re-renders if errors match
+                if (JSON.stringify(prev) === JSON.stringify(result.errors)) {
+                    return prev;
+                }
+                return result.errors!;
+            });
+            return false;
+        }
+
+        // Clear errors if valid
+        setManualErrors((prev) => {
+            if (Object.keys(prev).length === 0) return prev;
+            return {};
+        });
+        return true;
+    }, [resolver]);
+
+    // -------------------------------------------------------------------------
     // Handle async default values
     // -------------------------------------------------------------------------
 
     const [resolvedDefaults, setResolvedDefaults] = useState<TData | undefined>(
-        typeof defaultValues === 'function' ? undefined : defaultValues
+        typeof defaultValues === 'function' ? undefined : defaultValues as TData
     );
     const [isLoadingDefaults, setIsLoadingDefaults] = useState(
         typeof defaultValues === 'function'
@@ -100,31 +134,51 @@ export function useTanstack<TData extends Record<string, unknown> = Record<strin
     // Initialize TanStack Form
     // -------------------------------------------------------------------------
 
-    const form = useForm({
+    const form = useForm<TData>({
         defaultValues: (resolvedDefaults ?? {}) as TData,
-        // TanStack Form uses a different validator API - we'll handle validation differently
         asyncDebounceMs,
+        // Integrate mode-based validation
+        // Note: We use sync validators that fire-and-forget the async validateForm.
+        // The validateForm updates React state (manualErrors) which triggers re-render.
+        validators: {
+            onChange: (mode === 'onChange' || mode === 'all')
+                ? ({ value }) => { void validateForm(value); return undefined; }
+                : undefined,
+            onBlur: (mode === 'onBlur' || mode === 'all')
+                ? ({ value }) => { void validateForm(value); return undefined; }
+                : undefined,
+        },
         onSubmit: async ({ value }) => {
-            // Run resolver validation before submit
-            if (resolver) {
-                const result = await resolver(value as TData);
-                if (result.errors && Object.keys(result.errors).length > 0) {
-                    // Set errors manually
-                    Object.entries(result.errors).forEach(([field, error]) => {
-                        setManualErrors(prev => ({
-                            ...prev,
-                            [field]: error,
-                        }));
-                    });
-                    return; // Don't submit if validation fails
-                }
+            // Always validate on submit
+            const isValid = await validateForm(value);
+
+            if (!isValid) {
+                return; // Don't submit if validation fails
             }
 
             if (onSubmit) {
-                await onSubmit(value as TData);
+                await onSubmit(value);
             }
         },
     });
+
+    // -------------------------------------------------------------------------
+    // Validate on Mount
+    // -------------------------------------------------------------------------
+
+    const hasValidatedOnMount = useRef(false);
+
+    useEffect(() => {
+        if (
+            validateOnMount &&
+            !hasValidatedOnMount.current &&
+            !isLoadingDefaults // Wait for async defaults
+        ) {
+            hasValidatedOnMount.current = true;
+            validateForm(form.state.values);
+        }
+    }, [validateOnMount, isLoadingDefaults, validateForm, form.state.values]);
+
     // -------------------------------------------------------------------------
     // Handle controlled values updates
     // -------------------------------------------------------------------------
@@ -135,7 +189,7 @@ export function useTanstack<TData extends Record<string, unknown> = Record<strin
         if (values && JSON.stringify(values) !== JSON.stringify(prevValuesRef.current)) {
             // Update all fields with new values
             Object.entries(values).forEach(([key, value]) => {
-                form.setFieldValue(key as any, value as any);
+                form.setFieldValue(key as DeepKeys<TData>, value as DeepValue<TData, DeepKeys<TData>>);
             });
             prevValuesRef.current = values;
         }
@@ -169,18 +223,23 @@ export function useTanstack<TData extends Record<string, unknown> = Record<strin
 
             // Derive dirtyFields from TanStack's fieldMeta
             const dirtyFields: Record<string, boolean> = {};
-            const fieldMeta = state.fieldMeta as Record<string, { isDirty?: boolean }>;
-            for (const [key, meta] of Object.entries(fieldMeta)) {
+            const fieldMeta = state.fieldMeta;
+
+            // Iterate over keys safely
+            const keys = Object.keys(fieldMeta) as Array<keyof typeof fieldMeta>;
+            for (const key of keys) {
+                const meta = fieldMeta[key];
                 if (meta?.isDirty) {
-                    dirtyFields[key] = true;
+                    dirtyFields[key as string] = true;
                 }
             }
 
             // Derive touchedFields from fieldMeta
             const touchedFields: Record<string, boolean> = {};
-            for (const [key, meta] of Object.entries(fieldMeta)) {
-                if ((meta as any)?.isTouched) {
-                    touchedFields[key] = true;
+            for (const key of keys) {
+                const meta = fieldMeta[key];
+                if (meta?.isTouched) {
+                    touchedFields[key as string] = true;
                 }
             }
 
@@ -206,9 +265,9 @@ export function useTanstack<TData extends Record<string, unknown> = Record<strin
         handleSubmit: (e) => {
             e?.preventDefault();
             e?.stopPropagation();
-            // Clear manual errors before submission
+            // Clear manual errors before submission (they will be re-set by onSubmit validation)
             setManualErrors({});
-            return form.handleSubmit() as any;
+            return form.handleSubmit();
         },
 
         // --- Value Management ---
@@ -216,9 +275,9 @@ export function useTanstack<TData extends Record<string, unknown> = Record<strin
         getValues: () => form.state.values,
 
         setValue: (name: string, value: unknown, opts?: SetValueOptions) => {
-            form.setFieldValue(name as any, value as any);
+            form.setFieldValue(name as DeepKeys<TData>, value as DeepValue<TData, DeepKeys<TData>>);
             if (opts?.shouldValidate) {
-                form.validateField(name as any, 'change');
+                form.validateField(name as DeepKeys<TData>, 'change');
             }
         },
 
@@ -230,7 +289,16 @@ export function useTanstack<TData extends Record<string, unknown> = Record<strin
         watch: <T = unknown>(name: string): T => {
             // Navigate the values object using dot notation
             const parts = name.split('.');
-            return parts.reduce((acc: any, key) => acc?.[key], form.state.values) as T;
+            let current: unknown = form.state.values;
+
+            for (const part of parts) {
+                if (isRecord(current)) {
+                    current = current[part];
+                } else {
+                    return undefined as T;
+                }
+            }
+            return current as T;
         },
 
         // --- Validation ---
@@ -238,18 +306,21 @@ export function useTanstack<TData extends Record<string, unknown> = Record<strin
         validate: async (name) => {
             if (name) {
                 const names = Array.isArray(name) ? name : [name];
-                const results = await Promise.all(
-                    names.map(n => form.validateField(n as any, 'change'))
+                await Promise.all(
+                    names.map(n => form.validateField(n as DeepKeys<TData>, 'change'))
                 );
                 // Check if all validations passed
                 return names.every(n => {
-                    const meta = (form.state.fieldMeta as any)[n];
-                    return !meta?.errors?.length;
+                    // Safe access to fieldMeta using generic constraint
+                    const meta = form.getFieldMeta(n as DeepKeys<TData>);
+                    return !meta?.errors.length;
                 });
             }
             // Validate entire form
             await form.validateAllFields('change');
-            return form.state.isValid;
+            // Also run global resolver
+            const isValid = await validateForm(form.state.values);
+            return form.state.isValid && isValid;
         },
 
         setError: (name: string, error: FieldError) => {
@@ -277,10 +348,18 @@ export function useTanstack<TData extends Record<string, unknown> = Record<strin
         array: createArrayHelpers(
             (path) => {
                 const parts = path.split('.');
-                const val = parts.reduce((acc: any, key) => acc?.[key], form.state.values);
-                return Array.isArray(val) ? val : [];
+                let current: unknown = form.state.values;
+                for (const part of parts) {
+                    if (isRecord(current)) {
+                        current = current[part];
+                    } else {
+                        current = undefined;
+                        break;
+                    }
+                }
+                return Array.isArray(current) ? current : [];
             },
-            (path, value) => form.setFieldValue(path as any, value as any)
+            (path, value) => form.setFieldValue(path as DeepKeys<TData>, value as DeepValue<TData, DeepKeys<TData>>)
         ),
     };
 
@@ -297,18 +376,28 @@ export function useTanstack<TData extends Record<string, unknown> = Record<strin
  * Normalize TanStack's fieldMeta errors to flat string map.
  */
 function normalizeErrors(
-    fieldMeta: Record<string, any>
+    fieldMeta: Record<string, unknown>
 ): Record<string, string | string[] | undefined> {
     const result: Record<string, string | string[] | undefined> = {};
 
     for (const [key, meta] of Object.entries(fieldMeta)) {
-        if (meta?.errors?.length) {
-            // TanStack stores errors as array of strings
-            result[key] = meta.errors.length === 1 ? meta.errors[0] : meta.errors;
+        if (isRecord(meta) && Array.isArray(meta.errors) && meta.errors.length > 0) {
+            const firstError = meta.errors[0];
+            // TanStack stores errors as array of strings or objects
+            if (typeof firstError === 'string') {
+                result[key] = meta.errors.length === 1 ? firstError : meta.errors as string[];
+            } else if (isRecord(firstError) && typeof firstError.message === 'string') {
+                // If error is an object with message property
+                result[key] = firstError.message;
+            }
         }
     }
 
     return result;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
 }
 
 // =============================================================================
