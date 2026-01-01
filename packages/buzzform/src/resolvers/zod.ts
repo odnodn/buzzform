@@ -16,7 +16,7 @@ import type { Resolver, FieldError, ResolverResult } from '../types';
  * @returns A Resolver function compatible with BuzzForm adapters
  * 
  * @example
- * import { z } from 'zod';
+ * import { z } from '@buildnbuzz/buzzform/zod';
  * import { zodResolver } from '@buildnbuzz/buzzform';
  * 
  * const schema = z.object({
@@ -39,13 +39,13 @@ export function zodResolver<TData>(
 
             return {
                 values: parsed,
-                errors: undefined,
+                errors: {},
             };
         } catch (error) {
             // Handle Zod validation errors
             if (isZodError(error)) {
                 return {
-                    values: undefined,
+                    values: {} as TData,
                     errors: mapZodErrors(error),
                 };
             }
@@ -129,3 +129,4 @@ function isZodError(error: unknown): error is ZodError {
 // =============================================================================
 
 export type { ZodSchema } from 'zod';
+export { z } from 'zod';

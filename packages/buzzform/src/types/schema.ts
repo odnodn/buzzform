@@ -83,3 +83,28 @@ export type SchemaBuilder<TField extends Field = Field> = (field: TField) => z.Z
 export type SchemaBuilderMap = {
     [K in Field['type']]?: SchemaBuilder<Extract<Field, { type: K }>>;
 };
+
+// =============================================================================
+// INFER SCHEMA TYPE
+// =============================================================================
+
+/**
+ * Infer the TypeScript type from a BuzzForm schema.
+ * 
+ * Use this instead of `z.infer<typeof schema>` to avoid needing to import
+ * `z` from `@buildnbuzz/buzzform/zod`.
+ * 
+ * @example
+ * import { createSchema, type InferSchema } from '@buildnbuzz/buzzform';
+ * 
+ * const loginSchema = createSchema([
+ *   { type: 'email', name: 'email', required: true },
+ *   { type: 'password', name: 'password', required: true },
+ * ]);
+ * 
+ * type LoginFormData = InferSchema<typeof loginSchema>;
+ * // { email: string; password: string }
+ * 
+ * @see {@link https://form.buildnbuzz.com/docs/type-inference Type Inference Guide}
+ */
+export type InferSchema<T extends z.ZodTypeAny> = z.infer<T>;

@@ -76,4 +76,5 @@ export type {
     FieldsToShape,
     SchemaBuilder,
     SchemaBuilderMap,
+    InferSchema,
 } from './schema';
