@@ -3,6 +3,7 @@ import { defineConfig } from 'tsup'
 export default defineConfig({
     entry: {
         'index': 'src/index.ts',
+        'schema': 'src/schema/index.ts',
         'rhf': 'src/adapters/rhf.ts',
         'tanstack': 'src/adapters/tanstack.ts',
         'zod': 'src/resolvers/zod.ts',

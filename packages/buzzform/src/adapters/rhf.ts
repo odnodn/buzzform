@@ -19,6 +19,7 @@ import type {
     SetValueOptions,
 } from '../types';
 import { createArrayHelpers } from '../utils';
+import { getNestedValue } from '../lib';
 
 // =============================================================================
 // RHF ADAPTER OPTIONS
@@ -164,8 +165,26 @@ export function useRhf<TData extends FieldValues = FieldValues>(
         getValues: () => form.getValues(),
 
         setValue: (name: string, value: unknown, opts?: SetValueOptions) => {
+            let shouldValidate = opts?.shouldValidate;
+
+            if (shouldValidate === undefined) {
+                const hasError = !!getNestedValue(form.formState.errors, name);
+
+                if (mode === 'onChange') {
+                    shouldValidate = true;
+                } else if (mode === 'onBlur') {
+                    if (hasError && reValidateMode === 'onChange') {
+                        shouldValidate = true;
+                    }
+                } else if (mode === 'onSubmit') {
+                    if (hasError && reValidateMode === 'onChange') {
+                        shouldValidate = true;
+                    }
+                }
+            }
+
             form.setValue(name as Path<TData>, value as PathValue<TData, Path<TData>>, {
-                shouldValidate: opts?.shouldValidate,
+                shouldValidate,
                 shouldDirty: opts?.shouldDirty ?? true,
                 shouldTouch: opts?.shouldTouch,
             });
@@ -176,6 +195,23 @@ export function useRhf<TData extends FieldValues = FieldValues>(
         watch: <T = unknown>(name: string): T => {
             // Note: This creates a subscription. For non-reactive reads, use getValues
             return form.watch(name as Path<TData>) as T;
+        },
+
+        onBlur: (name: string) => {
+            let shouldValidate = false;
+            const hasError = !!getNestedValue(form.formState.errors, name);
+
+            if (mode === 'onBlur') {
+                shouldValidate = true;
+            } else if (mode === 'onSubmit') {
+                if (hasError && reValidateMode === 'onBlur') {
+                    shouldValidate = true;
+                }
+            }
+
+            if (shouldValidate) {
+                form.trigger(name as Path<TData>);
+            }
         },
 
         // --- Validation ---

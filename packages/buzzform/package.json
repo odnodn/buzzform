@@ -32,6 +32,16 @@
         "default": "./dist/index.js"
       }
     },
+    "./schema": {
+      "import": {
+        "types": "./dist/schema.d.mts",
+        "default": "./dist/schema.mjs"
+      },
+      "require": {
+        "types": "./dist/schema.d.ts",
+        "default": "./dist/schema.js"
+      }
+    },
     "./rhf": {
       "import": {
         "types": "./dist/rhf.d.mts",

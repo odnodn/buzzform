@@ -201,6 +201,11 @@ export interface AdapterOptions<TData = Record<string, unknown>> {
     mode?: 'onChange' | 'onBlur' | 'onSubmit' | 'all';
 
     /**
+     * When to re-validate after initial error.
+     */
+    reValidateMode?: 'onChange' | 'onBlur' | 'onSubmit';
+
+    /**
      * Callback when form is submitted (after validation passes).
      */
     onSubmit?: (values: TData) => Promise<void> | void;
@@ -307,6 +312,14 @@ export interface FormAdapter<TData = Record<string, unknown>> {
      * @returns Current value of the field
      */
     watch: <T = unknown>(name: string) => T;
+
+    /**
+     * Handle field blur event.
+     * Triggers validation if mode is 'onBlur'.
+     * 
+     * @param name - Field path
+     */
+    onBlur: (name: string) => void;
 
     // -------------------------------------------------------------------------
     // Validation

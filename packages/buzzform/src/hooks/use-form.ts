@@ -107,6 +107,7 @@ export function useForm<TData extends Record<string, unknown> = Record<string, u
     const adapter = options.adapter ?? globalConfig?.adapter;
     const resolverFn = globalConfig?.resolver;
     const mode = options.mode ?? globalConfig?.mode ?? 'onChange';
+    const reValidateMode = options.reValidateMode ?? globalConfig?.reValidateMode ?? 'onChange';
 
     // Validate adapter is available
     if (!adapter) {
@@ -133,6 +134,7 @@ export function useForm<TData extends Record<string, unknown> = Record<string, u
         defaultValues,
         resolver,
         mode,
+        reValidateMode,
         onSubmit: options.onSubmit,
     } as AdapterOptions) as FormAdapter<TData>;
 

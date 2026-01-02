@@ -85,6 +85,8 @@ export interface FieldComponentProps<TValue = unknown, TField = Field> {
     readOnly: boolean;
     /** First error message, if any */
     error?: string;
+    /** Whether the field should auto-focus */
+    autoFocus?: boolean;
 }
 
 /**
@@ -112,6 +114,8 @@ export interface FieldInputProps<TValue = unknown, TField = Field> {
     readOnly: boolean;
     /** First error message, if any */
     error?: string;
+    /** Whether the field should auto-focus */
+    autoFocus?: boolean;
     /** Live validation state (if enabled) */
     validation?: {
         /** Whether validation is currently running */

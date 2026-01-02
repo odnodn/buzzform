@@ -84,6 +84,15 @@ export interface FormConfig {
      * @default 'onChange'
      */
     mode?: 'onChange' | 'onBlur' | 'onSubmit';
+
+    /**
+     * When to re-validate after initial validation error.
+     * - 'onChange': Re-validate on every change (default)
+     * - 'onBlur': Re-validate when fields lose focus
+     * - 'onSubmit': Re-validate only on submit
+     * @default 'onChange'
+     */
+    reValidateMode?: 'onChange' | 'onBlur' | 'onSubmit';
 }
 
 // =============================================================================
@@ -146,6 +155,12 @@ export interface UseFormOptions<TData = Record<string, unknown>> {
      * Uses provider's mode if not specified.
      */
     mode?: 'onChange' | 'onBlur' | 'onSubmit';
+
+    /**
+     * Override the re-validation mode for this form.
+     * Uses provider's reValidateMode if not specified.
+     */
+    reValidateMode?: 'onChange' | 'onBlur' | 'onSubmit';
 
     // =========================================================================
     // BEHAVIOR

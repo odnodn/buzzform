@@ -301,6 +301,16 @@ export function useTanstack<TData extends Record<string, unknown> = Record<strin
             return current as T;
         },
 
+        onBlur: (name: string) => {
+            form.setFieldMeta(name as DeepKeys<TData>, (prev) => ({
+                ...prev,
+                isTouched: true,
+            }));
+            if (mode === 'onBlur') {
+                form.validateField(name as DeepKeys<TData>, 'blur');
+            }
+        },
+
         // --- Validation ---
 
         validate: async (name) => {
