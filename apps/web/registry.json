@@ -91,6 +91,32 @@
           "target": "components/buzzform/fields/checkbox.tsx"
         }
       ]
+    },
+    {
+      "name": "password",
+      "type": "registry:ui",
+      "title": "PasswordField",
+      "description": "A password field component for BuzzForm. Supports show/hide toggle, strength indicator, requirements checklist, password generation, and copy-to-clipboard.",
+      "dependencies": ["@buildnbuzz/buzzform"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "input",
+        "button",
+        "field",
+        "@buzzform/copy"
+      ],
+      "files": [
+        {
+          "path": "registry/base/fields/password.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/fields/password.tsx"
+        },
+        {
+          "path": "registry/base/lib/password.ts",
+          "type": "registry:lib",
+          "target": "components/buzzform/lib/password.ts"
+        }
+      ]
     }
   ]
 }

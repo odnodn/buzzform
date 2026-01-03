@@ -24,6 +24,10 @@ import {
   CheckboxField,
   CheckboxFieldSkeleton,
 } from "@/components/buzzform/fields/checkbox";
+import {
+  PasswordField,
+  PasswordFieldSkeleton,
+} from "@/components/buzzform/fields/password";
 
 export interface FieldRendererComponentProps {
   field: Field;
@@ -70,6 +74,11 @@ export const defaultFieldRegistry: FieldRegistry = createFieldRegistry({
     kind: "data",
     renderer: CheckboxField as ComponentType<FieldRendererComponentProps>,
     skeleton: CheckboxFieldSkeleton as ComponentType<{ field: Field }>,
+  },
+  password: {
+    kind: "data",
+    renderer: PasswordField as ComponentType<FieldRendererComponentProps>,
+    skeleton: PasswordFieldSkeleton as ComponentType<{ field: Field }>,
   },
 });
 
