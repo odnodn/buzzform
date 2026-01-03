@@ -305,13 +305,13 @@ export interface FormAdapter<TData = Record<string, unknown>> {
     reset: (values?: Partial<TData>) => void;
 
     /**
-     * Watch a field's value reactively.
-     * Returns current value and causes re-render when value changes.
+     * Watch one or more field values reactively.
+     * Returns current value(s) and causes re-render when they change.
      * 
-     * @param name - Field path to watch
-     * @returns Current value of the field
+     * @param name - Field path to watch, or undefined for all values
+     * @returns Current value(s)
      */
-    watch: <T = unknown>(name: string) => T;
+    watch: <T = unknown>(name?: string) => T;
 
     /**
      * Handle field blur event.

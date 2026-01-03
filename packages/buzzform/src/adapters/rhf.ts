@@ -192,7 +192,7 @@ export function useRhf<TData extends FieldValues = FieldValues>(
 
         reset: (vals) => form.reset(vals as DefaultValues<TData>),
 
-        watch: <T = unknown>(name: string): T => {
+        watch: <T = unknown>(name?: string): T => {
             // Note: This creates a subscription. For non-reactive reads, use getValues
             return form.watch(name as Path<TData>) as T;
         },

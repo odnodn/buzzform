@@ -286,7 +286,8 @@ export function useTanstack<TData extends Record<string, unknown> = Record<strin
             setManualErrors({});
         },
 
-        watch: <T = unknown>(name: string): T => {
+        watch: <T = unknown>(name?: string): T => {
+            if (!name) return form.state.values as unknown as T;
             // Navigate the values object using dot notation
             const parts = name.split('.');
             let current: unknown = form.state.values;
