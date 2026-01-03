@@ -132,6 +132,21 @@
           "target": "components/buzzform/fields/switch.tsx"
         }
       ]
+    },
+    {
+      "name": "radio",
+      "type": "registry:ui",
+      "title": "RadioField",
+      "description": "A radio group field component for BuzzForm. Supports single selection with default or card variants, horizontal/vertical direction, and multi-column grid layouts.",
+      "dependencies": ["@buildnbuzz/buzzform"],
+      "registryDependencies": ["@buzzform/init", "radio-group", "field"],
+      "files": [
+        {
+          "path": "registry/base/fields/radio.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/fields/radio.tsx"
+        }
+      ]
     }
   ]
 }

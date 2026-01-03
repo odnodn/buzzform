@@ -442,22 +442,28 @@ export interface SwitchField extends BaseField<boolean> {
 }
 
 /**
- * Radio field
+ * Radio field - single selection from a group of options
  */
 export interface RadioField extends BaseField<string | number | boolean> {
     type: 'radio';
-    /** Radio options (static, string array, or async with context for dynamic radio groups) */
+    /** Static array or async function for options */
     options: SelectOption[] | string[] | ((context: ValidationContext) => Promise<SelectOption[]>);
-    /**
-     * Field paths that trigger options refetch when changed.
-     * Required when using async options that depend on other field values.
-     * @example dependencies: ['shippingMethod'] // Refetch when shipping method changes
-     */
+    /** Paths that trigger options refetch when changed */
     dependencies?: string[];
-    /** UI options */
     ui?: {
-        /** Layout direction */
-        direction?: 'horizontal' | 'vertical';
+        /** Visual variant ('default' or 'card') */
+        variant?: 'default' | 'card';
+        /** Layout direction for 'default' variant */
+        direction?: 'vertical' | 'horizontal';
+        /** Grid columns (responsive, 1 on mobile) */
+        columns?: 1 | 2 | 3 | 4;
+        /** Card settings (for variant: 'card') */
+        card?: {
+            /** Size preset ('sm', 'md', 'lg') */
+            size?: 'sm' | 'md' | 'lg';
+            /** Show border around cards */
+            bordered?: boolean;
+        };
     };
 }
 

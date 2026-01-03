@@ -32,6 +32,10 @@ import {
   SwitchField,
   SwitchFieldSkeleton,
 } from "@/components/buzzform/fields/switch";
+import {
+  RadioField,
+  RadioFieldSkeleton,
+} from "@/components/buzzform/fields/radio";
 
 export interface FieldRendererComponentProps {
   field: Field;
@@ -88,6 +92,11 @@ export const defaultFieldRegistry: FieldRegistry = createFieldRegistry({
     kind: "data",
     renderer: SwitchField as ComponentType<FieldRendererComponentProps>,
     skeleton: SwitchFieldSkeleton as ComponentType<{ field: Field }>,
+  },
+  radio: {
+    kind: "data",
+    renderer: RadioField as ComponentType<FieldRendererComponentProps>,
+    skeleton: RadioFieldSkeleton as ComponentType<{ field: Field }>,
   },
 });
 
