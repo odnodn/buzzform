@@ -56,6 +56,26 @@
           "target": "components/buzzform/fields/text.tsx"
         }
       ]
+    },
+    {
+      "name": "textarea",
+      "type": "registry:ui",
+      "title": "TextareaField",
+      "description": "A multi-line textarea field component for BuzzForm. Supports auto-resize, character count, copy-to-clipboard, and all TextareaField options.",
+      "dependencies": ["@buildnbuzz/buzzform"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "textarea",
+        "field",
+        "@buzzform/copy"
+      ],
+      "files": [
+        {
+          "path": "registry/base/fields/textarea.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/fields/textarea.tsx"
+        }
+      ]
     }
   ]
 }

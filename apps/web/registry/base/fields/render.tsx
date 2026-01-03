@@ -16,6 +16,10 @@ import {
   TextField,
   TextFieldSkeleton,
 } from "@/components/buzzform/fields/text";
+import {
+  TextareaField,
+  TextareaFieldSkeleton,
+} from "@/components/buzzform/fields/textarea";
 
 export interface FieldRendererComponentProps {
   field: Field;
@@ -52,6 +56,11 @@ export const defaultFieldRegistry: FieldRegistry = createFieldRegistry({
     kind: "data",
     renderer: TextField as ComponentType<FieldRendererComponentProps>,
     skeleton: TextFieldSkeleton as ComponentType<{ field: Field }>,
+  },
+  textarea: {
+    kind: "data",
+    renderer: TextareaField as ComponentType<FieldRendererComponentProps>,
+    skeleton: TextareaFieldSkeleton as ComponentType<{ field: Field }>,
   },
 });
 
