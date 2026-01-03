@@ -117,6 +117,21 @@
           "target": "components/buzzform/lib/password.ts"
         }
       ]
+    },
+    {
+      "name": "switch",
+      "type": "registry:ui",
+      "title": "SwitchField",
+      "description": "A toggle switch field component for BuzzForm. Supports boolean values with horizontal label layout, similar to checkbox but with a switch UI.",
+      "dependencies": ["@buildnbuzz/buzzform"],
+      "registryDependencies": ["@buzzform/init", "switch", "field"],
+      "files": [
+        {
+          "path": "registry/base/fields/switch.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/fields/switch.tsx"
+        }
+      ]
     }
   ]
 }

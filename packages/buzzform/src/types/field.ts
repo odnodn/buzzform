@@ -429,6 +429,16 @@ export interface CheckboxField extends BaseField<boolean> {
  */
 export interface SwitchField extends BaseField<boolean> {
     type: 'switch';
+    /** UI options */
+    ui?: {
+        /**
+         * Switch position relative to label.
+         * - 'between': Label on left, switch on right with full-width spacing (default)
+         * - 'start': Switch on left, label on right
+         * - 'end': Label on left, switch on right
+         */
+        alignment?: 'start' | 'end' | 'between';
+    };
 }
 
 /**

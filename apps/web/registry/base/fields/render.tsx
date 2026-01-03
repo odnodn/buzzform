@@ -28,6 +28,10 @@ import {
   PasswordField,
   PasswordFieldSkeleton,
 } from "@/components/buzzform/fields/password";
+import {
+  SwitchField,
+  SwitchFieldSkeleton,
+} from "@/components/buzzform/fields/switch";
 
 export interface FieldRendererComponentProps {
   field: Field;
@@ -79,6 +83,11 @@ export const defaultFieldRegistry: FieldRegistry = createFieldRegistry({
     kind: "data",
     renderer: PasswordField as ComponentType<FieldRendererComponentProps>,
     skeleton: PasswordFieldSkeleton as ComponentType<{ field: Field }>,
+  },
+  switch: {
+    kind: "data",
+    renderer: SwitchField as ComponentType<FieldRendererComponentProps>,
+    skeleton: SwitchFieldSkeleton as ComponentType<{ field: Field }>,
   },
 });
 
