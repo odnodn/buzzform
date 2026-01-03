@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "icons:dev": "pnpm dlx tsx --tsconfig ./tsconfig.scripts.json ./scripts/build-icons.ts --watch"
+    "icons:dev": "pnpm dlx tsx --tsconfig ./tsconfig.scripts.json ./scripts/build-icons.ts --watch",
+    "registry:build": "npx shadcn build"
   },
   "dependencies": {
     "@buildnbuzz/buzzform": "workspace:*",
