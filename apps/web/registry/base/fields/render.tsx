@@ -44,6 +44,10 @@ import {
   TagsField,
   TagsFieldSkeleton,
 } from "@/components/buzzform/fields/tags";
+import {
+  DateField,
+  DateFieldSkeleton,
+} from "@/components/buzzform/fields/date";
 
 export interface FieldRendererComponentProps {
   field: Field;
@@ -115,6 +119,16 @@ export const defaultFieldRegistry: FieldRegistry = createFieldRegistry({
     kind: "data",
     renderer: TagsField as ComponentType<FieldRendererComponentProps>,
     skeleton: TagsFieldSkeleton as ComponentType<{ field: Field }>,
+  },
+  date: {
+    kind: "data",
+    renderer: DateField as ComponentType<FieldRendererComponentProps>,
+    skeleton: DateFieldSkeleton as ComponentType<{ field: Field }>,
+  },
+  datetime: {
+    kind: "data",
+    renderer: DateField as ComponentType<FieldRendererComponentProps>,
+    skeleton: DateFieldSkeleton as ComponentType<{ field: Field }>,
   },
 });
 
