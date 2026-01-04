@@ -65,6 +65,10 @@ import {
   CollapsibleField,
   CollapsibleFieldSkeleton,
 } from "@/components/buzzform/fields/collapsible";
+import {
+  TabsField,
+  TabsFieldSkeleton,
+} from "@/components/buzzform/fields/tabs";
 
 export interface FieldRendererComponentProps {
   field: Field;
@@ -171,6 +175,11 @@ export const defaultFieldRegistry: FieldRegistry = createFieldRegistry({
     kind: "layout",
     renderer: CollapsibleField as ComponentType<FieldRendererComponentProps>,
     skeleton: CollapsibleFieldSkeleton as ComponentType<{ field: Field }>,
+  },
+  tabs: {
+    kind: "layout",
+    renderer: TabsField as ComponentType<FieldRendererComponentProps>,
+    skeleton: TabsFieldSkeleton as ComponentType<{ field: Field }>,
   },
 });
 

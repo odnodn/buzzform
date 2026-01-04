@@ -601,11 +601,15 @@ export interface Tab {
     /** Tab name (if provided, creates nested object) */
     name?: string;
     /** Tab label */
-    label: string;
+    label: string | ReactNode;
     /** Fields in this tab */
     fields: Field[];
     /** Tab description */
-    description?: string;
+    description?: string | ReactNode;
+    /** Tab icon */
+    icon?: ReactNode;
+    /** Whether this tab is disabled */
+    disabled?: boolean;
 }
 
 /**
@@ -619,6 +623,12 @@ export interface TabsField {
     ui?: {
         /** Default active tab (index or name) */
         defaultTab?: number | string;
+        /** Show error badge on tabs with validation errors */
+        showErrorBadge?: boolean;
+        /** Visual variant */
+        variant?: 'default' | 'line';
+        /** Spacing between fields within tabs */
+        spacing?: 'sm' | 'md' | 'lg';
     };
 }
 

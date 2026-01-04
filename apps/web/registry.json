@@ -302,6 +302,21 @@
           "target": "components/buzzform/fields/collapsible.tsx"
         }
       ]
+    },
+    {
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "TabsField",
+      "description": "A tabbed interface layout field for BuzzForm. Organizes fields into horizontal tabs with error badges per tab, support for named tabs (creates nested data structure), tab descriptions, and customizable default tab selection.",
+      "dependencies": ["@buildnbuzz/buzzform"],
+      "registryDependencies": ["@buzzform/init", "tabs", "badge", "skeleton"],
+      "files": [
+        {
+          "path": "registry/base/fields/tabs.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/fields/tabs.tsx"
+        }
+      ]
     }
   ]
 }
