@@ -57,6 +57,10 @@ import {
   UploadFieldSkeleton,
 } from "@/components/buzzform/fields/upload";
 import { RowField, RowFieldSkeleton } from "@/components/buzzform/fields/row";
+import {
+  GroupField,
+  GroupFieldSkeleton,
+} from "@/components/buzzform/fields/group";
 
 export interface FieldRendererComponentProps {
   field: Field;
@@ -153,6 +157,11 @@ export const defaultFieldRegistry: FieldRegistry = createFieldRegistry({
     kind: "layout",
     renderer: RowField as ComponentType<FieldRendererComponentProps>,
     skeleton: RowFieldSkeleton as ComponentType<{ field: Field }>,
+  },
+  group: {
+    kind: "data",
+    renderer: GroupField as ComponentType<FieldRendererComponentProps>,
+    skeleton: GroupFieldSkeleton as ComponentType<{ field: Field }>,
   },
 });
 

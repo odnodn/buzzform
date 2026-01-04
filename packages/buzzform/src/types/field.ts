@@ -539,6 +539,17 @@ export interface GroupField extends BaseField<Record<string, unknown>> {
     type: 'group';
     /** Nested fields */
     fields: Field[];
+    /** UI options */
+    ui?: {
+        /** Visual variant ('card', 'flat', 'ghost', 'bordered') */
+        variant?: 'card' | 'flat' | 'ghost' | 'bordered';
+        /** Spacing between fields ('sm', 'md', 'lg') */
+        spacing?: 'sm' | 'md' | 'lg';
+        /** Start in collapsed state */
+        collapsed?: boolean;
+        /** Show error badge */
+        showErrorBadge?: boolean;
+    };
 }
 
 /**

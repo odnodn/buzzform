@@ -260,6 +260,27 @@
           "target": "components/buzzform/fields/row.tsx"
         }
       ]
+    },
+    {
+      "name": "group",
+      "type": "registry:ui",
+      "title": "GroupField",
+      "description": "A container field for BuzzForm that groups nested fields into named objects. Supports multiple visual variants (card, flat, ghost, bordered) with collapse/expand functionality, error badge display, and nested field validation.",
+      "dependencies": ["@buildnbuzz/buzzform"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "card",
+        "collapsible",
+        "badge",
+        "skeleton"
+      ],
+      "files": [
+        {
+          "path": "registry/base/fields/group.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/fields/group.tsx"
+        }
+      ]
     }
   ]
 }
