@@ -528,7 +528,7 @@ export function DateField({
 const InputSkeleton = ({ className = "" }: { className?: string }) => (
   <div
     className={cn(
-      "h-10 w-full border border-input rounded-lg flex items-center gap-2 px-3 bg-muted/40",
+      "h-8 w-full border border-input rounded-lg flex items-center gap-2 px-3 bg-muted/40",
       className
     )}
   >

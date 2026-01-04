@@ -281,6 +281,27 @@
           "target": "components/buzzform/fields/group.tsx"
         }
       ]
+    },
+    {
+      "name": "collapsible",
+      "type": "registry:ui",
+      "title": "CollapsibleField",
+      "description": "A purely visual layout container for BuzzForm that can be toggled (expanded/collapsed). Unlike GroupField, it does not change the data structure. Supports multiple visual variants (card, ghost, bordered) with error badge display and nested field rendering.",
+      "dependencies": ["@buildnbuzz/buzzform"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "card",
+        "collapsible",
+        "badge",
+        "skeleton"
+      ],
+      "files": [
+        {
+          "path": "registry/base/fields/collapsible.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/fields/collapsible.tsx"
+        }
+      ]
     }
   ]
 }

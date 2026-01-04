@@ -61,6 +61,10 @@ import {
   GroupField,
   GroupFieldSkeleton,
 } from "@/components/buzzform/fields/group";
+import {
+  CollapsibleField,
+  CollapsibleFieldSkeleton,
+} from "@/components/buzzform/fields/collapsible";
 
 export interface FieldRendererComponentProps {
   field: Field;
@@ -162,6 +166,11 @@ export const defaultFieldRegistry: FieldRegistry = createFieldRegistry({
     kind: "data",
     renderer: GroupField as ComponentType<FieldRendererComponentProps>,
     skeleton: GroupFieldSkeleton as ComponentType<{ field: Field }>,
+  },
+  collapsible: {
+    kind: "layout",
+    renderer: CollapsibleField as ComponentType<FieldRendererComponentProps>,
+    skeleton: CollapsibleFieldSkeleton as ComponentType<{ field: Field }>,
   },
 });
 

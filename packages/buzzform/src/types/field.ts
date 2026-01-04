@@ -633,6 +633,21 @@ export interface CollapsibleField {
     fields: Field[];
     /** Start collapsed */
     collapsed?: boolean;
+    /** UI options */
+    ui?: {
+        /** Visual variant ('card', 'flat', 'ghost', 'bordered') */
+        variant?: 'card' | 'flat' | 'ghost' | 'bordered';
+        /** Spacing between fields ('sm', 'md', 'lg') */
+        spacing?: 'sm' | 'md' | 'lg';
+        /** Show error badge */
+        showErrorBadge?: boolean;
+        /** Optional description */
+        description?: string;
+        /** Optional icon */
+        icon?: ReactNode;
+    };
+    /** Styling options */
+    style?: FieldStyle;
 }
 
 // =============================================================================

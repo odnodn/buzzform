@@ -325,7 +325,7 @@ export function SelectField({
         disabled={isDisabled || isReadOnly}
       >
         <div ref={anchorRef} className="w-full">
-          <ComboboxChips className="min-h-10 w-full px-2">
+          <ComboboxChips className="min-h-8 w-full px-2">
             {visibleChips.map((val, index) => {
               const opt = resolvedOptions.find(
                 (o) => valueToString(o.value) === val
@@ -350,7 +350,7 @@ export function SelectField({
               />
             )}
             {!isSearchable && multiValues.length === 0 && (
-              <ComboboxTrigger className="flex-1 text-left py-1 text-muted-foreground h-10 px-3">
+              <ComboboxTrigger className="flex-1 text-left py-1 text-muted-foreground h-8 px-3">
                 {placeholder}
               </ComboboxTrigger>
             )}
@@ -398,7 +398,7 @@ export function SelectField({
           <InputGroupButton
             id={fieldId}
             render={<ComboboxTrigger />}
-            className="w-full justify-between font-normal h-10 px-3"
+            className="flex-1 justify-between font-normal h-8 px-3"
             disabled={isDisabled || isReadOnly}
           >
             {selectedOption ? (
@@ -436,7 +436,7 @@ export function SelectField({
             <ComboboxInput
               autoFocus
               placeholder={searchPlaceholder}
-              className="w-full border-none shadow-none focus-visible:ring-0 h-9"
+              className="w-full border-none shadow-none focus-visible:ring-0 h-8"
               showTrigger={false}
             />
           </div>
@@ -525,7 +525,7 @@ export function SelectFieldSkeleton({ field }: { field: SelectFieldType }) {
     >
       {label && <div className="h-4 w-24 animate-pulse rounded bg-muted" />}
       <FieldContent>
-        <div className="h-9 w-full animate-pulse rounded-lg bg-muted" />
+        <div className="h-8 w-full animate-pulse rounded-lg bg-muted" />
       </FieldContent>
       {field.description && (
         <div className="h-3 w-48 animate-pulse rounded bg-muted" />

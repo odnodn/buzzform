@@ -214,7 +214,7 @@ export function NumberField({
     if (hideSteppers) {
       if (prefix || suffix || copyable) {
         return (
-          <InputGroup className="h-9">
+          <InputGroup className="h-8">
             {prefix && (
               <InputGroupAddon
                 align="inline-start"
@@ -264,7 +264,7 @@ export function NumberField({
     // Stacked variant - vertical buttons on right
     if (variant === "stacked") {
       return (
-        <InputGroup className="h-9">
+        <InputGroup className="h-8">
           {prefix && (
             <InputGroupAddon
               align="inline-start"
@@ -373,7 +373,7 @@ export function NumberField({
 
     // Default variant - inline buttons on sides
     return (
-      <InputGroup className="h-9">
+      <InputGroup className="h-8">
         <InputGroupAddon align="inline-start">
           <InputGroupButton
             variant="ghost"
@@ -483,7 +483,7 @@ export function NumberFieldSkeleton({ field }: { field: NumberFieldType }) {
 
     if (variant === "stacked") {
       return (
-        <div className="flex items-center h-9 border rounded-lg">
+        <div className="flex items-center h-8 border rounded-lg">
           {hasPrefix && (
             <div className="h-4 w-6 ml-3 animate-pulse bg-muted rounded" />
           )}
@@ -501,7 +501,7 @@ export function NumberFieldSkeleton({ field }: { field: NumberFieldType }) {
 
     if (variant === "pill") {
       return (
-        <div className="flex items-center h-9 border rounded-full px-2 gap-2">
+        <div className="flex items-center h-8 border rounded-full px-2 gap-2">
           {stepperSkeleton}
           {hasPrefix && (
             <div className="h-4 w-6 animate-pulse bg-muted rounded" />
@@ -517,7 +517,7 @@ export function NumberFieldSkeleton({ field }: { field: NumberFieldType }) {
 
     // Default variant
     return (
-      <div className="flex items-center h-9 border rounded-lg px-2 gap-2">
+      <div className="flex items-center h-8 border rounded-lg px-2 gap-2">
         {stepperSkeleton}
         {hasPrefix && (
           <div className="h-4 w-6 animate-pulse bg-muted rounded" />
