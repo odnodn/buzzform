@@ -69,6 +69,10 @@ import {
   TabsField,
   TabsFieldSkeleton,
 } from "@/components/buzzform/fields/tabs";
+import {
+  ArrayField,
+  ArrayFieldSkeleton,
+} from "@/components/buzzform/fields/array";
 
 export interface FieldRendererComponentProps {
   field: Field;
@@ -180,6 +184,11 @@ export const defaultFieldRegistry: FieldRegistry = createFieldRegistry({
     kind: "layout",
     renderer: TabsField as ComponentType<FieldRendererComponentProps>,
     skeleton: TabsFieldSkeleton as ComponentType<{ field: Field }>,
+  },
+  array: {
+    kind: "data",
+    renderer: ArrayField as ComponentType<FieldRendererComponentProps>,
+    skeleton: ArrayFieldSkeleton as ComponentType<{ field: Field }>,
   },
 });
 

@@ -113,8 +113,16 @@ export {
 // =============================================================================
 export { createArrayHelpers } from './utils';
 
-// Add common utilities that registry components will need
+// Common utilities for registry components
 export { generateFieldId, getNestedValue, setNestedValue, formatBytes } from './lib';
+
+// Field utilities for nested fields, error counting, and dynamic state
+export {
+    getNestedFieldPaths,
+    countNestedErrors,
+    resolveFieldState,
+    getArrayRowLabel,
+} from './lib';
 
 // =============================================================================
 // CONTEXT & PROVIDERS

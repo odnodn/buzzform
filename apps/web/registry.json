@@ -317,6 +317,34 @@
           "target": "components/buzzform/fields/tabs.tsx"
         }
       ]
+    },
+    {
+      "name": "array",
+      "type": "registry:ui",
+      "title": "ArrayField",
+      "description": "A repeatable array field for BuzzForm. Supports nested fields, drag-and-drop reordering, add/duplicate/remove items, minRows/maxRows constraints, collapsible rows, and error badges per row.",
+      "dependencies": [
+        "@buildnbuzz/buzzform",
+        "@dnd-kit/core",
+        "@dnd-kit/sortable",
+        "@dnd-kit/utilities"
+      ],
+      "registryDependencies": [
+        "@buzzform/init",
+        "card",
+        "collapsible",
+        "badge",
+        "button",
+        "skeleton",
+        "alert-dialog"
+      ],
+      "files": [
+        {
+          "path": "registry/base/fields/array.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/fields/array.tsx"
+        }
+      ]
     }
   ]
 }

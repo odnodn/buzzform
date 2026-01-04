@@ -565,10 +565,22 @@ export interface ArrayField extends BaseField<unknown[]> {
     maxRows?: number;
     /** UI options */
     ui?: {
-        /** Allow reordering */
+        /** Allow reordering via drag & drop (default: true) */
         isSortable?: boolean;
-        /** Add button label */
+        /** Add button label (default: "Add Item") */
         addLabel?: string;
+        /** Field name to use for row labels (falls back to first named field) */
+        rowLabelField?: string;
+        /** Start the array container collapsed */
+        collapsed?: boolean;
+        /** Start individual rows collapsed */
+        rowsCollapsed?: boolean;
+        /** Show confirmation dialog before deleting all items */
+        confirmDelete?: boolean;
+        /** Custom empty state message */
+        emptyMessage?: string;
+        /** Show error count badge in header (default: true) */
+        showErrorBadge?: boolean;
     };
 }
 

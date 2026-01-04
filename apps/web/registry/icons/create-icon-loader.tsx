@@ -24,7 +24,6 @@ export function createIconLoader(libraryName: string) {
 
   return function IconLoader({
     name,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     strokeWidth = 2,
     ...props
   }: {
@@ -45,7 +44,13 @@ export function createIconLoader(libraryName: string) {
     }
 
     if (isIconData(iconData)) {
-      return <HugeiconsIcon icon={iconData} strokeWidth={2} {...props} />;
+      return (
+        <HugeiconsIcon
+          icon={iconData}
+          strokeWidth={typeof strokeWidth === "number" ? strokeWidth : 2}
+          {...props}
+        />
+      );
     }
 
     const IconComponent = iconData;
