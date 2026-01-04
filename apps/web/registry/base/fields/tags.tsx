@@ -63,10 +63,10 @@ export function TagsField({
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const tags = useMemo(() => {
-    const value = form.watch<string[]>(path) ?? [];
-    return Array.isArray(value) ? value : [];
-  }, [form, path]);
+  // Watch field value directly
+  const rawValue = form.watch<string[]>(path);
+  const emptyTags = useMemo(() => [], []);
+  const tags = Array.isArray(rawValue) ? rawValue : emptyTags;
 
   const error = form.formState.errors[path];
   const errorMessage =

@@ -76,7 +76,7 @@ export function RowField({
   registry,
 }: RowFieldComponentProps) {
   const ui = field.ui;
-  const responsive = ui?.responsive !== false;
+  const responsive = ui?.responsive ?? true;
   const wrap = ui?.wrap ?? false;
 
   const gapClass = getGapClass(ui?.gap);
@@ -162,7 +162,7 @@ export function RowField({
 
 export function RowFieldSkeleton({ field }: { field: RowFieldType }) {
   const ui = field.ui;
-  const responsive = ui?.responsive !== false;
+  const responsive = ui?.responsive ?? true;
 
   const gapClass = getGapClass(ui?.gap);
 

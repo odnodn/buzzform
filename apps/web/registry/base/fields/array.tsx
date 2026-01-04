@@ -83,6 +83,7 @@ interface ArrayRowProps {
   isDisabled: boolean;
   isReadOnly: boolean;
   isNew?: boolean; // For animation on new rows
+  isExiting?: boolean; // For animation on removing rows
 }
 
 // =============================================================================
@@ -144,6 +145,7 @@ const ArrayRow = React.memo(
     isDisabled,
     isReadOnly,
     isNew = false,
+    isExiting = false,
   }: ArrayRowProps) => {
     const rowRef = React.useRef<HTMLDivElement>(null);
     const {
@@ -224,15 +226,18 @@ const ArrayRow = React.memo(
           aria-label={`${rowLabel}, item ${index + 1}`}
           style={style}
           className={cn(
-            "bg-card border rounded-lg overflow-hidden transition-all duration-200",
+            "bg-card border rounded-lg overflow-hidden",
             isDragging && "shadow-lg ring-2 ring-primary/20",
             isDisabled && "opacity-60 pointer-events-none",
-            isNew && "animate-in fade-in-0 slide-in-from-top-2 duration-300"
+            isNew &&
+              "animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-700",
+            isExiting &&
+              "animate-out fade-out-0 zoom-out-95 slide-out-to-top-2 duration-300 pointer-events-none"
           )}
         >
           <CardHeader
             className={cn(
-              "flex flex-row items-center gap-3 px-4 py-2 bg-muted/50 transition-colors shrink-0",
+              "flex flex-row items-center gap-3 px-4 py-2 bg-muted/50 transition-colors shrink-0 rounded-t-lg",
               !isDisabled && "hover:bg-muted/75",
               isOpen && "border-b"
             )}
@@ -361,7 +366,8 @@ const ArrayRow = React.memo(
       prevProps.isDisabled === nextProps.isDisabled &&
       prevProps.isReadOnly === nextProps.isReadOnly &&
       prevProps.path === nextProps.path &&
-      prevProps.isNew === nextProps.isNew
+      prevProps.isNew === nextProps.isNew &&
+      prevProps.isExiting === nextProps.isExiting
     );
   }
 );
@@ -401,8 +407,11 @@ export const ArrayField = React.forwardRef<
   >({});
   const [showDeleteAllDialog, setShowDeleteAllDialog] = React.useState(false);
 
-  // Track newly added rows for animation
+  // Track newly added rows and exiting rows for animation
   const [newRowIds, setNewRowIds] = React.useState<Set<string>>(new Set());
+  const [exitingRowIds, setExitingRowIds] = React.useState<Set<string>>(
+    new Set()
+  );
 
   // Screen reader announcement
   const [announcement, setAnnouncement] = React.useState<string>("");
@@ -426,12 +435,39 @@ export const ArrayField = React.forwardRef<
     }
   }, [rows, ui?.rowsCollapsed, collapsedRowsMap]);
 
+  // Track previous rows to detect additions for animation
+  const prevRowsRef = React.useRef(rows);
+
+  // Use useLayoutEffect to detect additions synchronously to avoid flicker
+  React.useLayoutEffect(() => {
+    const prevRows = prevRowsRef.current;
+
+    // Detect additions (length increased)
+    if (rows.length > prevRows.length) {
+      // Find IDs that are in current but not in prev
+      const prevIds = new Set(prevRows.map((r) => r.id));
+      const newItems = rows.filter((r) => !prevIds.has(r.id));
+
+      if (newItems.length > 0) {
+        const idsToAdd = newItems.map((r) => r.id);
+        setNewRowIds((prev) => {
+          const next = new Set(prev);
+          idsToAdd.forEach((id) => next.add(id));
+          return next;
+        });
+      }
+    }
+
+    // Update ref for next render
+    prevRowsRef.current = rows;
+  }, [rows]);
+
   // Clear "new" status after animation completes
   React.useEffect(() => {
     if (newRowIds.size > 0) {
       const timer = setTimeout(() => {
         setNewRowIds(new Set());
-      }, 500); // Match animation duration
+      }, 700); // Match animation duration
       return () => clearTimeout(timer);
     }
   }, [newRowIds]);
@@ -467,14 +503,6 @@ export const ArrayField = React.forwardRef<
       e?.stopPropagation();
       if (!isDisabled && !isReadOnly) {
         form.array.append(path, {});
-        // Track new row for animation (get the ID after append)
-        setTimeout(() => {
-          const updatedRows = form.array.fields<ArrayRowItem>(path);
-          const lastRow = updatedRows[updatedRows.length - 1];
-          if (lastRow) {
-            setNewRowIds((prev) => new Set([...prev, lastRow.id]));
-          }
-        }, 0);
         setAnnouncement(`Item ${rows.length + 1} added`);
       }
     },
@@ -483,11 +511,41 @@ export const ArrayField = React.forwardRef<
 
   const handleRemove = React.useCallback(
     (index: number) => {
-      const removedLabel = rows[index] ? `Item ${index + 1}` : "Item";
-      form.array.remove(path, index);
-      setAnnouncement(`${removedLabel} removed`);
+      const rowToRemove = rows[index];
+      if (!rowToRemove) return;
+
+      const removedLabel = getArrayRowLabel(
+        rowToRemove,
+        field.fields,
+        field.ui,
+        `Item ${index + 1}`
+      );
+
+      // 1. Mark as exiting to trigger animation
+      setExitingRowIds((prev) => new Set([...prev, rowToRemove.id]));
+
+      // 2. Wait for animation to complete before actual removal
+      setTimeout(() => {
+        // Find fresh index of this ID in case list changed
+        const currentRows = form.array.fields<ArrayRowItem>(path);
+        const currentIndex = currentRows.findIndex(
+          (r) => r.id === rowToRemove.id
+        );
+
+        if (currentIndex !== -1) {
+          form.array.remove(path, currentIndex);
+          setAnnouncement(`${removedLabel} removed`);
+        }
+
+        // Cleanup exiting state
+        setExitingRowIds((prev) => {
+          const next = new Set(prev);
+          next.delete(rowToRemove.id);
+          return next;
+        });
+      }, 300); // Match CSS animation duration
     },
-    [form, path, rows]
+    [form, path, rows, field.fields, field.ui]
   );
 
   const handleDuplicate = React.useCallback(
@@ -497,14 +555,6 @@ export const ArrayField = React.forwardRef<
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { id, ...rest } = currentValue;
         form.array.insert(path, index + 1, rest);
-        // Track new duplicated row for animation
-        setTimeout(() => {
-          const updatedRows = form.array.fields<ArrayRowItem>(path);
-          const newRow = updatedRows[index + 1];
-          if (newRow) {
-            setNewRowIds((prev) => new Set([...prev, newRow.id]));
-          }
-        }, 0);
         setAnnouncement(`Item ${index + 1} duplicated`);
       }
     },
@@ -558,6 +608,7 @@ export const ArrayField = React.forwardRef<
   const allRowsCollapsed =
     rows.length > 0 && rows.every((row) => collapsedRowsMap[row.id]);
   const canAddMore = !field.maxRows || rows.length < field.maxRows;
+  const canRemoveAny = !field.minRows || rows.length > field.minRows;
   const label = field.label !== false ? field.label || field.name : null;
 
   const bodyContent = (
@@ -596,6 +647,7 @@ export const ArrayField = React.forwardRef<
                   isDisabled={isDisabled}
                   isReadOnly={isReadOnly}
                   isNew={newRowIds.has(row.id)}
+                  isExiting={exitingRowIds.has(row.id)}
                 />
               ))}
             </div>
@@ -635,6 +687,26 @@ export const ArrayField = React.forwardRef<
             </Button>
           )}
         </div>
+      )}
+
+      {/* Footer Add Button - Rendered when items exist to allow adding at the bottom */}
+      {rows.length > 0 && !isReadOnly && (
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full mt-4 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-all"
+          onClick={handleAdd}
+          disabled={!canAddMore || isDisabled}
+        >
+          <IconPlaceholder
+            lucide="Plus"
+            hugeicons="Add01Icon"
+            tabler="IconPlus"
+            phosphor="Plus"
+            className="size-4 mr-2"
+          />
+          {addLabel}
+        </Button>
       )}
 
       {typeof field.minRows === "number" &&
@@ -721,37 +793,45 @@ export const ArrayField = React.forwardRef<
               !isArrayCollapsed && "border-b"
             )}
           >
-            <CollapsibleTrigger className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+            <CollapsibleTrigger className="flex items-start gap-2 cursor-pointer hover:opacity-80 transition-opacity flex-1 min-w-0 py-1">
               <IconPlaceholder
                 lucide="ChevronDown"
                 hugeicons="ArrowDown01Icon"
                 tabler="IconChevronDown"
                 phosphor="CaretDown"
                 className={cn(
-                  "size-4 text-muted-foreground transition-transform duration-200 shrink-0",
+                  "size-4 text-muted-foreground transition-transform duration-200 shrink-0 mt-0.5",
                   isArrayCollapsed && "-rotate-90"
                 )}
               />
-              <div className="flex flex-col items-start">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-sm">{label}</span>
+              <div className="flex flex-col items-start gap-0.5 min-w-0 w-full">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 w-full pr-2">
+                  <span className="font-semibold text-sm truncate">
+                    {label}
+                  </span>
                   {field.required && (
                     <span className="text-destructive">*</span>
                   )}
                   {rows.length > 0 && (
-                    <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                    <Badge
+                      variant="secondary"
+                      className="h-5 px-1.5 text-xs whitespace-nowrap shrink-0"
+                    >
                       {rows.length} {rows.length === 1 ? "item" : "items"}
                     </Badge>
                   )}
                   {showErrorBadge && totalErrorCount > 0 && (
-                    <Badge variant="destructive" className="h-5 px-1.5 text-xs">
+                    <Badge
+                      variant="destructive"
+                      className="h-5 px-1.5 text-xs whitespace-nowrap shrink-0"
+                    >
                       {totalErrorCount}{" "}
                       {totalErrorCount === 1 ? "error" : "errors"}
                     </Badge>
                   )}
                 </div>
                 {field.description && (
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-xs text-muted-foreground text-left wrap-break-word leading-tight w-full pr-2">
                     {field.description}
                   </p>
                 )}
@@ -805,11 +885,23 @@ export const ArrayField = React.forwardRef<
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-destructive hover:bg-destructive/10"
+                      className={cn(
+                        "h-7 w-7 text-destructive hover:bg-destructive/10",
+                        (!canRemoveAny || isDisabled) &&
+                          "opacity-50 cursor-not-allowed"
+                      )}
                       onClick={handleRemoveAllClick}
-                      disabled={isDisabled}
-                      title="Delete all items"
-                      aria-label="Delete all items"
+                      disabled={isDisabled || !canRemoveAny}
+                      title={
+                        canRemoveAny
+                          ? "Delete all items"
+                          : `Minimum ${field.minRows} items required`
+                      }
+                      aria-label={
+                        canRemoveAny
+                          ? "Delete all items"
+                          : `Minimum ${field.minRows} items required`
+                      }
                     >
                       <IconPlaceholder
                         lucide="Trash"

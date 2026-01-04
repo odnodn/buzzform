@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { getNestedFieldPaths } from "@buildnbuzz/buzzform";
 import type {
   Field,
   GroupField as GroupFieldType,
@@ -24,32 +25,6 @@ export interface GroupFieldComponentProps {
   form: FormAdapter;
   registry?: FieldRegistry;
 }
-
-/**
- * Get all field paths within a group for error checking
- */
-const getNestedFieldPaths = (fields: Field[], basePath: string): string[] => {
-  const paths: string[] = [];
-
-  for (const field of fields) {
-    if ("name" in field && field.name) {
-      const fieldPath = basePath ? `${basePath}.${field.name}` : field.name;
-      paths.push(fieldPath);
-
-      // Recursively get paths for nested group/array fields
-      if (field.type === "group" && "fields" in field) {
-        paths.push(...getNestedFieldPaths(field.fields, fieldPath));
-      }
-    }
-    // Handle layout fields that don't add to path
-    if ("fields" in field && field.type !== "group" && field.type !== "array") {
-      const layoutField = field as Field & { fields: Field[] };
-      paths.push(...getNestedFieldPaths(layoutField.fields, basePath));
-    }
-  }
-
-  return paths;
-};
 
 /**
  * Count errors in nested fields
