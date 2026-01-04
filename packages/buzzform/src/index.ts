@@ -124,6 +124,29 @@ export {
     getArrayRowLabel,
 } from './lib';
 
+// Field style utilities
+export { getFieldWidthStyle } from './lib';
+
+// Select option utilities
+export {
+    normalizeSelectOption,
+    getSelectOptionValue,
+    getSelectOptionLabel,
+    getSelectOptionLabelString,
+    isSelectOptionDisabled,
+} from './lib';
+
+// Number utilities
+export {
+    clampNumber,
+    applyNumericPrecision,
+    formatNumberWithSeparator,
+    parseFormattedNumber,
+} from './lib';
+
+// Date utilities
+export { parseToDate } from './lib';
+
 // =============================================================================
 // CONTEXT & PROVIDERS
 // =============================================================================

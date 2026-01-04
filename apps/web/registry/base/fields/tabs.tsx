@@ -17,9 +17,14 @@ export interface TabsFieldComponentProps {
   field: TabsFieldType;
   path: string;
   form: FormAdapter;
-  formValues: Record<string, unknown>;
-  siblingData: Record<string, unknown>;
   registry?: FieldRegistry;
+  // Computed props
+  fieldId: string;
+  label: React.ReactNode | null;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  error?: string;
+  autoFocus?: boolean;
 }
 
 const spacingMap = {

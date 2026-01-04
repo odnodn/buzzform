@@ -11,7 +11,7 @@ import type {
   TagsField as TagsFieldType,
   FormAdapter,
 } from "@buildnbuzz/buzzform";
-import { generateFieldId } from "@buildnbuzz/buzzform";
+import { getFieldWidthStyle } from "@buildnbuzz/buzzform";
 import { Badge } from "@/components/ui/badge";
 import { CopyButton } from "@/components/buzzform/copy";
 import { cn } from "@/lib/utils";
@@ -28,8 +28,12 @@ export interface TagsFieldProps {
   path: string;
   form: FormAdapter;
   autoFocus?: boolean;
-  formValues: Record<string, unknown>;
-  siblingData: Record<string, unknown>;
+  // Computed props
+  fieldId: string;
+  label: React.ReactNode | null;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  error?: string;
 }
 
 // X icon for removing tags
@@ -56,8 +60,11 @@ export function TagsField({
   path,
   form,
   autoFocus,
-  formValues,
-  siblingData,
+  fieldId,
+  label,
+  isDisabled,
+  isReadOnly,
+  error,
 }: TagsFieldProps) {
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -67,28 +74,7 @@ export function TagsField({
   const rawValue = form.watch<string[]>(path);
   const emptyTags = useMemo(() => [], []);
   const tags = Array.isArray(rawValue) ? rawValue : emptyTags;
-
-  const error = form.formState.errors[path];
-  const errorMessage =
-    typeof error === "string"
-      ? error
-      : Array.isArray(error)
-        ? error[0]
-        : undefined;
-  const hasError = !!errorMessage;
-
-  const isDisabled =
-    (typeof field.disabled === "function"
-      ? field.disabled(formValues, siblingData)
-      : (field.disabled ?? false)) || form.formState.isSubmitting;
-
-  const isReadOnly =
-    typeof field.readOnly === "function"
-      ? field.readOnly(formValues, siblingData)
-      : (field.readOnly ?? false);
-
-  const label = field.label !== false ? (field.label ?? field.name) : null;
-  const fieldId = field.id ?? generateFieldId(path);
+  const hasError = !!error;
 
   // Get delimiters from field config - memoized
   const delimiters = useMemo(
@@ -222,16 +208,7 @@ export function TagsField({
       className={field.style?.className}
       data-invalid={hasError}
       data-disabled={isDisabled}
-      style={
-        field.style?.width
-          ? {
-              width:
-                typeof field.style.width === "number"
-                  ? `${field.style.width}px`
-                  : field.style.width,
-            }
-          : undefined
-      }
+      style={getFieldWidthStyle(field.style)}
     >
       {label && (
         <FieldLabel htmlFor={fieldId} className="gap-1 items-baseline">
@@ -335,7 +312,7 @@ export function TagsField({
         </FieldDescription>
       )}
 
-      {errorMessage && <FieldError>{errorMessage}</FieldError>}
+      {error && <FieldError>{error}</FieldError>}
     </Field>
   );
 }

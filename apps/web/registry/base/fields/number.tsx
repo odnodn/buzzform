@@ -5,7 +5,13 @@ import type {
   NumberField as NumberFieldType,
   FormAdapter,
 } from "@buildnbuzz/buzzform";
-import { generateFieldId } from "@buildnbuzz/buzzform";
+import {
+  formatNumberWithSeparator,
+  parseFormattedNumber,
+  clampNumber,
+  applyNumericPrecision,
+  getFieldWidthStyle,
+} from "@buildnbuzz/buzzform";
 import { Input } from "@/components/ui/input";
 import {
   InputGroup,
@@ -29,24 +35,12 @@ export interface NumberFieldProps {
   path: string;
   form: FormAdapter;
   autoFocus?: boolean;
-  formValues: Record<string, unknown>;
-  siblingData: Record<string, unknown>;
-}
-
-/** Format number with thousand separators */
-function formatWithSeparator(val: number | undefined, sep: string): string {
-  if (val === undefined || val === null || isNaN(val)) return "";
-  const [intPart, decPart] = val.toString().split(".");
-  const formattedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
-  return decPart !== undefined ? `${formattedInt}.${decPart}` : formattedInt;
-}
-
-/** Parse formatted string back to number */
-function parseFormattedNumber(str: string, sep: string): number | undefined {
-  if (!str || str === "") return undefined;
-  const cleaned = str.split(sep).join("");
-  const num = parseFloat(cleaned);
-  return isNaN(num) ? undefined : num;
+  // Computed props
+  fieldId: string;
+  label: React.ReactNode | null;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  error?: string;
 }
 
 export function NumberField({
@@ -54,32 +48,14 @@ export function NumberField({
   path,
   form,
   autoFocus,
-  formValues,
-  siblingData,
+  fieldId,
+  label,
+  isDisabled,
+  isReadOnly,
+  error,
 }: NumberFieldProps) {
   const value = form.watch<number>(path);
-
-  const error = form.formState.errors[path];
-  const errorMessage =
-    typeof error === "string"
-      ? error
-      : Array.isArray(error)
-        ? error[0]
-        : undefined;
-  const hasError = !!errorMessage;
-
-  const isDisabled =
-    (typeof field.disabled === "function"
-      ? field.disabled(formValues, siblingData)
-      : (field.disabled ?? false)) || form.formState.isSubmitting;
-
-  const isReadOnly =
-    typeof field.readOnly === "function"
-      ? field.readOnly(formValues, siblingData)
-      : (field.readOnly ?? false);
-
-  const label = field.label !== false ? (field.label ?? field.name) : null;
-  const fieldId = field.id ?? generateFieldId(path);
+  const hasError = !!error;
 
   // UI options
   const step = field.ui?.step ?? 1;
@@ -94,14 +70,14 @@ export function NumberField({
   // Display value for thousand separator mode
   const [displayValue, setDisplayValue] = React.useState<string>(() =>
     thousandSeparator && typeof value === "number"
-      ? formatWithSeparator(value, sep)
+      ? formatNumberWithSeparator(value, sep)
       : ""
   );
 
   // Sync display value when external value changes
   React.useEffect(() => {
     if (thousandSeparator && typeof value === "number") {
-      setDisplayValue(formatWithSeparator(value, sep));
+      setDisplayValue(formatNumberWithSeparator(value, sep));
     } else if (thousandSeparator && value === undefined) {
       setDisplayValue("");
     }
@@ -110,19 +86,14 @@ export function NumberField({
   const handleChange = (val: number | undefined) => {
     if (isReadOnly) return;
     // Apply precision if specified
-    let finalVal = val;
-    if (finalVal !== undefined && field.precision !== undefined) {
-      finalVal = parseFloat(finalVal.toFixed(field.precision));
-    }
+    const finalVal = applyNumericPrecision(val, field.precision);
     form.setValue(path, finalVal, { shouldDirty: true });
   };
 
   const handleAdjust = (delta: number) => {
     if (isReadOnly || isDisabled) return;
     const current = typeof value === "number" ? value : (field.min ?? 0);
-    let next = current + delta;
-    if (field.min !== undefined && next < field.min) next = field.min;
-    if (field.max !== undefined && next > field.max) next = field.max;
+    const next = clampNumber(current + delta, field.min, field.max);
     handleChange(next);
   };
 
@@ -148,7 +119,7 @@ export function NumberField({
 
   const handleFormattedInputBlur = () => {
     if (typeof value === "number") {
-      setDisplayValue(formatWithSeparator(value, sep));
+      setDisplayValue(formatNumberWithSeparator(value, sep));
     }
   };
 
@@ -424,16 +395,7 @@ export function NumberField({
       className={field.style?.className}
       data-invalid={hasError}
       data-disabled={isDisabled}
-      style={
-        field.style?.width
-          ? {
-              width:
-                typeof field.style.width === "number"
-                  ? `${field.style.width}px`
-                  : field.style.width,
-            }
-          : undefined
-      }
+      style={getFieldWidthStyle(field.style)}
     >
       {label && (
         <FieldLabel htmlFor={fieldId}>
@@ -450,7 +412,7 @@ export function NumberField({
         </FieldDescription>
       )}
 
-      {errorMessage && <FieldError>{errorMessage}</FieldError>}
+      {error && <FieldError>{error}</FieldError>}
     </Field>
   );
 }

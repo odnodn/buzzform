@@ -5,7 +5,7 @@ import type {
   TextareaField as TextareaFieldType,
   FormAdapter,
 } from "@buildnbuzz/buzzform";
-import { generateFieldId } from "@buildnbuzz/buzzform";
+import { getFieldWidthStyle } from "@buildnbuzz/buzzform";
 import { Textarea } from "@/components/ui/textarea";
 import { CopyButton } from "@/components/buzzform/copy";
 import {
@@ -23,6 +23,12 @@ export interface TextareaFieldProps {
   autoFocus?: boolean;
   formValues: Record<string, unknown>;
   siblingData: Record<string, unknown>;
+  // Computed props
+  fieldId: string;
+  label: string | null;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  error?: string;
 }
 
 export function TextareaField({
@@ -30,33 +36,15 @@ export function TextareaField({
   path,
   form,
   autoFocus,
-  formValues,
-  siblingData,
+  fieldId,
+  label,
+  isDisabled,
+  isReadOnly,
+  error,
 }: TextareaFieldProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const value = form.watch<string>(path) ?? "";
-
-  const error = form.formState.errors[path];
-  const errorMessage =
-    typeof error === "string"
-      ? error
-      : Array.isArray(error)
-        ? error[0]
-        : undefined;
-  const hasError = !!errorMessage;
-
-  const isDisabled =
-    (typeof field.disabled === "function"
-      ? field.disabled(formValues, siblingData)
-      : (field.disabled ?? false)) || form.formState.isSubmitting;
-
-  const isReadOnly =
-    typeof field.readOnly === "function"
-      ? field.readOnly(formValues, siblingData)
-      : (field.readOnly ?? false);
-
-  const label = field.label !== false ? (field.label ?? field.name) : null;
-  const fieldId = field.id ?? generateFieldId(path);
+  const hasError = !!error;
 
   // Auto-resize logic
   const adjustHeight = useCallback(() => {
@@ -100,16 +88,7 @@ export function TextareaField({
       className={field.style?.className}
       data-invalid={hasError}
       data-disabled={isDisabled}
-      style={
-        field.style?.width
-          ? {
-              width:
-                typeof field.style.width === "number"
-                  ? `${field.style.width}px`
-                  : field.style.width,
-            }
-          : undefined
-      }
+      style={getFieldWidthStyle(field.style)}
     >
       {label && (
         <FieldLabel htmlFor={fieldId} className="gap-1 items-baseline">
@@ -175,7 +154,7 @@ export function TextareaField({
         </FieldDescription>
       )}
 
-      {errorMessage && <FieldError>{errorMessage}</FieldError>}
+      {error && <FieldError>{error}</FieldError>}
     </Field>
   );
 }

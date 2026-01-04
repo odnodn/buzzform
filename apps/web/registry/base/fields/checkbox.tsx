@@ -4,7 +4,7 @@ import type {
   CheckboxField as CheckboxFieldType,
   FormAdapter,
 } from "@buildnbuzz/buzzform";
-import { generateFieldId } from "@buildnbuzz/buzzform";
+import { getFieldWidthStyle } from "@buildnbuzz/buzzform";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
@@ -19,8 +19,12 @@ export interface CheckboxFieldProps {
   path: string;
   form: FormAdapter;
   autoFocus?: boolean;
-  formValues: Record<string, unknown>;
-  siblingData: Record<string, unknown>;
+  // Computed props
+  fieldId: string;
+  label: React.ReactNode | null;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  error?: string;
 }
 
 export function CheckboxField({
@@ -28,32 +32,14 @@ export function CheckboxField({
   path,
   form,
   autoFocus,
-  formValues,
-  siblingData,
+  fieldId,
+  label,
+  isDisabled,
+  isReadOnly,
+  error,
 }: CheckboxFieldProps) {
   const value = form.watch<boolean>(path) ?? false;
-
-  const error = form.formState.errors[path];
-  const errorMessage =
-    typeof error === "string"
-      ? error
-      : Array.isArray(error)
-        ? error[0]
-        : undefined;
-  const hasError = !!errorMessage;
-
-  const isDisabled =
-    (typeof field.disabled === "function"
-      ? field.disabled(formValues, siblingData)
-      : (field.disabled ?? false)) || form.formState.isSubmitting;
-
-  const isReadOnly =
-    typeof field.readOnly === "function"
-      ? field.readOnly(formValues, siblingData)
-      : (field.readOnly ?? false);
-
-  const label = field.label !== false ? (field.label ?? field.name) : null;
-  const fieldId = field.id ?? generateFieldId(path);
+  const hasError = !!error;
 
   const handleChange = (checked: boolean | "indeterminate") => {
     if (isReadOnly) return;
@@ -69,16 +55,7 @@ export function CheckboxField({
       className={field.style?.className}
       data-invalid={hasError}
       data-disabled={isDisabled}
-      style={
-        field.style?.width
-          ? {
-              width:
-                typeof field.style.width === "number"
-                  ? `${field.style.width}px`
-                  : field.style.width,
-            }
-          : undefined
-      }
+      style={getFieldWidthStyle(field.style)}
     >
       <Checkbox
         id={fieldId}
@@ -110,7 +87,7 @@ export function CheckboxField({
           </FieldDescription>
         )}
 
-        {errorMessage && <FieldError>{errorMessage}</FieldError>}
+        {error && <FieldError>{error}</FieldError>}
       </FieldContent>
     </Field>
   );

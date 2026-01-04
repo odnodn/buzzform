@@ -24,6 +24,13 @@ export interface GroupFieldComponentProps {
   path: string;
   form: FormAdapter;
   registry?: FieldRegistry;
+  autoFocus?: boolean;
+  // Computed props
+  fieldId: string;
+  label: React.ReactNode | null;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  error?: string;
 }
 
 /**
@@ -63,7 +70,7 @@ const spacingMap = {
 export const GroupField = React.forwardRef<
   HTMLDivElement,
   GroupFieldComponentProps
->(({ field, path, form, registry }: GroupFieldComponentProps, ref) => {
+>(({ field, path, form, registry, label }: GroupFieldComponentProps, ref) => {
   // Extract UI options with defaults
   const variant = field.ui?.variant ?? "card";
   const spacing = field.ui?.spacing ?? "md";
@@ -74,9 +81,6 @@ export const GroupField = React.forwardRef<
 
   // Count nested errors for badge
   const errorCount = useNestedErrors(form, field.fields, path);
-
-  // Get label (can be hidden with label: false)
-  const label = field.label !== false ? field.label || field.name : null;
 
   // Render nested fields
   const renderNestedFields = () => (

@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  useRef,
-  type ReactNode,
-} from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import type {
   SelectField as SelectFieldType,
   SelectOption,
@@ -19,7 +12,13 @@ interface ExtendedSelectOption extends SelectOption {
   badge?: string;
 }
 
-import { generateFieldId, getNestedValue } from "@buildnbuzz/buzzform";
+import {
+  getNestedValue,
+  normalizeSelectOption,
+  getSelectOptionLabel,
+  getSelectOptionLabelString,
+  getFieldWidthStyle,
+} from "@buildnbuzz/buzzform";
 import {
   Field,
   FieldContent,
@@ -55,27 +54,17 @@ export interface SelectFieldProps {
   autoFocus?: boolean;
   formValues: Record<string, unknown>;
   siblingData: Record<string, unknown>;
+  // Computed props
+  fieldId: string;
+  label: React.ReactNode | null;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  error?: string;
 }
 
 type OptionValue = string | number | boolean;
 
-function getOptionLabel(option: SelectOption | string): string {
-  if (typeof option === "string") return option;
-  return typeof option.label === "string" ? option.label : String(option.value);
-}
-
-function getOptionLabelNode(option: SelectOption | string): ReactNode {
-  if (typeof option === "string") return option;
-  return option.label;
-}
-
-function normalizeOption(option: SelectOption | string): SelectOption {
-  if (typeof option === "string") {
-    return { value: option, label: option };
-  }
-  return option;
-}
-
+/** Convert option values to string for comparison */
 function valueToString(value: OptionValue): string {
   if (typeof value === "boolean") return value ? "true" : "false";
   return String(value);
@@ -109,7 +98,11 @@ function useAsyncOptions(
   const cacheRef = useRef<Map<string, SelectOption[]>>(new Map());
 
   const [resolvedOptions, setResolvedOptions] = useState<SelectOption[]>(
-    !isAsync ? (Array.isArray(options) ? options.map(normalizeOption) : []) : []
+    !isAsync
+      ? Array.isArray(options)
+        ? options.map(normalizeSelectOption)
+        : []
+      : []
   );
   const [isLoading, setIsLoading] = useState(isAsync);
 
@@ -122,7 +115,7 @@ function useAsyncOptions(
   useEffect(() => {
     if (!isAsync) {
       if (Array.isArray(options)) {
-        setResolvedOptions(options.map(normalizeOption));
+        setResolvedOptions(options.map(normalizeSelectOption));
       }
       setIsLoading(false);
       return;
@@ -150,7 +143,7 @@ function useAsyncOptions(
           options as (context: ValidationContext) => Promise<SelectOption[]>
         )(context);
 
-        const normalized = result.map(normalizeOption);
+        const normalized = result.map(normalizeSelectOption);
 
         if (isMounted) {
           cacheRef.current.set(dependencyKey, normalized);
@@ -185,32 +178,16 @@ export function SelectField({
   autoFocus,
   formValues,
   siblingData,
+  fieldId,
+  label,
+  isDisabled,
+  isReadOnly,
+  error,
 }: SelectFieldProps) {
   const [searchValue, setSearchValue] = useState("");
   const rawValue = form.watch(path);
   const anchorRef = useComboboxAnchor();
-
-  const error = form.formState.errors[path];
-  const errorMessage =
-    typeof error === "string"
-      ? error
-      : Array.isArray(error)
-        ? error[0]
-        : undefined;
-  const hasError = !!errorMessage;
-
-  const isDisabled =
-    (typeof field.disabled === "function"
-      ? field.disabled(formValues, siblingData)
-      : (field.disabled ?? false)) || form.formState.isSubmitting;
-
-  const isReadOnly =
-    typeof field.readOnly === "function"
-      ? field.readOnly(formValues, siblingData)
-      : (field.readOnly ?? false);
-
-  const label = field.label !== false ? (field.label ?? field.name) : null;
-  const fieldId = field.id ?? generateFieldId(path);
+  const hasError = !!error;
 
   const { resolvedOptions, isLoading } = useAsyncOptions(
     field.options,
@@ -236,7 +213,7 @@ export function SelectField({
     }
     const query = searchValue.toLowerCase();
     return resolvedOptions.filter((opt) =>
-      getOptionLabel(opt).toLowerCase().includes(query)
+      getSelectOptionLabelString(opt).toLowerCase().includes(query)
     );
   }, [resolvedOptions, searchValue, isSearchable]);
 
@@ -294,7 +271,7 @@ export function SelectField({
       <div className="flex-1 min-w-0 py-0.5 text-left">
         <div className="flex items-center gap-2">
           <span className="truncate font-medium">
-            {getOptionLabelNode(option)}
+            {getSelectOptionLabel(option)}
           </span>
           {option.badge && (
             <span className="shrink-0 px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
@@ -332,7 +309,7 @@ export function SelectField({
               );
               return (
                 <ComboboxChip key={`${val}-${index}`}>
-                  {opt ? getOptionLabel(opt) : val}
+                  {opt ? getSelectOptionLabelString(opt) : val}
                 </ComboboxChip>
               );
             })}
@@ -409,7 +386,7 @@ export function SelectField({
                   </span>
                 )}
                 <span className="truncate">
-                  {getOptionLabel(selectedOption)}
+                  {getSelectOptionLabelString(selectedOption)}
                 </span>
               </span>
             ) : (
@@ -473,16 +450,7 @@ export function SelectField({
       className={field.style?.className}
       data-invalid={hasError}
       data-disabled={isDisabled}
-      style={
-        field.style?.width
-          ? {
-              width:
-                typeof field.style.width === "number"
-                  ? `${field.style.width}px`
-                  : field.style.width,
-            }
-          : undefined
-      }
+      style={getFieldWidthStyle(field.style)}
     >
       {label && (
         <FieldLabel htmlFor={fieldId} className="gap-1 items-baseline">
@@ -501,7 +469,7 @@ export function SelectField({
         </FieldDescription>
       )}
 
-      {errorMessage && <FieldError>{errorMessage}</FieldError>}
+      {error && <FieldError>{error}</FieldError>}
     </Field>
   );
 }

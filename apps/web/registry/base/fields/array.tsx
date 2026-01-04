@@ -8,7 +8,6 @@ import type {
 import {
   getNestedFieldPaths,
   countNestedErrors,
-  resolveFieldState,
   getArrayRowLabel,
 } from "@buildnbuzz/buzzform";
 import { cn } from "@/lib/utils";
@@ -60,6 +59,15 @@ export interface ArrayFieldComponentProps {
   path: string;
   form: FormAdapter;
   registry?: FieldRegistry;
+  autoFocus?: boolean;
+  formValues: Record<string, unknown>;
+  siblingData: Record<string, unknown>;
+  // Computed props
+  fieldId: string;
+  label: React.ReactNode | null;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  error?: string;
 }
 
 interface ArrayRowItem {
@@ -381,573 +389,589 @@ ArrayRow.displayName = "ArrayRow";
 export const ArrayField = React.forwardRef<
   HTMLDivElement,
   ArrayFieldComponentProps
->(({ field, path, form, registry }: ArrayFieldComponentProps, ref) => {
-  const dndContextId = React.useId();
+>(
+  (
+    {
+      field,
+      path,
+      form,
+      registry,
+      isDisabled,
+      isReadOnly,
+      label,
+    }: ArrayFieldComponentProps,
+    ref
+  ) => {
+    const dndContextId = React.useId();
 
-  // UI options with type-safe defaults
-  const ui = field.ui;
-  const isSortable = ui?.isSortable !== false;
-  const addLabel = ui?.addLabel ?? "Add Item";
-  const showErrorBadge = ui?.showErrorBadge !== false;
-  const emptyMessage = ui?.emptyMessage ?? "No items added yet";
+    // UI options with type-safe defaults
+    const ui = field.ui;
+    const isSortable = ui?.isSortable !== false;
+    const addLabel = ui?.addLabel ?? "Add Item";
+    const showErrorBadge = ui?.showErrorBadge !== false;
+    const emptyMessage = ui?.emptyMessage ?? "No items added yet";
 
-  // Get form data for conditional disabled/readOnly
-  const formData = form.watch() as Record<string, unknown>;
+    // Initialize collapsed states from UI options
+    const [isArrayCollapsed, setIsArrayCollapsed] = React.useState(
+      ui?.collapsed ?? false
+    );
+    const [collapsedRowsMap, setCollapsedRowsMap] = React.useState<
+      Record<string, boolean>
+    >({});
+    const [showDeleteAllDialog, setShowDeleteAllDialog] = React.useState(false);
 
-  // Resolve disabled and readOnly states using shared utility
-  const isDisabled = resolveFieldState(field.disabled, formData);
-  const isReadOnly = resolveFieldState(field.readOnly, formData);
+    // Track newly added rows and exiting rows for animation
+    const [newRowIds, setNewRowIds] = React.useState<Set<string>>(new Set());
+    const [exitingRowIds, setExitingRowIds] = React.useState<Set<string>>(
+      new Set()
+    );
 
-  // Initialize collapsed states from UI options
-  const [isArrayCollapsed, setIsArrayCollapsed] = React.useState(
-    ui?.collapsed ?? false
-  );
-  const [collapsedRowsMap, setCollapsedRowsMap] = React.useState<
-    Record<string, boolean>
-  >({});
-  const [showDeleteAllDialog, setShowDeleteAllDialog] = React.useState(false);
+    // Screen reader announcement
+    const [announcement, setAnnouncement] = React.useState<string>("");
 
-  // Track newly added rows and exiting rows for animation
-  const [newRowIds, setNewRowIds] = React.useState<Set<string>>(new Set());
-  const [exitingRowIds, setExitingRowIds] = React.useState<Set<string>>(
-    new Set()
-  );
+    // Use form.array.fields() for stable items with IDs
+    const rows = form.array.fields<ArrayRowItem>(path);
 
-  // Screen reader announcement
-  const [announcement, setAnnouncement] = React.useState<string>("");
-
-  // Use form.array.fields() for stable items with IDs
-  const rows = form.array.fields<ArrayRowItem>(path);
-
-  // Initialize row collapsed state when rows change (for ui.rowsCollapsed)
-  React.useEffect(() => {
-    if (ui?.rowsCollapsed && rows.length > 0) {
-      const newMap: Record<string, boolean> = {};
-      for (const row of rows) {
-        // Only collapse new rows, preserve existing state
-        if (collapsedRowsMap[row.id] === undefined) {
-          newMap[row.id] = true;
+    // Initialize row collapsed state when rows change (for ui.rowsCollapsed)
+    React.useEffect(() => {
+      if (ui?.rowsCollapsed && rows.length > 0) {
+        const newMap: Record<string, boolean> = {};
+        for (const row of rows) {
+          // Only collapse new rows, preserve existing state
+          if (collapsedRowsMap[row.id] === undefined) {
+            newMap[row.id] = true;
+          }
+        }
+        if (Object.keys(newMap).length > 0) {
+          setCollapsedRowsMap((prev) => ({ ...prev, ...newMap }));
         }
       }
-      if (Object.keys(newMap).length > 0) {
-        setCollapsedRowsMap((prev) => ({ ...prev, ...newMap }));
+    }, [rows, ui?.rowsCollapsed, collapsedRowsMap]);
+
+    // Track previous rows to detect additions for animation
+    const prevRowsRef = React.useRef(rows);
+
+    // Use useLayoutEffect to detect additions synchronously to avoid flicker
+    React.useLayoutEffect(() => {
+      const prevRows = prevRowsRef.current;
+
+      // Detect additions (length increased)
+      if (rows.length > prevRows.length) {
+        // Find IDs that are in current but not in prev
+        const prevIds = new Set(prevRows.map((r) => r.id));
+        const newItems = rows.filter((r) => !prevIds.has(r.id));
+
+        if (newItems.length > 0) {
+          const idsToAdd = newItems.map((r) => r.id);
+          setNewRowIds((prev) => {
+            const next = new Set(prev);
+            idsToAdd.forEach((id) => next.add(id));
+            return next;
+          });
+        }
       }
-    }
-  }, [rows, ui?.rowsCollapsed, collapsedRowsMap]);
 
-  // Track previous rows to detect additions for animation
-  const prevRowsRef = React.useRef(rows);
+      // Update ref for next render
+      prevRowsRef.current = rows;
+    }, [rows]);
 
-  // Use useLayoutEffect to detect additions synchronously to avoid flicker
-  React.useLayoutEffect(() => {
-    const prevRows = prevRowsRef.current;
-
-    // Detect additions (length increased)
-    if (rows.length > prevRows.length) {
-      // Find IDs that are in current but not in prev
-      const prevIds = new Set(prevRows.map((r) => r.id));
-      const newItems = rows.filter((r) => !prevIds.has(r.id));
-
-      if (newItems.length > 0) {
-        const idsToAdd = newItems.map((r) => r.id);
-        setNewRowIds((prev) => {
-          const next = new Set(prev);
-          idsToAdd.forEach((id) => next.add(id));
-          return next;
-        });
+    // Clear "new" status after animation completes
+    React.useEffect(() => {
+      if (newRowIds.size > 0) {
+        const timer = setTimeout(() => {
+          setNewRowIds(new Set());
+        }, 700); // Match animation duration
+        return () => clearTimeout(timer);
       }
-    }
+    }, [newRowIds]);
 
-    // Update ref for next render
-    prevRowsRef.current = rows;
-  }, [rows]);
+    // Calculate total errors across all rows for header badge
+    const totalErrorCount = useArrayErrors(
+      form,
+      field.fields,
+      path,
+      rows.length
+    );
 
-  // Clear "new" status after animation completes
-  React.useEffect(() => {
-    if (newRowIds.size > 0) {
-      const timer = setTimeout(() => {
-        setNewRowIds(new Set());
-      }, 700); // Match animation duration
-      return () => clearTimeout(timer);
-    }
-  }, [newRowIds]);
+    const sensors = useSensors(
+      useSensor(PointerSensor, {
+        activationConstraint: {
+          distance: 10,
+        },
+      }),
+      useSensor(KeyboardSensor, {
+        coordinateGetter: sortableKeyboardCoordinates,
+      })
+    );
 
-  // Calculate total errors across all rows for header badge
-  const totalErrorCount = useArrayErrors(form, field.fields, path, rows.length);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 10,
+    const handleDragEnd = React.useCallback(
+      (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+          const oldIndex = rows.findIndex((r) => r.id === active.id);
+          const newIndex = rows.findIndex((r) => r.id === over.id);
+          if (oldIndex !== -1 && newIndex !== -1) {
+            form.array.move(path, oldIndex, newIndex);
+          }
+        }
       },
-    }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
+      [rows, form, path]
+    );
 
-  const handleDragEnd = React.useCallback(
-    (event: DragEndEvent) => {
-      const { active, over } = event;
-      if (over && active.id !== over.id) {
-        const oldIndex = rows.findIndex((r) => r.id === active.id);
-        const newIndex = rows.findIndex((r) => r.id === over.id);
-        if (oldIndex !== -1 && newIndex !== -1) {
-          form.array.move(path, oldIndex, newIndex);
+    const handleAdd = React.useCallback(
+      (e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        if (!isDisabled && !isReadOnly) {
+          form.array.append(path, {});
+          setAnnouncement(`Item ${rows.length + 1} added`);
         }
-      }
-    },
-    [rows, form, path]
-  );
+      },
+      [form, path, isDisabled, isReadOnly, rows.length]
+    );
 
-  const handleAdd = React.useCallback(
-    (e?: React.MouseEvent) => {
-      e?.stopPropagation();
-      if (!isDisabled && !isReadOnly) {
-        form.array.append(path, {});
-        setAnnouncement(`Item ${rows.length + 1} added`);
-      }
-    },
-    [form, path, isDisabled, isReadOnly, rows.length]
-  );
+    const handleRemove = React.useCallback(
+      (index: number) => {
+        const rowToRemove = rows[index];
+        if (!rowToRemove) return;
 
-  const handleRemove = React.useCallback(
-    (index: number) => {
-      const rowToRemove = rows[index];
-      if (!rowToRemove) return;
-
-      const removedLabel = getArrayRowLabel(
-        rowToRemove,
-        field.fields,
-        field.ui,
-        `Item ${index + 1}`
-      );
-
-      // 1. Mark as exiting to trigger animation
-      setExitingRowIds((prev) => new Set([...prev, rowToRemove.id]));
-
-      // 2. Wait for animation to complete before actual removal
-      setTimeout(() => {
-        // Find fresh index of this ID in case list changed
-        const currentRows = form.array.fields<ArrayRowItem>(path);
-        const currentIndex = currentRows.findIndex(
-          (r) => r.id === rowToRemove.id
+        const removedLabel = getArrayRowLabel(
+          rowToRemove,
+          field.fields,
+          field.ui,
+          `Item ${index + 1}`
         );
 
-        if (currentIndex !== -1) {
-          form.array.remove(path, currentIndex);
-          setAnnouncement(`${removedLabel} removed`);
+        // 1. Mark as exiting to trigger animation
+        setExitingRowIds((prev) => new Set([...prev, rowToRemove.id]));
+
+        // 2. Wait for animation to complete before actual removal
+        setTimeout(() => {
+          // Find fresh index of this ID in case list changed
+          const currentRows = form.array.fields<ArrayRowItem>(path);
+          const currentIndex = currentRows.findIndex(
+            (r) => r.id === rowToRemove.id
+          );
+
+          if (currentIndex !== -1) {
+            form.array.remove(path, currentIndex);
+            setAnnouncement(`${removedLabel} removed`);
+          }
+
+          // Cleanup exiting state
+          setExitingRowIds((prev) => {
+            const next = new Set(prev);
+            next.delete(rowToRemove.id);
+            return next;
+          });
+        }, 300); // Match CSS animation duration
+      },
+      [form, path, rows, field.fields, field.ui]
+    );
+
+    const handleDuplicate = React.useCallback(
+      (index: number) => {
+        const currentValue = rows[index];
+        if (currentValue) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { id, ...rest } = currentValue;
+          form.array.insert(path, index + 1, rest);
+          setAnnouncement(`Item ${index + 1} duplicated`);
         }
+      },
+      [form, path, rows]
+    );
 
-        // Cleanup exiting state
-        setExitingRowIds((prev) => {
-          const next = new Set(prev);
-          next.delete(rowToRemove.id);
-          return next;
-        });
-      }, 300); // Match CSS animation duration
-    },
-    [form, path, rows, field.fields, field.ui]
-  );
+    const handleRemoveAllClick = React.useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        // Check if confirmation is required (default: true for safety)
+        if (ui?.confirmDelete !== false) {
+          setShowDeleteAllDialog(true);
+        } else {
+          form.array.replace(path, []);
+        }
+      },
+      [ui?.confirmDelete, form, path]
+    );
 
-  const handleDuplicate = React.useCallback(
-    (index: number) => {
-      const currentValue = rows[index];
-      if (currentValue) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { id, ...rest } = currentValue;
-        form.array.insert(path, index + 1, rest);
-        setAnnouncement(`Item ${index + 1} duplicated`);
-      }
-    },
-    [form, path, rows]
-  );
+    const handleConfirmRemoveAll = React.useCallback(() => {
+      form.array.replace(path, []);
+      setShowDeleteAllDialog(false);
+    }, [form, path]);
 
-  const handleRemoveAllClick = React.useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      // Check if confirmation is required (default: true for safety)
-      if (ui?.confirmDelete !== false) {
-        setShowDeleteAllDialog(true);
-      } else {
-        form.array.replace(path, []);
-      }
-    },
-    [ui?.confirmDelete, form, path]
-  );
+    const handleToggleRow = React.useCallback(
+      (index: number) => {
+        const rowId = rows[index]?.id;
+        if (rowId) {
+          setCollapsedRowsMap((prev) => ({
+            ...prev,
+            [rowId]: !prev[rowId],
+          }));
+        }
+      },
+      [rows]
+    );
 
-  const handleConfirmRemoveAll = React.useCallback(() => {
-    form.array.replace(path, []);
-    setShowDeleteAllDialog(false);
-  }, [form, path]);
+    const handleToggleAllRows = React.useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const allOpen = rows.every((row) => !collapsedRowsMap[row.id]);
+        const newMap: Record<string, boolean> = {};
+        for (const row of rows) {
+          newMap[row.id] = allOpen;
+        }
+        setCollapsedRowsMap(newMap);
+      },
+      [rows, collapsedRowsMap]
+    );
 
-  const handleToggleRow = React.useCallback(
-    (index: number) => {
-      const rowId = rows[index]?.id;
-      if (rowId) {
-        setCollapsedRowsMap((prev) => ({
-          ...prev,
-          [rowId]: !prev[rowId],
-        }));
-      }
-    },
-    [rows]
-  );
+    const allRowsCollapsed =
+      rows.length > 0 && rows.every((row) => collapsedRowsMap[row.id]);
+    const canAddMore = !field.maxRows || rows.length < field.maxRows;
+    const canRemoveAny = !field.minRows || rows.length > field.minRows;
 
-  const handleToggleAllRows = React.useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      const allOpen = rows.every((row) => !collapsedRowsMap[row.id]);
-      const newMap: Record<string, boolean> = {};
-      for (const row of rows) {
-        newMap[row.id] = allOpen;
-      }
-      setCollapsedRowsMap(newMap);
-    },
-    [rows, collapsedRowsMap]
-  );
-
-  const allRowsCollapsed =
-    rows.length > 0 && rows.every((row) => collapsedRowsMap[row.id]);
-  const canAddMore = !field.maxRows || rows.length < field.maxRows;
-  const canRemoveAny = !field.minRows || rows.length > field.minRows;
-  const label = field.label !== false ? field.label || field.name : null;
-
-  const bodyContent = (
-    <CardContent className="pt-4 px-4 pb-4">
-      {rows.length > 0 ? (
-        <DndContext
-          id={dndContextId}
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={rows.map((r) => r.id)}
-            strategy={verticalListSortingStrategy}
+    const bodyContent = (
+      <CardContent className="pt-4 px-4 pb-4">
+        {rows.length > 0 ? (
+          <DndContext
+            id={dndContextId}
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            <div
-              className="space-y-3"
-              role="list"
-              aria-label={`${label} items`}
+            <SortableContext
+              items={rows.map((r) => r.id)}
+              strategy={verticalListSortingStrategy}
             >
-              {rows.map((row, index) => (
-                <ArrayRow
-                  key={row.id}
-                  id={row.id}
-                  index={index}
-                  field={field}
-                  path={path}
-                  form={form}
-                  registry={registry}
-                  onRemove={handleRemove}
-                  onDuplicate={handleDuplicate}
-                  isOpen={!collapsedRowsMap[row.id]}
-                  onToggle={handleToggleRow}
-                  canRemove={!field.minRows || rows.length > field.minRows}
-                  isSortable={isSortable}
-                  isDisabled={isDisabled}
-                  isReadOnly={isReadOnly}
-                  isNew={newRowIds.has(row.id)}
-                  isExiting={exitingRowIds.has(row.id)}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed rounded-lg text-center">
-          <IconPlaceholder
-            lucide="ListPlus"
-            hugeicons="InsertRowDownIcon"
-            tabler="IconRowInsertBottom"
-            phosphor="ListPlus"
-            className="size-10 text-muted-foreground/50 mb-3"
-          />
-          <p className="text-sm font-medium text-muted-foreground mb-1">
-            {emptyMessage}
-          </p>
-          <p className="text-xs text-muted-foreground/75 mb-4">
-            Click the button below to add your first item
-          </p>
-          {!isReadOnly && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleAdd}
-              disabled={!canAddMore || isDisabled}
-            >
-              <IconPlaceholder
-                lucide="Plus"
-                hugeicons="Add01Icon"
-                tabler="IconPlus"
-                phosphor="Plus"
-                className="size-4 mr-1.5"
-              />
-              {addLabel}
-            </Button>
-          )}
-        </div>
-      )}
-
-      {/* Footer Add Button - Rendered when items exist to allow adding at the bottom */}
-      {rows.length > 0 && !isReadOnly && (
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full mt-4 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-all"
-          onClick={handleAdd}
-          disabled={!canAddMore || isDisabled}
-        >
-          <IconPlaceholder
-            lucide="Plus"
-            hugeicons="Add01Icon"
-            tabler="IconPlus"
-            phosphor="Plus"
-            className="size-4 mr-2"
-          />
-          {addLabel}
-        </Button>
-      )}
-
-      {typeof field.minRows === "number" &&
-        field.minRows > 0 &&
-        rows.length < field.minRows && (
-          <div className="mt-3 text-xs text-destructive flex items-center gap-1.5 px-1 font-medium">
+              <div
+                className="space-y-3"
+                role="list"
+                aria-label={`${label} items`}
+              >
+                {rows.map((row, index) => (
+                  <ArrayRow
+                    key={row.id}
+                    id={row.id}
+                    index={index}
+                    field={field}
+                    path={path}
+                    form={form}
+                    registry={registry}
+                    onRemove={handleRemove}
+                    onDuplicate={handleDuplicate}
+                    isOpen={!collapsedRowsMap[row.id]}
+                    onToggle={handleToggleRow}
+                    canRemove={!field.minRows || rows.length > field.minRows}
+                    isSortable={isSortable}
+                    isDisabled={isDisabled}
+                    isReadOnly={isReadOnly}
+                    isNew={newRowIds.has(row.id)}
+                    isExiting={exitingRowIds.has(row.id)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed rounded-lg text-center">
             <IconPlaceholder
-              lucide="AlertCircle"
-              hugeicons="SecurityBlockIcon"
-              tabler="IconAlertCircle"
-              phosphor="Warning"
-              className="size-3.5"
+              lucide="ListPlus"
+              hugeicons="InsertRowDownIcon"
+              tabler="IconRowInsertBottom"
+              phosphor="ListPlus"
+              className="size-10 text-muted-foreground/50 mb-3"
             />
-            Minimum {field.minRows} {field.minRows === 1 ? "item" : "items"}{" "}
-            required
+            <p className="text-sm font-medium text-muted-foreground mb-1">
+              {emptyMessage}
+            </p>
+            <p className="text-xs text-muted-foreground/75 mb-4">
+              Click the button below to add your first item
+            </p>
+            {!isReadOnly && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAdd}
+                disabled={!canAddMore || isDisabled}
+              >
+                <IconPlaceholder
+                  lucide="Plus"
+                  hugeicons="Add01Icon"
+                  tabler="IconPlus"
+                  phosphor="Plus"
+                  className="size-4 mr-1.5"
+                />
+                {addLabel}
+              </Button>
+            )}
           </div>
         )}
-    </CardContent>
-  );
 
-  return (
-    <>
-      {/* Screen reader announcements */}
-      <div
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-        className="sr-only"
-      >
-        {announcement}
-      </div>
-
-      {/* Delete All Confirmation Dialog */}
-      <AlertDialog
-        open={showDeleteAllDialog}
-        onOpenChange={setShowDeleteAllDialog}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogMedia className="bg-destructive/10 text-destructive">
-              <IconPlaceholder
-                lucide="Trash2"
-                hugeicons="Delete02Icon"
-                tabler="IconTrash"
-                phosphor="Trash"
-                className="size-5"
-              />
-            </AlertDialogMedia>
-            <AlertDialogTitle>Delete all items?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently remove all {rows.length}{" "}
-              {rows.length === 1 ? "item" : "items"} from this list. This action
-              cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleConfirmRemoveAll}
-            >
-              Delete All
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <Collapsible
-        open={!isArrayCollapsed}
-        onOpenChange={(open) => setIsArrayCollapsed(!open)}
-      >
-        <Card
-          ref={ref}
-          className={cn(
-            "py-0 gap-0",
-            field.style?.className,
-            isDisabled && "opacity-60"
-          )}
-          style={field.style?.width ? { width: field.style.width } : undefined}
-        >
-          <CardHeader
-            className={cn(
-              "flex flex-row items-center justify-between bg-muted/50 transition-colors py-3 px-4",
-              !isArrayCollapsed && "border-b"
-            )}
+        {/* Footer Add Button - Rendered when items exist to allow adding at the bottom */}
+        {rows.length > 0 && !isReadOnly && (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full mt-4 border-dashed border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 text-muted-foreground hover:text-foreground transition-all"
+            onClick={handleAdd}
+            disabled={!canAddMore || isDisabled}
           >
-            <CollapsibleTrigger className="flex items-start gap-2 cursor-pointer hover:opacity-80 transition-opacity flex-1 min-w-0 py-1">
+            <IconPlaceholder
+              lucide="Plus"
+              hugeicons="Add01Icon"
+              tabler="IconPlus"
+              phosphor="Plus"
+              className="size-4 mr-2"
+            />
+            {addLabel}
+          </Button>
+        )}
+
+        {typeof field.minRows === "number" &&
+          field.minRows > 0 &&
+          rows.length < field.minRows && (
+            <div className="mt-3 text-xs text-destructive flex items-center gap-1.5 px-1 font-medium">
               <IconPlaceholder
-                lucide="ChevronDown"
-                hugeicons="ArrowDown01Icon"
-                tabler="IconChevronDown"
-                phosphor="CaretDown"
-                className={cn(
-                  "size-4 text-muted-foreground transition-transform duration-200 shrink-0 mt-0.5",
-                  isArrayCollapsed && "-rotate-90"
-                )}
+                lucide="AlertCircle"
+                hugeicons="SecurityBlockIcon"
+                tabler="IconAlertCircle"
+                phosphor="Warning"
+                className="size-3.5"
               />
-              <div className="flex flex-col items-start gap-0.5 min-w-0 w-full">
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 w-full pr-2">
-                  <span className="font-semibold text-sm truncate">
-                    {label}
-                  </span>
-                  {field.required && (
-                    <span className="text-destructive">*</span>
+              Minimum {field.minRows} {field.minRows === 1 ? "item" : "items"}{" "}
+              required
+            </div>
+          )}
+      </CardContent>
+    );
+
+    return (
+      <>
+        {/* Screen reader announcements */}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="sr-only"
+        >
+          {announcement}
+        </div>
+
+        {/* Delete All Confirmation Dialog */}
+        <AlertDialog
+          open={showDeleteAllDialog}
+          onOpenChange={setShowDeleteAllDialog}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogMedia className="bg-destructive/10 text-destructive">
+                <IconPlaceholder
+                  lucide="Trash2"
+                  hugeicons="Delete02Icon"
+                  tabler="IconTrash"
+                  phosphor="Trash"
+                  className="size-5"
+                />
+              </AlertDialogMedia>
+              <AlertDialogTitle>Delete all items?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently remove all {rows.length}{" "}
+                {rows.length === 1 ? "item" : "items"} from this list. This
+                action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                variant="destructive"
+                onClick={handleConfirmRemoveAll}
+              >
+                Delete All
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <Collapsible
+          open={!isArrayCollapsed}
+          onOpenChange={(open) => setIsArrayCollapsed(!open)}
+        >
+          <Card
+            ref={ref}
+            className={cn(
+              "py-0 gap-0",
+              field.style?.className,
+              isDisabled && "opacity-60"
+            )}
+            style={
+              field.style?.width ? { width: field.style.width } : undefined
+            }
+          >
+            <CardHeader
+              className={cn(
+                "flex flex-row items-center justify-between bg-muted/50 transition-colors py-3 px-4",
+                !isArrayCollapsed && "border-b"
+              )}
+            >
+              <CollapsibleTrigger className="flex items-start gap-2 cursor-pointer hover:opacity-80 transition-opacity flex-1 min-w-0 py-1">
+                <IconPlaceholder
+                  lucide="ChevronDown"
+                  hugeicons="ArrowDown01Icon"
+                  tabler="IconChevronDown"
+                  phosphor="CaretDown"
+                  className={cn(
+                    "size-4 text-muted-foreground transition-transform duration-200 shrink-0 mt-0.5",
+                    isArrayCollapsed && "-rotate-90"
                   )}
-                  {rows.length > 0 && (
-                    <Badge
-                      variant="secondary"
-                      className="h-5 px-1.5 text-xs whitespace-nowrap shrink-0"
-                    >
-                      {rows.length} {rows.length === 1 ? "item" : "items"}
-                    </Badge>
-                  )}
-                  {showErrorBadge && totalErrorCount > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="h-5 px-1.5 text-xs whitespace-nowrap shrink-0"
-                    >
-                      {totalErrorCount}{" "}
-                      {totalErrorCount === 1 ? "error" : "errors"}
-                    </Badge>
+                />
+                <div className="flex flex-col items-start gap-0.5 min-w-0 w-full">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 w-full pr-2">
+                    <span className="font-semibold text-sm truncate">
+                      {label}
+                    </span>
+                    {field.required && (
+                      <span className="text-destructive">*</span>
+                    )}
+                    {rows.length > 0 && (
+                      <Badge
+                        variant="secondary"
+                        className="h-5 px-1.5 text-xs whitespace-nowrap shrink-0"
+                      >
+                        {rows.length} {rows.length === 1 ? "item" : "items"}
+                      </Badge>
+                    )}
+                    {showErrorBadge && totalErrorCount > 0 && (
+                      <Badge
+                        variant="destructive"
+                        className="h-5 px-1.5 text-xs whitespace-nowrap shrink-0"
+                      >
+                        {totalErrorCount}{" "}
+                        {totalErrorCount === 1 ? "error" : "errors"}
+                      </Badge>
+                    )}
+                  </div>
+                  {field.description && (
+                    <p className="text-xs text-muted-foreground text-left wrap-break-word leading-tight w-full pr-2">
+                      {field.description}
+                    </p>
                   )}
                 </div>
-                {field.description && (
-                  <p className="text-xs text-muted-foreground text-left wrap-break-word leading-tight w-full pr-2">
-                    {field.description}
-                  </p>
-                )}
-              </div>
-            </CollapsibleTrigger>
-            {!isReadOnly && (
-              <div className="flex items-center gap-1">
-                {rows.length > 0 && (
-                  <>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                      onClick={handleToggleAllRows}
-                      disabled={isDisabled}
-                      title={
-                        allRowsCollapsed
-                          ? "Expand all items"
-                          : "Collapse all items"
-                      }
-                      aria-label={
-                        allRowsCollapsed
-                          ? "Expand all items"
-                          : "Collapse all items"
-                      }
-                    >
-                      <IconPlaceholder
-                        lucide={
-                          allRowsCollapsed ? "ChevronsDownUp" : "ChevronsUpDown"
-                        }
-                        hugeicons={
+              </CollapsibleTrigger>
+              {!isReadOnly && (
+                <div className="flex items-center gap-1">
+                  {rows.length > 0 && (
+                    <>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                        onClick={handleToggleAllRows}
+                        disabled={isDisabled}
+                        title={
                           allRowsCollapsed
-                            ? "ArrowExpand02Icon"
-                            : "ArrowShrink02Icon"
+                            ? "Expand all items"
+                            : "Collapse all items"
                         }
-                        tabler={
+                        aria-label={
                           allRowsCollapsed
-                            ? "IconChevronsDown"
-                            : "IconChevronsUp"
+                            ? "Expand all items"
+                            : "Collapse all items"
                         }
-                        phosphor={
-                          allRowsCollapsed
-                            ? "ArrowsInSimple"
-                            : "ArrowsOutSimple"
+                      >
+                        <IconPlaceholder
+                          lucide={
+                            allRowsCollapsed
+                              ? "ChevronsDownUp"
+                              : "ChevronsUpDown"
+                          }
+                          hugeicons={
+                            allRowsCollapsed
+                              ? "ArrowExpand02Icon"
+                              : "ArrowShrink02Icon"
+                          }
+                          tabler={
+                            allRowsCollapsed
+                              ? "IconChevronsDown"
+                              : "IconChevronsUp"
+                          }
+                          phosphor={
+                            allRowsCollapsed
+                              ? "ArrowsInSimple"
+                              : "ArrowsOutSimple"
+                          }
+                          className="size-4"
+                        />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          "h-7 w-7 text-destructive hover:bg-destructive/10",
+                          (!canRemoveAny || isDisabled) &&
+                            "opacity-50 cursor-not-allowed"
+                        )}
+                        onClick={handleRemoveAllClick}
+                        disabled={isDisabled || !canRemoveAny}
+                        title={
+                          canRemoveAny
+                            ? "Delete all items"
+                            : `Minimum ${field.minRows} items required`
                         }
-                        className="size-4"
-                      />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className={cn(
-                        "h-7 w-7 text-destructive hover:bg-destructive/10",
-                        (!canRemoveAny || isDisabled) &&
-                          "opacity-50 cursor-not-allowed"
-                      )}
-                      onClick={handleRemoveAllClick}
-                      disabled={isDisabled || !canRemoveAny}
-                      title={
-                        canRemoveAny
-                          ? "Delete all items"
-                          : `Minimum ${field.minRows} items required`
-                      }
-                      aria-label={
-                        canRemoveAny
-                          ? "Delete all items"
-                          : `Minimum ${field.minRows} items required`
-                      }
-                    >
-                      <IconPlaceholder
-                        lucide="Trash"
-                        hugeicons="DeletePutBackIcon"
-                        tabler="IconTrash"
-                        phosphor="TrashSimple"
-                        className="size-4"
-                      />
-                    </Button>
-                  </>
-                )}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7"
-                  disabled={!canAddMore || isDisabled}
-                  onClick={handleAdd}
-                  title={
-                    canAddMore
-                      ? "Add item"
-                      : `Maximum ${field.maxRows} items reached`
-                  }
-                  aria-label={
-                    canAddMore
-                      ? "Add item"
-                      : `Maximum ${field.maxRows} items reached`
-                  }
-                >
-                  <IconPlaceholder
-                    lucide="Plus"
-                    hugeicons="Add01Icon"
-                    tabler="IconPlus"
-                    phosphor="Plus"
-                    className="size-4"
-                  />
-                </Button>
-              </div>
-            )}
-          </CardHeader>
-          <CollapsibleContent>{bodyContent}</CollapsibleContent>
-        </Card>
-      </Collapsible>
-    </>
-  );
-});
+                        aria-label={
+                          canRemoveAny
+                            ? "Delete all items"
+                            : `Minimum ${field.minRows} items required`
+                        }
+                      >
+                        <IconPlaceholder
+                          lucide="Trash"
+                          hugeicons="DeletePutBackIcon"
+                          tabler="IconTrash"
+                          phosphor="TrashSimple"
+                          className="size-4"
+                        />
+                      </Button>
+                    </>
+                  )}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    disabled={!canAddMore || isDisabled}
+                    onClick={handleAdd}
+                    title={
+                      canAddMore
+                        ? "Add item"
+                        : `Maximum ${field.maxRows} items reached`
+                    }
+                    aria-label={
+                      canAddMore
+                        ? "Add item"
+                        : `Maximum ${field.maxRows} items reached`
+                    }
+                  >
+                    <IconPlaceholder
+                      lucide="Plus"
+                      hugeicons="Add01Icon"
+                      tabler="IconPlus"
+                      phosphor="Plus"
+                      className="size-4"
+                    />
+                  </Button>
+                </div>
+              )}
+            </CardHeader>
+            <CollapsibleContent>{bodyContent}</CollapsibleContent>
+          </Card>
+        </Collapsible>
+      </>
+    );
+  }
+);
 
 ArrayField.displayName = "ArrayField";
 

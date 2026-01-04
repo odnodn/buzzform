@@ -5,7 +5,7 @@ import type {
   TextField as TextFieldType,
   FormAdapter,
 } from "@buildnbuzz/buzzform";
-import { generateFieldId } from "@buildnbuzz/buzzform";
+import { getFieldWidthStyle } from "@buildnbuzz/buzzform";
 import { Input } from "@/components/ui/input";
 import { CopyButton } from "@/components/buzzform/copy";
 import {
@@ -23,6 +23,12 @@ export interface TextFieldProps {
   autoFocus?: boolean;
   formValues: Record<string, unknown>;
   siblingData: Record<string, unknown>;
+  // Computed props
+  fieldId: string;
+  label: string | null;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  error?: string;
 }
 
 export function TextField({
@@ -30,32 +36,14 @@ export function TextField({
   path,
   form,
   autoFocus,
-  formValues,
-  siblingData,
+  fieldId,
+  label,
+  isDisabled,
+  isReadOnly,
+  error,
 }: TextFieldProps) {
   const value = form.watch<string>(path) ?? "";
-
-  const error = form.formState.errors[path];
-  const errorMessage =
-    typeof error === "string"
-      ? error
-      : Array.isArray(error)
-        ? error[0]
-        : undefined;
-  const hasError = !!errorMessage;
-
-  const isDisabled =
-    (typeof field.disabled === "function"
-      ? field.disabled(formValues, siblingData)
-      : (field.disabled ?? false)) || form.formState.isSubmitting;
-
-  const isReadOnly =
-    typeof field.readOnly === "function"
-      ? field.readOnly(formValues, siblingData)
-      : (field.readOnly ?? false);
-
-  const label = field.label !== false ? (field.label ?? field.name) : null;
-  const fieldId = field.id ?? generateFieldId(path);
+  const hasError = !!error;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     form.setValue(path, e.target.value, {
@@ -87,16 +75,7 @@ export function TextField({
       className={field.style?.className}
       data-invalid={hasError}
       data-disabled={isDisabled}
-      style={
-        field.style?.width
-          ? {
-              width:
-                typeof field.style.width === "number"
-                  ? `${field.style.width}px`
-                  : field.style.width,
-            }
-          : undefined
-      }
+      style={getFieldWidthStyle(field.style)}
     >
       {label && (
         <FieldLabel htmlFor={fieldId} className="gap-1 items-baseline">
@@ -145,7 +124,7 @@ export function TextField({
         </FieldDescription>
       )}
 
-      {errorMessage && <FieldError>{errorMessage}</FieldError>}
+      {error && <FieldError>{error}</FieldError>}
     </Field>
   );
 }

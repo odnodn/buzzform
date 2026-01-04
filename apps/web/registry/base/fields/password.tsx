@@ -5,7 +5,7 @@ import type {
   PasswordField as PasswordFieldType,
   FormAdapter,
 } from "@buildnbuzz/buzzform";
-import { generateFieldId } from "@buildnbuzz/buzzform";
+import { getFieldWidthStyle } from "@buildnbuzz/buzzform";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/buzzform/copy";
@@ -33,6 +33,12 @@ export interface PasswordFieldProps {
   autoFocus?: boolean;
   formValues: Record<string, unknown>;
   siblingData: Record<string, unknown>;
+  // Computed props
+  fieldId: string;
+  label: React.ReactNode | null;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  error?: string;
 }
 
 export function PasswordField({
@@ -40,43 +46,51 @@ export function PasswordField({
   path,
   form,
   autoFocus,
-  formValues,
-  siblingData,
+  fieldId,
+  label,
+  isDisabled,
+  isReadOnly,
+  error,
 }: PasswordFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
   const value = form.watch<string>(path) ?? "";
-
-  const error = form.formState.errors[path];
-  const errorMessage =
-    typeof error === "string"
-      ? error
-      : Array.isArray(error)
-        ? error[0]
-        : undefined;
-  const hasError = !!errorMessage;
-
-  const isDisabled =
-    (typeof field.disabled === "function"
-      ? field.disabled(formValues, siblingData)
-      : (field.disabled ?? false)) || form.formState.isSubmitting;
-
-  const isReadOnly =
-    typeof field.readOnly === "function"
-      ? field.readOnly(formValues, siblingData)
-      : (field.readOnly ?? false);
-
-  const label = field.label !== false ? (field.label ?? field.name) : null;
-  const fieldId = field.id ?? generateFieldId(path);
+  const hasError = !!error;
 
   // Password criteria from field config
   const criteria = field.criteria ?? {};
+
+  // Calculate strength once
   const strength = calculatePasswordStrength(value, {
     minLength: field.minLength ?? 8,
     maxLength: field.maxLength,
     ...criteria,
   });
 
-  // Build requirements list
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    form.setValue(path, e.target.value, {
+      shouldDirty: true,
+    });
+  };
+
+  const handleBlur = () => {
+    form.onBlur(path);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleGenerate = () => {
+    const generated = generateStrongPassword({
+      minLength: field.minLength ?? 16,
+      maxLength: field.maxLength,
+      ...criteria,
+    });
+    form.setValue(path, generated, { shouldDirty: true });
+    setShowPassword(true); // Show password after generating
+  };
+
+  // Build requirements list based on calculated strength
   const requirements = [
     {
       key: "minLength",
@@ -130,41 +144,12 @@ export function PasswordField({
       : []),
   ];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    form.setValue(path, e.target.value, {
-      shouldDirty: true,
-    });
-  };
-
-  const handleBlur = () => {
-    form.onBlur(path);
-  };
-
-  const handleGenerate = () => {
-    const generated = generateStrongPassword({
-      minLength: field.minLength ?? 16,
-      maxLength: field.maxLength,
-      ...criteria,
-    });
-    form.setValue(path, generated, { shouldDirty: true });
-    setShowPassword(true); // Show password after generating
-  };
-
   return (
     <Field
       className={field.style?.className}
       data-invalid={hasError}
       data-disabled={isDisabled}
-      style={
-        field.style?.width
-          ? {
-              width:
-                typeof field.style.width === "number"
-                  ? `${field.style.width}px`
-                  : field.style.width,
-            }
-          : undefined
-      }
+      style={getFieldWidthStyle(field.style)}
     >
       {label && (
         <FieldLabel htmlFor={fieldId} className="gap-1 items-baseline">
@@ -240,7 +225,7 @@ export function PasswordField({
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={togglePasswordVisibility}
                 disabled={isDisabled}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
@@ -350,7 +335,7 @@ export function PasswordField({
         </FieldDescription>
       )}
 
-      {errorMessage && <FieldError>{errorMessage}</FieldError>}
+      {error && <FieldError>{error}</FieldError>}
     </Field>
   );
 }

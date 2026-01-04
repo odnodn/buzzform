@@ -81,6 +81,12 @@ export interface FieldRendererComponentProps {
   autoFocus?: boolean;
   formValues: Record<string, unknown>;
   siblingData: Record<string, unknown>;
+  // Computed props
+  fieldId: string;
+  label: React.ReactNode | null;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  error?: string;
 }
 
 export interface FieldRegistryEntry {
@@ -250,33 +256,16 @@ function CustomComponentRenderer({
   path,
   form,
   formValues,
-  siblingData,
   autoFocus,
-}: {
-  field: DataField;
-  path: string;
-  form: FormAdapter;
-  formValues: Record<string, unknown>;
-  siblingData: Record<string, unknown>;
-  autoFocus?: boolean;
-}) {
+  fieldId,
+  isDisabled,
+  isReadOnly,
+  error,
+}: FieldRendererComponentProps & { field: DataField }) {
   const CustomComponent = field.component as React.ComponentType<
     FieldComponentProps<unknown, DataField>
   >;
   const value = getNestedValue(formValues, path);
-  const fieldId = field.id ?? generateFieldId(path);
-
-  const isDisabled =
-    (typeof field.disabled === "function"
-      ? field.disabled(formValues, siblingData)
-      : (field.disabled ?? false)) || form.formState.isSubmitting;
-
-  const isReadOnly =
-    typeof field.readOnly === "function"
-      ? field.readOnly(formValues, siblingData)
-      : (field.readOnly ?? false);
-
-  const errorMessage = getErrorMessage(form.formState.errors, path);
 
   return (
     <CustomComponent
@@ -293,7 +282,7 @@ function CustomComponentRenderer({
       }}
       disabled={isDisabled}
       readOnly={isReadOnly}
-      error={errorMessage}
+      error={error}
       autoFocus={autoFocus}
     />
   );
@@ -305,30 +294,14 @@ function CustomInputRenderer({
   path,
   form,
   formValues,
-  siblingData,
   autoFocus,
-}: {
-  field: DataField;
-  path: string;
-  form: FormAdapter;
-  formValues: Record<string, unknown>;
-  siblingData: Record<string, unknown>;
-  autoFocus?: boolean;
-}) {
+  fieldId,
+  label,
+  isDisabled,
+  isReadOnly,
+  error,
+}: FieldRendererComponentProps & { field: DataField }) {
   const value = getNestedValue(formValues, path);
-  const fieldId = field.id ?? generateFieldId(path);
-
-  const isDisabled =
-    typeof field.disabled === "function"
-      ? field.disabled(formValues, siblingData)
-      : (field.disabled ?? false);
-
-  const isReadOnly =
-    typeof field.readOnly === "function"
-      ? field.readOnly(formValues, siblingData)
-      : (field.readOnly ?? false);
-
-  const errorMessage = getErrorMessage(form.formState.errors, path);
 
   const inputProps: FieldInputProps = {
     field,
@@ -340,14 +313,14 @@ function CustomInputRenderer({
     onBlur: () => {
       form.onBlur?.(path);
     },
-    disabled: isDisabled || form.formState.isSubmitting,
+    disabled: isDisabled,
     readOnly: isReadOnly,
-    error: errorMessage,
+    error: error,
     autoFocus,
     validation: {
       isChecking: form.formState.isValidating,
-      isValid: !errorMessage,
-      message: errorMessage,
+      isValid: !error,
+      message: error,
     },
   };
 
@@ -359,8 +332,6 @@ function CustomInputRenderer({
           CustomInput as React.ComponentType<FieldInputProps>,
           inputProps
         );
-
-  const label = field.label !== false ? field.label || field.name : null;
 
   return (
     <div
@@ -393,9 +364,9 @@ function CustomInputRenderer({
         </p>
       )}
 
-      {errorMessage && (
+      {error && (
         <p className="text-sm text-destructive mt-1.5" role="alert">
-          {errorMessage}
+          {error}
         </p>
       )}
     </div>
@@ -431,22 +402,44 @@ export function FieldRenderer({
     return true;
   }, [field, formValues, siblingData, path]);
 
-  const shouldAutoFocus = React.useMemo(() => {
+  // Derived properties calculation
+  const fieldId = React.useMemo(
+    () => (isDataField(field) && field.id ? field.id : generateFieldId(path)),
+    [field, path]
+  );
+
+  const label = React.useMemo(
+    () =>
+      isDataField(field) && field.label !== false
+        ? (field.label ?? field.name ?? null)
+        : null,
+    [field]
+  );
+
+  const isDisabled = React.useMemo(() => {
     if (!isDataField(field)) return false;
-    const isDisabled =
+    const disabled =
       typeof field.disabled === "function"
         ? field.disabled(formValues, siblingData)
         : (field.disabled ?? false);
+    return disabled || form.formState.isSubmitting;
+  }, [field, formValues, siblingData, form.formState.isSubmitting]);
 
-    const isReadOnly =
-      typeof field.readOnly === "function"
-        ? field.readOnly(formValues, siblingData)
-        : (field.readOnly ?? false);
+  const isReadOnly = React.useMemo(() => {
+    if (!isDataField(field)) return false;
+    return typeof field.readOnly === "function"
+      ? field.readOnly(formValues, siblingData)
+      : (field.readOnly ?? false);
+  }, [field, formValues, siblingData]);
 
+  const error = getErrorMessage(form.formState.errors, path);
+
+  const shouldAutoFocus = React.useMemo(() => {
+    if (!isDataField(field)) return false;
     return (
       isFirstField && form.settings?.autoFocus && !isDisabled && !isReadOnly
     );
-  }, [field, form, formValues, siblingData, isFirstField]);
+  }, [field, form.settings?.autoFocus, isDisabled, isReadOnly, isFirstField]);
 
   if (isHidden || !isConditionMet) return null;
 
@@ -469,6 +462,11 @@ export function FieldRenderer({
         formValues={formValues}
         siblingData={siblingData}
         autoFocus={shouldAutoFocus}
+        fieldId={fieldId}
+        label={label}
+        isDisabled={isDisabled}
+        isReadOnly={isReadOnly}
+        error={error}
       />
     );
   }
@@ -482,6 +480,11 @@ export function FieldRenderer({
         formValues={formValues}
         siblingData={siblingData}
         autoFocus={shouldAutoFocus}
+        fieldId={fieldId}
+        label={label}
+        isDisabled={isDisabled}
+        isReadOnly={isReadOnly}
+        error={error}
       />
     );
   }
@@ -503,6 +506,11 @@ export function FieldRenderer({
       autoFocus={shouldAutoFocus}
       formValues={formValues}
       siblingData={siblingData}
+      fieldId={fieldId}
+      label={label}
+      isDisabled={isDisabled}
+      isReadOnly={isReadOnly}
+      error={error}
     />
   );
 }

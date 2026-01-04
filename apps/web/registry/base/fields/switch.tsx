@@ -4,7 +4,7 @@ import type {
   SwitchField as SwitchFieldType,
   FormAdapter,
 } from "@buildnbuzz/buzzform";
-import { generateFieldId } from "@buildnbuzz/buzzform";
+import { getFieldWidthStyle } from "@buildnbuzz/buzzform";
 import { Switch } from "@/components/ui/switch";
 import {
   Field,
@@ -19,8 +19,12 @@ export interface SwitchFieldProps {
   path: string;
   form: FormAdapter;
   autoFocus?: boolean;
-  formValues: Record<string, unknown>;
-  siblingData: Record<string, unknown>;
+  // Computed props
+  fieldId: string;
+  label: React.ReactNode | null;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  error?: string;
 }
 
 export function SwitchField({
@@ -28,32 +32,15 @@ export function SwitchField({
   path,
   form,
   autoFocus,
-  formValues,
-  siblingData,
+  fieldId,
+  label,
+  isDisabled,
+  isReadOnly,
+  error,
 }: SwitchFieldProps) {
   const value = form.watch<boolean>(path) ?? false;
+  const hasError = !!error;
 
-  const error = form.formState.errors[path];
-  const errorMessage =
-    typeof error === "string"
-      ? error
-      : Array.isArray(error)
-        ? error[0]
-        : undefined;
-  const hasError = !!errorMessage;
-
-  const isDisabled =
-    (typeof field.disabled === "function"
-      ? field.disabled(formValues, siblingData)
-      : (field.disabled ?? false)) || form.formState.isSubmitting;
-
-  const isReadOnly =
-    typeof field.readOnly === "function"
-      ? field.readOnly(formValues, siblingData)
-      : (field.readOnly ?? false);
-
-  const label = field.label !== false ? (field.label ?? field.name) : null;
-  const fieldId = field.id ?? generateFieldId(path);
   const alignment = field.ui?.alignment ?? "between";
 
   const handleChange = (checked: boolean) => {
@@ -96,7 +83,7 @@ export function SwitchField({
         </FieldDescription>
       )}
 
-      {errorMessage && <FieldError>{errorMessage}</FieldError>}
+      {error && <FieldError>{error}</FieldError>}
     </FieldContent>
   );
 
@@ -108,16 +95,7 @@ export function SwitchField({
       }`.trim()}
       data-invalid={hasError}
       data-disabled={isDisabled}
-      style={
-        field.style?.width
-          ? {
-              width:
-                typeof field.style.width === "number"
-                  ? `${field.style.width}px`
-                  : field.style.width,
-            }
-          : undefined
-      }
+      style={getFieldWidthStyle(field.style)}
     >
       {alignment === "start" && (
         <>

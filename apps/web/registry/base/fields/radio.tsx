@@ -2,10 +2,15 @@
 
 import type {
   RadioField as RadioFieldType,
-  SelectOption,
   FormAdapter,
 } from "@buildnbuzz/buzzform";
-import { generateFieldId } from "@buildnbuzz/buzzform";
+import {
+  getSelectOptionValue,
+  getSelectOptionLabel,
+  isSelectOptionDisabled,
+  normalizeSelectOption,
+  getFieldWidthStyle,
+} from "@buildnbuzz/buzzform";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Field,
@@ -20,39 +25,12 @@ export interface RadioFieldProps {
   path: string;
   form: FormAdapter;
   autoFocus?: boolean;
-  formValues: Record<string, unknown>;
-  siblingData: Record<string, unknown>;
-}
-
-/** Helper to extract value from option */
-function getOptionValue(option: SelectOption | string): string {
-  if (typeof option === "string") return option;
-  const val = option.value;
-  return typeof val === "string" ? val : String(val);
-}
-
-/** Helper to extract label from option */
-function getOptionLabel(option: SelectOption | string): React.ReactNode {
-  if (typeof option === "string") return option;
-  return option.label ?? String(option.value);
-}
-
-/** Helper to extract description from option */
-function getOptionDescription(option: SelectOption | string): React.ReactNode {
-  if (typeof option === "string") return null;
-  return option.description;
-}
-
-/** Helper to extract icon from option */
-function getOptionIcon(option: SelectOption | string): React.ReactNode {
-  if (typeof option === "string") return null;
-  return option.icon;
-}
-
-/** Helper to check if option is disabled */
-function isOptionDisabled(option: SelectOption | string): boolean {
-  if (typeof option === "string") return false;
-  return option.disabled === true;
+  // Computed props
+  fieldId: string;
+  label: React.ReactNode | null;
+  isDisabled: boolean;
+  isReadOnly: boolean;
+  error?: string;
 }
 
 /** Card size classes */
@@ -67,27 +45,14 @@ export function RadioField({
   path,
   form,
   autoFocus,
-  formValues,
-  siblingData,
+  fieldId,
+  label,
+  isDisabled,
+  isReadOnly,
+  error,
 }: RadioFieldProps) {
   const value = form.watch<string>(path) ?? "";
-
-  const error = form.formState.errors[path];
-  const errorMessage =
-    typeof error === "string"
-      ? error
-      : Array.isArray(error)
-        ? error[0]
-        : undefined;
-  const hasError = !!errorMessage;
-
-  const isDisabled =
-    (typeof field.disabled === "function"
-      ? field.disabled(formValues, siblingData)
-      : (field.disabled ?? false)) || form.formState.isSubmitting;
-
-  const label = field.label !== false ? (field.label ?? field.name) : null;
-  const fieldId = field.id ?? generateFieldId(path);
+  const hasError = !!error;
 
   // UI options with defaults
   const variant = field.ui?.variant ?? "default";
@@ -102,6 +67,7 @@ export function RadioField({
   const options = Array.isArray(field.options) ? field.options : [];
 
   const handleChange = (val: unknown) => {
+    if (isReadOnly) return;
     if (typeof val === "string") {
       form.setValue(path, val, {
         shouldDirty: true,
@@ -126,16 +92,8 @@ export function RadioField({
     <div
       className={cn("flex flex-col gap-2", field.style?.className)}
       data-invalid={hasError}
-      style={
-        field.style?.width
-          ? {
-              width:
-                typeof field.style.width === "number"
-                  ? `${field.style.width}px`
-                  : field.style.width,
-            }
-          : undefined
-      }
+      data-readonly={isReadOnly}
+      style={getFieldWidthStyle(field.style)}
     >
       {/* Label */}
       {label && (
@@ -161,13 +119,15 @@ export function RadioField({
         aria-describedby={
           field.description ? `${fieldId}-description` : undefined
         }
+        aria-readonly={isReadOnly}
       >
         {options.map((opt, i) => {
-          const val = getOptionValue(opt);
-          const optLabel = getOptionLabel(opt);
-          const optDesc = getOptionDescription(opt);
-          const optIcon = getOptionIcon(opt);
-          const optDisabled = isOptionDisabled(opt) || isDisabled;
+          const normalized = normalizeSelectOption(opt);
+          const val = getSelectOptionValue(opt);
+          const optLabel = getSelectOptionLabel(opt);
+          const optDesc = normalized.description;
+          const optIcon = normalized.icon;
+          const optDisabled = isSelectOptionDisabled(opt) || isDisabled;
           const isSelected = value === val;
           const id = `${fieldId}-${i}`;
 
@@ -276,7 +236,7 @@ export function RadioField({
       </RadioGroup>
 
       {/* Error */}
-      {errorMessage && <FieldError>{errorMessage}</FieldError>}
+      {error && <FieldError>{error}</FieldError>}
     </div>
   );
 }
