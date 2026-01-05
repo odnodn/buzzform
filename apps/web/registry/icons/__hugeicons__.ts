@@ -2,6 +2,8 @@
 export { Add01Icon } from "@hugeicons/core-free-icons"
 export { AlertCircleIcon } from "@hugeicons/core-free-icons"
 export { ArrowDown01Icon } from "@hugeicons/core-free-icons"
+export { ArrowExpand02Icon } from "@hugeicons/core-free-icons"
+export { ArrowShrink02Icon } from "@hugeicons/core-free-icons"
 export { Calendar02Icon } from "@hugeicons/core-free-icons"
 export { Cancel01Icon } from "@hugeicons/core-free-icons"
 export { Clock01Icon } from "@hugeicons/core-free-icons"

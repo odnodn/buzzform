@@ -295,7 +295,7 @@ const ArrayRow = React.memo(
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7"
+                  className="h-7 w-7 active:scale-95 transition-all"
                   onClick={handleDuplicateClick}
                   disabled={isDisabled}
                   title="Duplicate item"
@@ -314,7 +314,7 @@ const ArrayRow = React.memo(
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "h-7 w-7 text-destructive hover:bg-destructive/10",
+                    "h-7 w-7 text-destructive hover:bg-destructive/10 active:scale-95 transition-all",
                     (!canRemove || isDisabled) &&
                       "opacity-50 cursor-not-allowed"
                   )}
@@ -615,10 +615,13 @@ export const ArrayField = React.forwardRef<
     const handleToggleAllRows = React.useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
-        const allOpen = rows.every((row) => !collapsedRowsMap[row.id]);
+        // If any row is open, we want to collapse all.
+        // Only if ALL are collapsed, we expand all.
+        const anyOpen = rows.some((row) => !collapsedRowsMap[row.id]);
+
         const newMap: Record<string, boolean> = {};
         for (const row of rows) {
-          newMap[row.id] = allOpen;
+          newMap[row.id] = anyOpen;
         }
         setCollapsedRowsMap(newMap);
       },
@@ -866,7 +869,7 @@ export const ArrayField = React.forwardRef<
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                        className="h-7 w-7 text-muted-foreground hover:text-foreground active:scale-95 transition-all"
                         onClick={handleToggleAllRows}
                         disabled={isDisabled}
                         title={
@@ -880,36 +883,30 @@ export const ArrayField = React.forwardRef<
                             : "Collapse all items"
                         }
                       >
-                        <IconPlaceholder
-                          lucide={
-                            allRowsCollapsed
-                              ? "ChevronsDownUp"
-                              : "ChevronsUpDown"
-                          }
-                          hugeicons={
-                            allRowsCollapsed
-                              ? "ArrowExpand02Icon"
-                              : "ArrowShrink02Icon"
-                          }
-                          tabler={
-                            allRowsCollapsed
-                              ? "IconChevronsDown"
-                              : "IconChevronsUp"
-                          }
-                          phosphor={
-                            allRowsCollapsed
-                              ? "ArrowsInSimple"
-                              : "ArrowsOutSimple"
-                          }
-                          className="size-4"
-                        />
+                        {allRowsCollapsed ? (
+                          <IconPlaceholder
+                            lucide="ChevronsUpDown"
+                            hugeicons="ArrowExpand02Icon"
+                            tabler="IconArrowsMaximize"
+                            phosphor="ArrowsOutSimple"
+                            className="size-4"
+                          />
+                        ) : (
+                          <IconPlaceholder
+                            lucide="ChevronsDownUp"
+                            hugeicons="ArrowShrink02Icon"
+                            tabler="IconArrowsMinimize"
+                            phosphor="ArrowsInSimple"
+                            className="size-4"
+                          />
+                        )}
                       </Button>
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
                         className={cn(
-                          "h-7 w-7 text-destructive hover:bg-destructive/10",
+                          "h-7 w-7 text-destructive hover:bg-destructive/10 active:scale-95 transition-all",
                           (!canRemoveAny || isDisabled) &&
                             "opacity-50 cursor-not-allowed"
                         )}
@@ -927,7 +924,7 @@ export const ArrayField = React.forwardRef<
                         }
                       >
                         <IconPlaceholder
-                          lucide="Trash"
+                          lucide="Trash2"
                           hugeicons="DeletePutBackIcon"
                           tabler="IconTrash"
                           phosphor="TrashSimple"
@@ -940,7 +937,7 @@ export const ArrayField = React.forwardRef<
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7"
+                    className="h-7 w-7 active:scale-95 transition-all"
                     disabled={!canAddMore || isDisabled}
                     onClick={handleAdd}
                     title={
