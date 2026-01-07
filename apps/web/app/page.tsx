@@ -1,10 +1,23 @@
-import { Button } from "@/components/ui/button";
+import {
+  SiteHeader,
+  SiteFooter,
+  HeroSection,
+  UsageSection,
+  FeaturesSection,
+} from "@/components/landing";
 
 export default function Page() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4">
-      <h1>Welcome to Buzzform!</h1>
-      <Button>Get Started</Button>
-    </main>
+    <div className="flex min-h-screen flex-col bg-background text-foreground selection:bg-primary/20">
+      <SiteHeader />
+
+      <main className="flex-1 mx-auto">
+        <HeroSection />
+        <UsageSection />
+        <FeaturesSection />
+      </main>
+
+      <SiteFooter />
+    </div>
   );
 }
