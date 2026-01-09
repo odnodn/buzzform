@@ -1,12 +1,11 @@
+import type { IconSvgElement } from "@hugeicons/react";
 import {
-    LayoutDashboardIcon,
-    FileTextIcon,
-    UserIcon,
-    UploadIcon,
-    SettingsIcon,
-    ListIcon,
-    type LucideIcon,
-} from "lucide-react";
+    Rocket01Icon,
+    UserCircle02Icon,
+    Briefcase01Icon,
+    FolderOpenIcon,
+    File02Icon,
+} from "@hugeicons/core-free-icons";
 
 export interface Example {
     slug: string;
@@ -18,17 +17,18 @@ export interface Example {
 
 export interface ExampleCategory {
     category: string;
-    icon: LucideIcon;
+    icon: IconSvgElement;
     items: Example[];
 }
 
 /**
  * Single source of truth for all examples.
+ * Organized by use case for better discoverability.
  */
 export const exampleCategories: ExampleCategory[] = [
     {
-        category: "Forms",
-        icon: FileTextIcon,
+        category: "Getting Started",
+        icon: Rocket01Icon,
         items: [
             {
                 slug: "contact-form",
@@ -52,18 +52,72 @@ export const exampleCategories: ExampleCategory[] = [
                 file: "feedback-sheet.tsx",
             },
             {
-                slug: "pricing-form",
-                id: "PricingFormCard",
-                name: "Pricing",
-                description: "A form for selecting pricing plans.",
-                file: "pricing-form.tsx",
+                slug: "quick-add-popover",
+                id: "QuickAddPopover",
+                name: "Quick Add",
+                description: "A small form for quickly adding items.",
+                file: "quick-add.tsx",
             },
+            {
+                slug: "notification-settings",
+                id: "NotificationSettingsCard",
+                name: "Notifications",
+                description: "Preferences for email and push notifications.",
+                file: "notification-settings.tsx",
+            },
+        ],
+    },
+    {
+        category: "Authentication",
+        icon: UserCircle02Icon,
+        items: [
+            {
+                slug: "login-form",
+                id: "LoginFormCard",
+                name: "Login",
+                description: "A standard login card with email and password.",
+                file: "auth-forms.tsx",
+            },
+            {
+                slug: "register-dialog",
+                id: "RegisterFormDialog",
+                name: "Register",
+                description: "Registration form inside a modal dialog.",
+                file: "auth-forms.tsx",
+            },
+            {
+                slug: "profile-upload",
+                id: "ProfileUploadForm",
+                name: "Profile",
+                description: "Upload profile picture and details.",
+                file: "upload-form.tsx",
+            },
+            {
+                slug: "account-settings",
+                id: "AccountSettingsForm",
+                name: "Account",
+                description: "Tabbed account settings.",
+                file: "tabs-form.tsx",
+            },
+        ],
+    },
+    {
+        category: "Business Forms",
+        icon: Briefcase01Icon,
+        items: [
             {
                 slug: "product-form",
                 id: "ProductFormCard",
                 name: "Product",
                 description: "A form for creating or editing a product.",
                 file: "product-form.tsx",
+            },
+            {
+                slug: "pricing-form",
+                id: "PricingFormCard",
+                name: "Pricing",
+                description: "A form for selecting pricing plans.",
+                file: "pricing-form.tsx",
             },
             {
                 slug: "blog-post-form",
@@ -86,39 +140,33 @@ export const exampleCategories: ExampleCategory[] = [
                 description: "A detailed form for submitting support requests.",
                 file: "support-ticket-form.tsx",
             },
+            {
+                slug: "contact-layout",
+                id: "ContactLayoutForm",
+                name: "Contact Layout",
+                description: "Contact form with a sidebar layout.",
+                file: "layout-form.tsx",
+            },
+            {
+                slug: "coupon-layout",
+                id: "CouponLayoutForm",
+                name: "Coupon",
+                description: "Coupon creation form with a sidebar layout.",
+                file: "layout-form.tsx",
+            },
+            {
+                slug: "checkout",
+                id: "CheckoutForm",
+                name: "Checkout",
+                description: "A multi-step checkout process.",
+                file: "tabs-form.tsx",
+            },
         ],
     },
     {
-        category: "Auth",
-        icon: UserIcon,
+        category: "File Management",
+        icon: FolderOpenIcon,
         items: [
-            {
-                slug: "login-form",
-                id: "LoginFormCard",
-                name: "Login",
-                description: "A standard login card with email and password.",
-                file: "auth-forms.tsx",
-            },
-            {
-                slug: "register-dialog",
-                id: "RegisterFormDialog",
-                name: "Register",
-                description: "Registration form inside a modal dialog.",
-                file: "auth-forms.tsx",
-            },
-        ],
-    },
-    {
-        category: "Uploads",
-        icon: UploadIcon,
-        items: [
-            {
-                slug: "profile-upload",
-                id: "ProfileUploadForm",
-                name: "Profile",
-                description: "Upload profile picture and details.",
-                file: "upload-form.tsx",
-            },
             {
                 slug: "document-upload",
                 id: "DocumentUploadForm",
@@ -136,56 +184,16 @@ export const exampleCategories: ExampleCategory[] = [
         ],
     },
     {
-        category: "Layouts",
-        icon: LayoutDashboardIcon,
+        category: "Advanced Patterns",
+        icon: File02Icon,
         items: [
             {
-                slug: "contact-layout",
-                id: "ContactLayoutForm",
-                name: "Contact",
-                description: "Contact form with a sidebar layout.",
-                file: "layout-form.tsx",
+                slug: "array-field",
+                id: "ArrayFieldExample",
+                name: "Array",
+                description: "Dynamic list management using ArrayField.",
+                file: "array-form.tsx",
             },
-            {
-                slug: "coupon-layout",
-                id: "CouponLayoutForm",
-                name: "Coupon",
-                description: "Coupon creation form with a sidebar layout.",
-                file: "layout-form.tsx",
-            },
-        ],
-    },
-    {
-        category: "Settings",
-        icon: SettingsIcon,
-        items: [
-            {
-                slug: "notification-settings",
-                id: "NotificationSettingsCard",
-                name: "Notifications",
-                description: "Preferences for email and push notifications.",
-                file: "notification-settings.tsx",
-            },
-            {
-                slug: "collapsible-settings",
-                id: "CollapsibleSettingsForm",
-                name: "Collapsible",
-                description: "Settings organized in collapsible sections.",
-                file: "collapsible-form.tsx",
-            },
-            {
-                slug: "account-settings",
-                id: "AccountSettingsForm",
-                name: "Account",
-                description: "Tabbed account settings.",
-                file: "tabs-form.tsx",
-            },
-        ],
-    },
-    {
-        category: "Advanced",
-        icon: ListIcon,
-        items: [
             {
                 slug: "group-field",
                 id: "GroupFieldExample",
@@ -194,25 +202,11 @@ export const exampleCategories: ExampleCategory[] = [
                 file: "group-form.tsx",
             },
             {
-                slug: "quick-add-popover",
-                id: "QuickAddPopover",
-                name: "Quick Add",
-                description: "A small form for quickly adding items.",
-                file: "quick-add.tsx",
-            },
-            {
-                slug: "checkout",
-                id: "CheckoutForm",
-                name: "Checkout",
-                description: "A multi-step checkout process.",
-                file: "tabs-form.tsx",
-            },
-            {
-                slug: "array-field",
-                id: "ArrayFieldExample",
-                name: "Array",
-                description: "Dynamic list management using ArrayField.",
-                file: "array-form.tsx",
+                slug: "collapsible-settings",
+                id: "CollapsibleSettingsForm",
+                name: "Collapsible",
+                description: "Settings organized in collapsible sections.",
+                file: "collapsible-form.tsx",
             },
         ],
     },

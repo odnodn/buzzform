@@ -26,6 +26,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 /**
  * Client-side Sidebar Navigation for Examples with collapsible categories.
@@ -84,7 +85,7 @@ function NavCategory({
   category: (typeof exampleCategories)[0];
   pathname: string;
 }) {
-  const Icon = category.icon;
+  const icon = category.icon;
   const router = useRouter();
 
   // Check if any item in this category is active
@@ -113,7 +114,7 @@ function NavCategory({
         <CollapsibleTrigger
           render={
             <SidebarMenuButton tooltip={category.category}>
-              <Icon className="size-4" />
+              <HugeiconsIcon icon={icon} strokeWidth={2} className="size-4" />
               <span>{category.category}</span>
               <ChevronRight className="ml-auto size-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
             </SidebarMenuButton>
