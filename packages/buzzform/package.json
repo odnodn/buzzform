@@ -1,6 +1,6 @@
 {
   "name": "@buildnbuzz/buzzform",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Simple React form library for shadcn/ui. Declare fields, customize rendering, get live validation with minimal boilerplate.",
   "author": "Parth Lad <parth@buildnbuzz.com>",
   "license": "MIT",
