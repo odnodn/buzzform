@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     title: "BuzzForm Examples - Interactive Form Components",
     description:
       "Interactive examples of BuzzForm components and layouts. Explore real-world form implementations with live code previews.",
-    url: "https://buzzform.buildnbuzz.com/examples",
+    url: "https://form.buildnbuzz.com/examples",
     siteName: "BuzzForm",
     type: "website",
     images: [
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     creator: "@buildnbuzz",
   },
   alternates: {
-    canonical: "https://buzzform.buildnbuzz.com/examples",
+    canonical: "https://form.buildnbuzz.com/examples",
   },
 };
 

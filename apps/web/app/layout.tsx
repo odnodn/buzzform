@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://buzzform.buildnbuzz.com"),
+  metadataBase: new URL("https://form.buildnbuzz.com"),
   title: {
     template: "%s | BuzzForm",
     default: "BuzzForm - Beautiful, Type-Safe React Forms",
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://buzzform.buildnbuzz.com",
+    url: "https://form.buildnbuzz.com",
     siteName: "BuzzForm",
     title: "BuzzForm - Beautiful, Type-Safe React Forms",
     description:

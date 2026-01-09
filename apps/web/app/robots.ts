@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
                 disallow: ["/api/", "/_next/", "/registry/"],
             },
         ],
-        sitemap: "https://buzzform.buildnbuzz.com/sitemap.xml",
+        sitemap: "https://form.buildnbuzz.com/sitemap.xml",
     };
 }

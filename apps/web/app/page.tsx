@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     title: "BuzzForm - Beautiful, Type-Safe React Forms",
     description:
       "Build beautiful, accessible, and type-safe forms in React with BuzzForm. Schema-driven forms with full TypeScript support.",
-    url: "https://buzzform.buildnbuzz.com",
+    url: "https://form.buildnbuzz.com",
     siteName: "BuzzForm",
     type: "website",
     images: [
@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     creator: "@buildnbuzz",
   },
   alternates: {
-    canonical: "https://buzzform.buildnbuzz.com",
+    canonical: "https://form.buildnbuzz.com",
   },
 };
 

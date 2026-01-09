@@ -45,7 +45,7 @@ export async function generateMetadata({
     openGraph: {
       title: `${example.name} - BuzzForm Examples`,
       description: example.description,
-      url: `https://buzzform.buildnbuzz.com/examples/${slug}`,
+      url: `https://form.buildnbuzz.com/examples/${slug}`,
       siteName: "BuzzForm",
       type: "website",
       images: [
@@ -65,7 +65,7 @@ export async function generateMetadata({
       creator: "@buildnbuzz",
     },
     alternates: {
-      canonical: `https://buzzform.buildnbuzz.com/examples/${slug}`,
+      canonical: `https://form.buildnbuzz.com/examples/${slug}`,
     },
   };
 }

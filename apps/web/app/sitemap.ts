@@ -3,7 +3,7 @@ import { allExamples } from "@/lib/examples";
 import { source } from "@/lib/source";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = "https://buzzform.buildnbuzz.com";
+    const baseUrl = "https://form.buildnbuzz.com";
 
     // Static pages
     const staticPages: MetadataRoute.Sitemap = [
