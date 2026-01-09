@@ -29,16 +29,46 @@ export async function generateMetadata({
 
   if (!example) {
     return {
-      title: "Example Not Found - BuzzForm",
+      title: "Example Not Found",
+      description: "The requested example could not be found.",
     };
   }
 
   return {
-    title: `${example.name} - BuzzForm Examples`,
+    title: example.name,
     description: example.description,
+    keywords: [
+      "buzzform",
+      example.name.toLowerCase(),
+      "form example",
+      "react form",
+      "form component",
+      "interactive example",
+    ],
     openGraph: {
       title: `${example.name} - BuzzForm Examples`,
       description: example.description,
+      url: `https://buzzform.buildnbuzz.com/examples/${slug}`,
+      siteName: "BuzzForm",
+      type: "website",
+      images: [
+        {
+          url: "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: `${example.name} Example`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${example.name} - BuzzForm Examples`,
+      description: example.description,
+      images: ["/og-image.png"],
+      creator: "@buildnbuzz",
+    },
+    alternates: {
+      canonical: `https://buzzform.buildnbuzz.com/examples/${slug}`,
     },
   };
 }

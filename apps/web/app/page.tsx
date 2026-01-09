@@ -1,8 +1,53 @@
+import type { Metadata } from "next";
 import { FeaturesSection } from "@/components/landing/features-section";
 import { HeroSection } from "@/components/landing/hero-section";
 import { SiteFooter } from "@/components/landing/site-footer";
 import { UsageSection } from "@/components/landing/usage-section";
 import { SiteHeader } from "@/components/landing/site-header";
+
+export const metadata: Metadata = {
+  title: "BuzzForm - Beautiful, Type-Safe React Forms",
+  description:
+    "Build beautiful, accessible, and type-safe forms in React with BuzzForm. Schema-driven forms with full TypeScript support, built on shadcn/ui components.",
+  keywords: [
+    "react forms",
+    "typescript forms",
+    "schema-driven forms",
+    "shadcn ui",
+    "form builder",
+    "react form library",
+    "type-safe forms",
+    "zod forms",
+    "accessible forms",
+  ],
+  openGraph: {
+    title: "BuzzForm - Beautiful, Type-Safe React Forms",
+    description:
+      "Build beautiful, accessible, and type-safe forms in React with BuzzForm. Schema-driven forms with full TypeScript support.",
+    url: "https://buzzform.buildnbuzz.com",
+    siteName: "BuzzForm",
+    type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "BuzzForm - Beautiful, Type-Safe React Forms",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BuzzForm - Beautiful, Type-Safe React Forms",
+    description:
+      "Build beautiful, accessible, and type-safe forms in React with BuzzForm.",
+    images: ["/og-image.png"],
+    creator: "@buildnbuzz",
+  },
+  alternates: {
+    canonical: "https://buzzform.buildnbuzz.com",
+  },
+};
 
 export default function Page() {
   return (
