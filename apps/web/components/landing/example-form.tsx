@@ -20,6 +20,7 @@ const schema = createSchema([
     label: "Email",
     placeholder: "john@example.com",
     required: true,
+    autoComplete: "email",
   },
   {
     type: "password",
