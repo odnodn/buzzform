@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { createSchema } from "@buildnbuzz/buzzform";
-import { Form } from "@/registry/base/form";
-import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
+import { Form } from "@/components/buzzform/form";
 import Link from "next/link";
 
 const schema = createSchema([
@@ -20,7 +19,6 @@ const schema = createSchema([
     label: "Email",
     placeholder: "john@example.com",
     required: true,
-    autoComplete: "email",
   },
   {
     type: "password",
@@ -31,6 +29,20 @@ const schema = createSchema([
     minLength: 8,
     ui: {
       allowGenerate: true,
+    },
+  },
+  {
+    type: "password",
+    name: "passwordConfirm",
+    label: "Confirm Password",
+    placeholder: "••••••••",
+    required: true,
+    minLength: 8,
+    validate: (value, { data }) => {
+      if (value !== data.password) {
+        return "Passwords do not match";
+      }
+      return true;
     },
   },
   {
@@ -58,11 +70,7 @@ const schema = createSchema([
   },
 ]);
 
-const emptyState = `{
-  // Submit the form to see data here
-}`;
-
-export function ExampleForm() {
+export function SignUpForm() {
   const [submittedData, setSubmittedData] = useState<Record<
     string,
     unknown
@@ -78,12 +86,7 @@ export function ExampleForm() {
 
       <div className="[&_figure]:my-0! [&_figure]:border-border/30! [&_figure]:rounded-lg! [&_pre]:text-xs!">
         <p className="text-xs text-muted-foreground mb-2">Submitted data:</p>
-        <DynamicCodeBlock
-          lang="json"
-          code={
-            submittedData ? JSON.stringify(submittedData, null, 2) : emptyState
-          }
-        />
+        <pre>{JSON.stringify(submittedData, null, 2)}</pre>
       </div>
     </div>
   );
