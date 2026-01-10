@@ -1,11 +1,16 @@
 ---
 title: Installation
-description: Set up BuzzForm in your project with the shadcn registry or manual installation.
+description: Detailed installation guide and configuration options for BuzzForm.
 ---
 
 # Installation
 
-BuzzForm works with any React project that uses [shadcn/ui](https://ui.shadcn.com). This guide covers everything that gets installed and where files end up.
+This page covers everything about installing BuzzForm—what gets installed, where files end up, and alternative installation methods.
+
+<Callout type="tip">
+  **New to BuzzForm?** Check out the [Quick Start](/docs/quick-start) guide to
+  get running in 2 minutes.
+</Callout>
 
 ## Prerequisites
 
@@ -15,9 +20,11 @@ Before installing BuzzForm, ensure you have:
 - **React 18 or 19**
 - **A project with shadcn/ui initialized** ([setup guide](https://ui.shadcn.com/docs/installation))
 
-## Quick Install (Recommended)
+## Installation Methods
 
-The fastest way to get started is using the shadcn registry. This single command installs everything you need:
+### Quick Install (Recommended)
+
+The fastest way to get started is using the shadcn registry:
 
 ```bash tab="pnpm" selected
 pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/starter
@@ -35,9 +42,9 @@ yarn dlx shadcn@latest add https://form.buildnbuzz.com/r/starter
 bunx shadcn@latest add https://form.buildnbuzz.com/r/starter
 ```
 
-### Using a Named Registry (Optional)
+### Using a Named Registry
 
-If you prefer shorter commands, you can configure BuzzForm as a named registry in your `components.json`:
+For shorter commands, configure BuzzForm as a named registry in your `components.json`:
 
 ```json title="components.json"
 {
@@ -59,11 +66,39 @@ This also works for installing individual components:
 npx shadcn@latest add @buzzform/text @buzzform/select @buzzform/date
 ```
 
+### Manual Installation
+
+If you prefer installing components individually:
+
+#### Step 1: Install Core Package
+
+```bash
+npm install @buildnbuzz/buzzform react-hook-form zod
+```
+
+#### Step 2: Install Core Components
+
+```bash
+npx shadcn@latest add @buzzform/init @buzzform/rhf-provider
+```
+
+#### Step 3: Install Field Components
+
+Install only the field types you need:
+
+```bash
+npx shadcn@latest add @buzzform/text @buzzform/password @buzzform/select
+```
+
+Available fields: `text`, `textarea`, `password`, `checkbox`, `switch`, `radio`, `number`, `date`, `select`, `tags`, `upload`, `row`, `group`, `collapsible`, `tabs`, `array`.
+
+---
+
 ## What Gets Installed
 
 When you run the starter command, here's exactly what happens:
 
-### 1. NPM Package
+### NPM Package
 
 The core library is added to your `package.json`:
 
@@ -82,7 +117,7 @@ This package contains:
 - React Hook Form adapter (`useRhf`)
 - Zod schema generator (`zodResolver`)
 
-### 2. Peer Dependencies
+### Peer Dependencies
 
 BuzzForm requires these peer dependencies (installed automatically if missing):
 
@@ -98,7 +133,7 @@ Some field types require additional dependencies:
 | `date`, `datetime` | `date-fns`                                                 |
 | `array`            | `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities` |
 
-### 3. Component Files
+### Component Files
 
 Components are copied to your project as `.tsx` files. This gives you full control—you can modify anything.
 
@@ -130,11 +165,13 @@ Components are copied to your project as `.tsx` files. This gives you full contr
 | `fields/render.tsx` | Field renderer (maps types to components)          |
 | `fields/*.tsx`      | Individual field type components                   |
 
-## Setting Up the Provider (Optional)
+---
+
+## Provider Configuration
 
 The `BuzzFormProvider` is **optional** but recommended. It lets you configure React Hook Form and Zod validation globally, so you don't have to repeat settings on every form.
 
-### Option 1: Global Provider (Recommended)
+### Global Provider (Recommended)
 
 Wrap your application with `BuzzFormProvider` in your root layout:
 
@@ -163,7 +200,7 @@ The provider sets up:
   Change the validation mode, add default values, or swap adapters.
 </Callout>
 
-### Option 2: Per-Form Configuration
+### Per-Form Configuration
 
 If you prefer not to use a global provider, you can pass the adapter and resolver directly to each `Form` component:
 
@@ -187,31 +224,7 @@ export function MyForm() {
 
 This gives you more control when you need different settings per form, but requires more boilerplate.
 
-## Manual Installation
-
-If you prefer installing components individually:
-
-### Step 1: Install Core Package
-
-```bash
-npm install @buildnbuzz/buzzform react-hook-form zod
-```
-
-### Step 2: Install Core Components
-
-```bash
-npx shadcn@latest add @buzzform/init @buzzform/rhf-provider
-```
-
-### Step 3: Install Field Components
-
-Install only the field types you need:
-
-```bash
-npx shadcn@latest add @buzzform/text @buzzform/password @buzzform/select
-```
-
-Available fields: `text`, `textarea`, `password`, `checkbox`, `switch`, `radio`, `number`, `date`, `select`, `tags`, `upload`, `row`, `group`, `collapsible`, `tabs`, `array`.
+---
 
 ## Verifying Installation
 
@@ -238,6 +251,8 @@ export function TestForm() {
 ```
 
 If you see a form with Name and Email fields, you're all set!
+
+---
 
 ## Troubleshooting
 
