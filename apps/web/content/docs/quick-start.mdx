@@ -1,0 +1,103 @@
+---
+title: Quick Start
+description: Get a form running in under 2 minutes.
+---
+
+# Quick Start
+
+Get BuzzForm running in your project in **3 simple steps**.
+
+<Callout type="info">
+  This guide assumes you have a React project with
+  [shadcn/ui](https://ui.shadcn.com/docs/installation) already set up.
+</Callout>
+
+## Step 1: Install BuzzForm
+
+Run the starter command to install all BuzzForm components and dependencies:
+
+```bash tab="pnpm" selected
+pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/starter
+```
+
+```bash tab="npm"
+npx shadcn@latest add https://form.buildnbuzz.com/r/starter
+```
+
+```bash tab="yarn"
+yarn dlx shadcn@latest add https://form.buildnbuzz.com/r/starter
+```
+
+```bash tab="bun"
+bunx shadcn@latest add https://form.buildnbuzz.com/r/starter
+```
+
+## Step 2: Add the Provider
+
+Wrap your app with `BuzzFormProvider` in your root layout:
+
+```tsx title="app/layout.tsx" {1} {8}
+import { BuzzFormProvider } from "@/components/buzzform/provider";
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <BuzzFormProvider>{children}</BuzzFormProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+## Step 3: Try a Form
+
+Install a ready-made signup form to see BuzzForm in action:
+
+```bash tab="pnpm" selected
+pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/signup-form
+```
+
+```bash tab="npm"
+npx shadcn@latest add https://form.buildnbuzz.com/r/signup-form
+```
+
+```bash tab="yarn"
+yarn dlx shadcn@latest add https://form.buildnbuzz.com/r/signup-form
+```
+
+```bash tab="bun"
+bunx shadcn@latest add https://form.buildnbuzz.com/r/signup-form
+```
+
+Use it in any page:
+
+```tsx title="app/page.tsx" {1} {4}
+import { SignUpForm } from "@/components/buzzform/signup";
+
+export default function Page() {
+  return <SignUpForm />;
+}
+```
+
+---
+
+**That's it!** You now have a working form with validation, password generation, and more.
+
+<Cards>
+  <Card
+    title="Your First Form"
+    href="/docs/your-first-form"
+    description="Learn to build forms from scratch"
+  />
+  <Card
+    title="Schema Reference"
+    href="/docs/schema"
+    description="Explore all field types and options"
+  />
+  <Card
+    title="Examples Gallery"
+    href="/examples"
+    description="Browse 20+ ready-to-use form examples"
+  />
+</Cards>

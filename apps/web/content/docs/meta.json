@@ -4,6 +4,7 @@
   "pages": [
     "---Getting Started---",
     "index",
+    "quick-start",
     "installation",
     "your-first-form",
     "---Core Concepts---",
