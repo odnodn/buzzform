@@ -10,11 +10,11 @@ The `select` field provides a dropdown with optional search, multiple selection,
 ## Installation
 
 ```bash tab="pnpm"
-pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/select
+pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/select.json
 ```
 
 ```bash tab="npm"
-npx shadcn@latest add https://form.buildnbuzz.com/r/select
+npx shadcn@latest add https://form.buildnbuzz.com/r/select.json
 ```
 
 ## Usage
@@ -226,37 +226,44 @@ const schema = createSchema([
 }
 ```
 
-## Radix UI Migration
+## Radix UI Setup
 
-<Callout type="info">
+<Callout type="warning">
   The Select component uses **Base UI's render prop pattern** by default. If
-  your project uses **Radix UI primitives** with `asChild`, you'll need to
-  update the component after installing.
+  your project uses **Radix UI primitives** (standard in shadcn/ui), you must
+  update the component to use the `asChild` pattern.
 </Callout>
 
-### Pattern Difference
+### The Fix
 
-**Base UI (default)** - The button receives a `render` prop that specifies what underlying element to use:
-
-```tsx
-<InputGroupButton id={fieldId} render={<ComboboxTrigger />} className="...">
-  {/* button content */}
-</InputGroupButton>
-```
-
-**Radix UI** - The button uses `asChild` and the trigger becomes its child, inheriting the button's styling:
+Search for `render={<ComboboxTrigger />}` in `components/buzzform/fields/select.tsx` and replace the entire `InputGroupButton` block with this snippet:
 
 ```tsx
-<InputGroupButton id={fieldId} className="..." asChild>
-  <ComboboxTrigger>{/* button content */}</ComboboxTrigger>
+<InputGroupButton
+  id={fieldId}
+  asChild
+  className="flex-1 justify-between font-normal h-8 px-3"
+  disabled={isDisabled || isReadOnly}
+>
+  <ComboboxTrigger>
+    {selectedOption ? (
+      <span className="flex items-center gap-2 truncate text-left">
+        {selectedOption.icon && (
+          <span className="shrink-0 text-muted-foreground">
+            {selectedOption.icon}
+          </span>
+        )}
+        <span className="truncate">
+          {getSelectOptionLabelString(selectedOption)}
+        </span>
+      </span>
+    ) : (
+      <ComboboxValue>
+        {(value) =>
+          value ?? <span className="text-muted-foreground">{placeholder}</span>
+        }
+      </ComboboxValue>
+    )}
+  </ComboboxTrigger>
 </InputGroupButton>
 ```
-
-With `asChild` on the Button, the button's styling and props are passed down to the `ComboboxTrigger`, which handles the dropdown behavior.
-
-### Migration Steps
-
-1. Find `render={<ComboboxTrigger />}` patterns in `select.tsx`
-2. Remove the `render` prop from `InputGroupButton`
-3. Add `asChild` to `InputGroupButton`
-4. Make `<ComboboxTrigger>` a child of `InputGroupButton` and move the content inside it

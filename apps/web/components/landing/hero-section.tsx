@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { heroContent } from "@/lib/constants";
+import { CopyCommand } from "@/components/landing/copy-command";
 
 export function HeroSection() {
   return (
@@ -11,8 +12,12 @@ export function HeroSection() {
       <div className="container px-4 md:px-8 flex flex-col items-center text-center">
         <Badge
           variant="outline"
-          className="mb-4 animate-fade-in px-3 py-1 rounded-full border-primary/20 bg-primary/5 text-primary"
+          className="mb-4 animate-fade-in px-3 py-1 rounded-full border-primary/20 bg-primary/5 text-primary gap-2"
         >
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+          </span>
           {heroContent.badge}
         </Badge>
         <h1 className="text-2xl font-extrabold tracking-tight sm:text-4xl lg:text-6xl max-w-4xl bg-clip-text text-transparent bg-linear-to-b from-foreground to-foreground/70">
@@ -54,6 +59,7 @@ export function HeroSection() {
             }
           />
         </div>
+        <CopyCommand />
       </div>
       {/* Background decoration */}
       <div className="absolute top-1/2 left-1/2 -z-10 h-125 w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[100px]" />

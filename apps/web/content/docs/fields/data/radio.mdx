@@ -10,11 +10,11 @@ The `radio` field renders a single-selection radio button group with optional ca
 ## Installation
 
 ```bash tab="pnpm"
-pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/radio
+pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/radio.json
 ```
 
 ```bash tab="npm"
-npx shadcn@latest add https://form.buildnbuzz.com/r/radio
+npx shadcn@latest add https://form.buildnbuzz.com/r/radio.json
 ```
 
 ## Usage
@@ -44,20 +44,20 @@ export function RadioFieldDemo() {
 
 ## Properties
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `options` | `Array \| Function` | - | Radio options |
-| `dependencies` | `string[]` | - | Fields that trigger refetch |
+| Prop           | Type                | Default | Description                 |
+| -------------- | ------------------- | ------- | --------------------------- |
+| `options`      | `Array \| Function` | -       | Radio options               |
+| `dependencies` | `string[]`          | -       | Fields that trigger refetch |
 
 ## UI Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `ui.variant` | `'default' \| 'card'` | `'default'` | Visual style |
-| `ui.direction` | `'vertical' \| 'horizontal'` | `'vertical'` | Layout direction |
-| `ui.columns` | `1 \| 2 \| 3 \| 4` | - | Grid columns |
-| `ui.card.size` | `'sm' \| 'md' \| 'lg'` | `'md'` | Card size |
-| `ui.card.bordered` | `boolean` | `true` | Show card border |
+| Option             | Type                         | Default      | Description      |
+| ------------------ | ---------------------------- | ------------ | ---------------- |
+| `ui.variant`       | `'default' \| 'card'`        | `'default'`  | Visual style     |
+| `ui.direction`     | `'vertical' \| 'horizontal'` | `'vertical'` | Layout direction |
+| `ui.columns`       | `1 \| 2 \| 3 \| 4`           | -            | Grid columns     |
+| `ui.card.size`     | `'sm' \| 'md' \| 'lg'`       | `'md'`       | Card size        |
+| `ui.card.bordered` | `boolean`                    | `true`       | Show card border |
 
 ## Variants
 
@@ -116,7 +116,7 @@ options: [
     description: "Delivered tomorrow",
     disabled: true, // Not available
   },
-]
+];
 ```
 
 ## Examples

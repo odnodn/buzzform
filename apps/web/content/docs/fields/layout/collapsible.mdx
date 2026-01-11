@@ -10,11 +10,11 @@ The `collapsible` field provides an expandable/collapsible section for organizin
 ## Installation
 
 ```bash tab="pnpm"
-pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/collapsible
+pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/collapsible.json
 ```
 
 ```bash tab="npm"
-npx shadcn@latest add https://form.buildnbuzz.com/r/collapsible
+npx shadcn@latest add https://form.buildnbuzz.com/r/collapsible.json
 ```
 
 ## Usage
@@ -45,30 +45,30 @@ export function CollapsibleFieldDemo() {
 
 ## Properties
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `label` | `string` | - | Section title |
-| `fields` | `Field[]` | - | Fields inside section |
-| `collapsed` | `boolean` | `false` | Start collapsed |
+| Prop        | Type      | Default | Description           |
+| ----------- | --------- | ------- | --------------------- |
+| `label`     | `string`  | -       | Section title         |
+| `fields`    | `Field[]` | -       | Fields inside section |
+| `collapsed` | `boolean` | `false` | Start collapsed       |
 
 ## UI Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `ui.variant` | `'card' \| 'flat' \| 'ghost' \| 'bordered'` | `'bordered'` | Visual style |
-| `ui.spacing` | `'sm' \| 'md' \| 'lg'` | `'md'` | Space between fields |
-| `ui.showErrorBadge` | `boolean` | `true` | Show error count badge |
-| `ui.description` | `string` | - | Section description |
-| `ui.icon` | `ReactNode` | - | Section icon |
+| Option              | Type                                        | Default      | Description            |
+| ------------------- | ------------------------------------------- | ------------ | ---------------------- |
+| `ui.variant`        | `'card' \| 'flat' \| 'ghost' \| 'bordered'` | `'bordered'` | Visual style           |
+| `ui.spacing`        | `'sm' \| 'md' \| 'lg'`                      | `'md'`       | Space between fields   |
+| `ui.showErrorBadge` | `boolean`                                   | `true`       | Show error count badge |
+| `ui.description`    | `string`                                    | -            | Section description    |
+| `ui.icon`           | `ReactNode`                                 | -            | Section icon           |
 
 ## Group vs Collapsible
 
-| Feature | Group | Collapsible |
-|---------|-------|-------------|
-| Creates nested data | ✅ Yes | ❌ No |
-| Has `name` prop | ✅ Required | ❌ None |
-| Collapsible | ✅ Optional | ✅ Always |
-| Use case | Data structure | Visual organization |
+| Feature             | Group          | Collapsible         |
+| ------------------- | -------------- | ------------------- |
+| Creates nested data | ✅ Yes         | ❌ No               |
+| Has `name` prop     | ✅ Required    | ❌ None             |
+| Collapsible         | ✅ Optional    | ✅ Always           |
+| Use case            | Data structure | Visual organization |
 
 ## Variants
 
