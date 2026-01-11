@@ -10,11 +10,11 @@ The `group` field wraps child fields in a named object, creating nested data str
 ## Installation
 
 ```bash tab="pnpm"
-pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/group
+pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/group.json
 ```
 
 ```bash tab="npm"
-npx shadcn@latest add https://form.buildnbuzz.com/r/group
+npx shadcn@latest add https://form.buildnbuzz.com/r/group.json
 ```
 
 ## Usage
@@ -45,19 +45,19 @@ export function GroupFieldDemo() {
 
 ## Properties
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `name` | `string` | Object key in form data |
-| `fields` | `Field[]` | Nested fields |
+| Prop     | Type      | Description             |
+| -------- | --------- | ----------------------- |
+| `name`   | `string`  | Object key in form data |
+| `fields` | `Field[]` | Nested fields           |
 
 ## UI Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `ui.variant` | `'card' \| 'flat' \| 'ghost' \| 'bordered'` | `'flat'` | Visual style |
-| `ui.spacing` | `'sm' \| 'md' \| 'lg'` | `'md'` | Space between fields |
-| `ui.collapsed` | `boolean` | `false` | Start collapsed |
-| `ui.showErrorBadge` | `boolean` | `true` | Show error count badge |
+| Option              | Type                                        | Default  | Description            |
+| ------------------- | ------------------------------------------- | -------- | ---------------------- |
+| `ui.variant`        | `'card' \| 'flat' \| 'ghost' \| 'bordered'` | `'flat'` | Visual style           |
+| `ui.spacing`        | `'sm' \| 'md' \| 'lg'`                      | `'md'`   | Space between fields   |
+| `ui.collapsed`      | `boolean`                                   | `false`  | Start collapsed        |
+| `ui.showErrorBadge` | `boolean`                                   | `true`   | Show error count badge |
 
 ## Variants
 

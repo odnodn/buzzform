@@ -10,11 +10,11 @@ The `tabs` field organizes fields into a tabbed interface. Each tab can optional
 ## Installation
 
 ```bash tab="pnpm"
-pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/tabs
+pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/tabs.json
 ```
 
 ```bash tab="npm"
-npx shadcn@latest add https://form.buildnbuzz.com/r/tabs
+npx shadcn@latest add https://form.buildnbuzz.com/r/tabs.json
 ```
 
 ## Usage
@@ -56,29 +56,29 @@ export function TabsFieldDemo() {
 
 ## Properties
 
-| Prop | Type | Description |
-|------|------|-------------|
+| Prop   | Type    | Description     |
+| ------ | ------- | --------------- |
 | `tabs` | `Tab[]` | Tab definitions |
 
 ### Tab Properties
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `name` | `string` | Optional - creates nested object |
-| `label` | `string \| ReactNode` | Tab label |
-| `fields` | `Field[]` | Fields in this tab |
-| `description` | `string` | Tab description |
-| `icon` | `ReactNode` | Tab icon |
-| `disabled` | `boolean` | Disable tab |
+| Property      | Type                  | Description                      |
+| ------------- | --------------------- | -------------------------------- |
+| `name`        | `string`              | Optional - creates nested object |
+| `label`       | `string \| ReactNode` | Tab label                        |
+| `fields`      | `Field[]`             | Fields in this tab               |
+| `description` | `string`              | Tab description                  |
+| `icon`        | `ReactNode`           | Tab icon                         |
+| `disabled`    | `boolean`             | Disable tab                      |
 
 ## UI Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `ui.defaultTab` | `number \| string` | `0` | Initially active tab |
-| `ui.showErrorBadge` | `boolean` | `true` | Show error count per tab |
-| `ui.variant` | `'default' \| 'line'` | `'default'` | Tab style |
-| `ui.spacing` | `'sm' \| 'md' \| 'lg'` | `'md'` | Space between fields |
+| Option              | Type                   | Default     | Description              |
+| ------------------- | ---------------------- | ----------- | ------------------------ |
+| `ui.defaultTab`     | `number \| string`     | `0`         | Initially active tab     |
+| `ui.showErrorBadge` | `boolean`              | `true`      | Show error count per tab |
+| `ui.variant`        | `'default' \| 'line'`  | `'default'` | Tab style                |
+| `ui.spacing`        | `'sm' \| 'md' \| 'lg'` | `'md'`      | Space between fields     |
 
 ## Data Structure
 
@@ -138,10 +138,14 @@ Set the initially active tab:
 
 ```tsx
 // By index
-ui: { defaultTab: 1 }
+ui: {
+  defaultTab: 1;
+}
 
 // By name
-ui: { defaultTab: "settings" }
+ui: {
+  defaultTab: "settings";
+}
 ```
 
 ### Tab Icons
