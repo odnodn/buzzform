@@ -10,11 +10,11 @@ The `upload` field handles file uploads with drag-and-drop support, file preview
 ## Installation
 
 ```bash tab="pnpm"
-pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/upload
+pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/upload.json
 ```
 
 ```bash tab="npm"
-npx shadcn@latest add https://form.buildnbuzz.com/r/upload
+npx shadcn@latest add https://form.buildnbuzz.com/r/upload.json
 ```
 
 ## Usage
@@ -38,24 +38,24 @@ export function UploadFieldDemo() {
 
 ## Properties
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `hasMany` | `boolean` | `false` | Allow multiple files |
-| `minFiles` | `number` | - | Minimum files (with hasMany) |
-| `maxFiles` | `number` | - | Maximum files (with hasMany) |
-| `maxSize` | `number` | - | Max file size in bytes |
+| Prop       | Type      | Default | Description                  |
+| ---------- | --------- | ------- | ---------------------------- |
+| `hasMany`  | `boolean` | `false` | Allow multiple files         |
+| `minFiles` | `number`  | -       | Minimum files (with hasMany) |
+| `maxFiles` | `number`  | -       | Maximum files (with hasMany) |
+| `maxSize`  | `number`  | -       | Max file size in bytes       |
 
 ## UI Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `ui.accept` | `string` | `"*"` | MIME type filter |
-| `ui.variant` | `'dropzone' \| 'avatar' \| 'inline' \| 'gallery'` | `'dropzone'` | Visual style |
-| `ui.shape` | `'circle' \| 'square' \| 'rounded'` | `'rounded'` | Avatar shape |
-| `ui.size` | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'md'` | Size preset |
-| `ui.crop` | `boolean \| object` | - | Enable cropping |
-| `ui.showProgress` | `boolean` | `true` | Show upload progress |
-| `ui.dropzoneText` | `string` | - | Custom dropzone message |
+| Option            | Type                                              | Default      | Description             |
+| ----------------- | ------------------------------------------------- | ------------ | ----------------------- |
+| `ui.accept`       | `string`                                          | `"*"`        | MIME type filter        |
+| `ui.variant`      | `'dropzone' \| 'avatar' \| 'inline' \| 'gallery'` | `'dropzone'` | Visual style            |
+| `ui.shape`        | `'circle' \| 'square' \| 'rounded'`               | `'rounded'`  | Avatar shape            |
+| `ui.size`         | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'`            | `'md'`       | Size preset             |
+| `ui.crop`         | `boolean \| object`                               | -            | Enable cropping         |
+| `ui.showProgress` | `boolean`                                         | `true`       | Show upload progress    |
+| `ui.dropzoneText` | `string`                                          | -            | Custom dropzone message |
 
 ## Variants
 
@@ -127,16 +127,24 @@ Use `ui.accept` to filter file types:
 
 ```tsx
 // Images only
-ui: { accept: "image/*" }
+ui: {
+  accept: "image/*";
+}
 
 // Specific types
-ui: { accept: "image/png,image/jpeg" }
+ui: {
+  accept: "image/png,image/jpeg";
+}
 
 // By extension
-ui: { accept: ".pdf,.doc,.docx" }
+ui: {
+  accept: ".pdf,.doc,.docx";
+}
 
 // Multiple categories
-ui: { accept: "image/*,.pdf" }
+ui: {
+  accept: "image/*,.pdf";
+}
 ```
 
 ## Examples

@@ -10,11 +10,11 @@ The `row` field arranges child fields horizontally. It's a layout-only field tha
 ## Installation
 
 ```bash tab="pnpm"
-pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/row
+pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/row.json
 ```
 
 ```bash tab="npm"
-npx shadcn@latest add https://form.buildnbuzz.com/r/row
+npx shadcn@latest add https://form.buildnbuzz.com/r/row.json
 ```
 
 ## Usage
@@ -40,19 +40,19 @@ export function RowFieldDemo() {
 
 ## Properties
 
-| Prop | Type | Description |
-|------|------|-------------|
+| Prop     | Type      | Description                    |
+| -------- | --------- | ------------------------------ |
 | `fields` | `Field[]` | Fields to arrange horizontally |
 
 ## UI Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `ui.gap` | `number \| string` | `4` | Space between fields |
-| `ui.align` | `'start' \| 'center' \| 'end' \| 'stretch'` | `'stretch'` | Vertical alignment |
-| `ui.justify` | `'start' \| 'center' \| 'end' \| 'between'` | `'start'` | Horizontal distribution |
-| `ui.wrap` | `boolean` | `false` | Allow wrapping |
-| `ui.responsive` | `boolean \| 'stack'` | `false` | Stack on mobile |
+| Option          | Type                                        | Default     | Description             |
+| --------------- | ------------------------------------------- | ----------- | ----------------------- |
+| `ui.gap`        | `number \| string`                          | `4`         | Space between fields    |
+| `ui.align`      | `'start' \| 'center' \| 'end' \| 'stretch'` | `'stretch'` | Vertical alignment      |
+| `ui.justify`    | `'start' \| 'center' \| 'end' \| 'between'` | `'start'`   | Horizontal distribution |
+| `ui.wrap`       | `boolean`                                   | `false`     | Allow wrapping          |
+| `ui.responsive` | `boolean \| 'stack'`                        | `false`     | Stack on mobile         |
 
 ## Features
 

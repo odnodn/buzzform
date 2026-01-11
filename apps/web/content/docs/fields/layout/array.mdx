@@ -10,15 +10,16 @@ The `array` field creates repeatable field groups with add/remove functionality 
 ## Installation
 
 ```bash tab="pnpm"
-pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/array
+pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/array.json
 ```
 
 ```bash tab="npm"
-npx shadcn@latest add https://form.buildnbuzz.com/r/array
+npx shadcn@latest add https://form.buildnbuzz.com/r/array.json
 ```
 
 <Callout>
-Drag-and-drop requires `@dnd-kit`. Install with: `npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities`
+  Drag-and-drop requires `@dnd-kit`. Install with: `npm install @dnd-kit/core
+  @dnd-kit/sortable @dnd-kit/utilities`
 </Callout>
 
 ## Usage
@@ -48,25 +49,25 @@ export function ArrayFieldDemo() {
 
 ## Properties
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `name` | `string` | - | Array key in form data |
-| `fields` | `Field[]` | - | Fields for each array item |
-| `minRows` | `number` | - | Minimum items |
-| `maxRows` | `number` | - | Maximum items |
+| Prop      | Type      | Default | Description                |
+| --------- | --------- | ------- | -------------------------- |
+| `name`    | `string`  | -       | Array key in form data     |
+| `fields`  | `Field[]` | -       | Fields for each array item |
+| `minRows` | `number`  | -       | Minimum items              |
+| `maxRows` | `number`  | -       | Maximum items              |
 
 ## UI Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `ui.isSortable` | `boolean` | `true` | Enable drag-drop reordering |
-| `ui.addLabel` | `string` | `"Add Item"` | Add button text |
-| `ui.rowLabelField` | `string` | - | Field name for row titles |
-| `ui.collapsed` | `boolean` | `false` | Start container collapsed |
-| `ui.rowsCollapsed` | `boolean` | `false` | Start rows collapsed |
-| `ui.confirmDelete` | `boolean` | `false` | Confirm before delete all |
-| `ui.emptyMessage` | `string` | - | Empty state message |
-| `ui.showErrorBadge` | `boolean` | `true` | Show error count badge |
+| Option              | Type      | Default      | Description                 |
+| ------------------- | --------- | ------------ | --------------------------- |
+| `ui.isSortable`     | `boolean` | `true`       | Enable drag-drop reordering |
+| `ui.addLabel`       | `string`  | `"Add Item"` | Add button text             |
+| `ui.rowLabelField`  | `string`  | -            | Field name for row titles   |
+| `ui.collapsed`      | `boolean` | `false`      | Start container collapsed   |
+| `ui.rowsCollapsed`  | `boolean` | `false`      | Start rows collapsed        |
+| `ui.confirmDelete`  | `boolean` | `false`      | Confirm before delete all   |
+| `ui.emptyMessage`   | `string`  | -            | Empty state message         |
+| `ui.showErrorBadge` | `boolean` | `true`       | Show error count badge      |
 
 ## Features
 

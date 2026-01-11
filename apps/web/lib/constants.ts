@@ -137,8 +137,7 @@ export const footerSections: FooterSection[] = [
         title: "Product",
         links: [
             { label: "Documentation", href: "/docs" },
-            // { label: "Examples", href: "/docs/examples" },
-            // { label: "Changelog", href: "/changelog" },
+            { label: "Showcase", href: "/examples" },
         ],
     },
     {

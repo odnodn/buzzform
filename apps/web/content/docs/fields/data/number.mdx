@@ -10,11 +10,11 @@ The `number` field provides numeric input with increment/decrement buttons, form
 ## Installation
 
 ```bash tab="pnpm"
-pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/number
+pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/number.json
 ```
 
 ```bash tab="npm"
-npx shadcn@latest add https://form.buildnbuzz.com/r/number
+npx shadcn@latest add https://form.buildnbuzz.com/r/number.json
 ```
 
 ## Usage
@@ -41,23 +41,23 @@ export function NumberFieldDemo() {
 
 ## Properties
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `min` | `number` | - | Minimum value |
-| `max` | `number` | - | Maximum value |
-| `precision` | `number` | - | Decimal places |
+| Prop        | Type     | Default | Description    |
+| ----------- | -------- | ------- | -------------- |
+| `min`       | `number` | -       | Minimum value  |
+| `max`       | `number` | -       | Maximum value  |
+| `precision` | `number` | -       | Decimal places |
 
 ## UI Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `ui.step` | `number` | `1` | Increment/decrement amount |
-| `ui.variant` | `'default' \| 'stacked' \| 'pill' \| 'plain'` | `'default'` | Stepper button style |
-| `ui.prefix` | `string` | - | Prefix text (e.g., "$") |
-| `ui.suffix` | `string` | - | Suffix text (e.g., "kg") |
-| `ui.thousandSeparator` | `boolean \| string` | `false` | Format with separators |
-| `ui.hideSteppers` | `boolean` | `false` | Hide +/- buttons |
-| `ui.copyable` | `boolean` | `false` | Show copy button |
+| Option                 | Type                                          | Default     | Description                |
+| ---------------------- | --------------------------------------------- | ----------- | -------------------------- |
+| `ui.step`              | `number`                                      | `1`         | Increment/decrement amount |
+| `ui.variant`           | `'default' \| 'stacked' \| 'pill' \| 'plain'` | `'default'` | Stepper button style       |
+| `ui.prefix`            | `string`                                      | -           | Prefix text (e.g., "$")    |
+| `ui.suffix`            | `string`                                      | -           | Suffix text (e.g., "kg")   |
+| `ui.thousandSeparator` | `boolean \| string`                           | `false`     | Format with separators     |
+| `ui.hideSteppers`      | `boolean`                                     | `false`     | Hide +/- buttons           |
+| `ui.copyable`          | `boolean`                                     | `false`     | Show copy button           |
 
 ## Features
 

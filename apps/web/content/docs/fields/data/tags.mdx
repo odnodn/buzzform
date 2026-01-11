@@ -10,11 +10,11 @@ The `tags` field allows users to enter multiple text values as chips/tags. Value
 ## Installation
 
 ```bash tab="pnpm"
-pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/tags
+pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/tags.json
 ```
 
 ```bash tab="npm"
-npx shadcn@latest add https://form.buildnbuzz.com/r/tags
+npx shadcn@latest add https://form.buildnbuzz.com/r/tags.json
 ```
 
 ## Usage
@@ -39,20 +39,20 @@ export function TagsFieldDemo() {
 
 ## Properties
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `minTags` | `number` | - | Minimum number of tags |
-| `maxTags` | `number` | - | Maximum number of tags |
-| `maxTagLength` | `number` | - | Maximum characters per tag |
-| `allowDuplicates` | `boolean` | `false` | Allow duplicate values |
+| Prop              | Type      | Default | Description                |
+| ----------------- | --------- | ------- | -------------------------- |
+| `minTags`         | `number`  | -       | Minimum number of tags     |
+| `maxTags`         | `number`  | -       | Maximum number of tags     |
+| `maxTagLength`    | `number`  | -       | Maximum characters per tag |
+| `allowDuplicates` | `boolean` | `false` | Allow duplicate values     |
 
 ## UI Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `ui.delimiters` | `Array` | `['enter']` | Keys that create tags |
-| `ui.variant` | `'chips' \| 'pills' \| 'inline'` | `'chips'` | Visual style |
-| `ui.copyable` | `boolean` | `false` | Copy all tags button |
+| Option          | Type                             | Default     | Description           |
+| --------------- | -------------------------------- | ----------- | --------------------- |
+| `ui.delimiters` | `Array`                          | `['enter']` | Keys that create tags |
+| `ui.variant`    | `'chips' \| 'pills' \| 'inline'` | `'chips'`   | Visual style          |
+| `ui.copyable`   | `boolean`                        | `false`     | Copy all tags button  |
 
 ## Delimiters
 
@@ -70,6 +70,7 @@ Configure which keys create new tags:
 ```
 
 Available delimiters:
+
 - `"enter"` - Enter key
 - `"comma"` - Comma key
 - `"space"` - Space key

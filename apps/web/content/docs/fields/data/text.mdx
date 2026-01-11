@@ -10,11 +10,11 @@ The `text` field renders a single-line text input. It's the most common field ty
 ## Installation
 
 ```bash tab="pnpm"
-pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/text
+pnpm dlx shadcn@latest add https://form.buildnbuzz.com/r/text.json
 ```
 
 ```bash tab="npm"
-npx shadcn@latest add https://form.buildnbuzz.com/r/text
+npx shadcn@latest add https://form.buildnbuzz.com/r/text.json
 ```
 
 ## Usage
@@ -42,17 +42,17 @@ export function TextFieldDemo() {
 
 ## Properties
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `minLength` | `number` | - | Minimum character length |
-| `maxLength` | `number` | - | Maximum character length |
-| `pattern` | `string \| RegExp` | - | Validation pattern |
-| `trim` | `boolean` | `false` | Trim whitespace on blur |
+| Prop        | Type               | Default | Description              |
+| ----------- | ------------------ | ------- | ------------------------ |
+| `minLength` | `number`           | -       | Minimum character length |
+| `maxLength` | `number`           | -       | Maximum character length |
+| `pattern`   | `string \| RegExp` | -       | Validation pattern       |
+| `trim`      | `boolean`          | `false` | Trim whitespace on blur  |
 
 ## UI Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
+| Option        | Type      | Default | Description      |
+| ------------- | --------- | ------- | ---------------- |
 | `ui.copyable` | `boolean` | `false` | Show copy button |
 
 ## Examples
