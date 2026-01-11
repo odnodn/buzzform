@@ -42,6 +42,13 @@ yarn dlx shadcn@latest add https://form.buildnbuzz.com/r/starter.json
 bunx shadcn@latest add https://form.buildnbuzz.com/r/starter.json
 ```
 
+<Callout type="warning">
+  **Radix UI Users:** If your project uses traditional Radix UI primitives
+  (standard in shadcn/ui), you may need to manually update the `Select`
+  component to use `asChild` instead of `render`. [See the fix
+  here](/docs/fields/data/select#radix-ui-setup).
+</Callout>
+
 ### Using a Named Registry
 
 For shorter commands, configure BuzzForm as a named registry in your `components.json`:
