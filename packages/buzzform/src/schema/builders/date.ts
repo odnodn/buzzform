@@ -23,13 +23,13 @@ export function createDateFieldSchema(field: DateField | DatetimeField): z.ZodTy
     const maxDate = toDate(field.maxDate);
 
     // Build base date schema
-    let dateSchema = z.date({ invalid_type_error: 'Please enter a valid date' });
+    let dateSchema = z.date({ error: 'Please enter a valid date' });
 
     // Add min date constraint
     if (minDate) {
         const formattedDate = isDatetime ? minDate.toLocaleString() : minDate.toDateString();
         dateSchema = dateSchema.min(minDate, {
-            message: `Date must be on or after ${formattedDate}`,
+            error: `Date must be on or after ${formattedDate}`,
         });
     }
 
@@ -37,7 +37,7 @@ export function createDateFieldSchema(field: DateField | DatetimeField): z.ZodTy
     if (maxDate) {
         const formattedDate = isDatetime ? maxDate.toLocaleString() : maxDate.toDateString();
         dateSchema = dateSchema.max(maxDate, {
-            message: `Date must be on or before ${formattedDate}`,
+            error: `Date must be on or before ${formattedDate}`,
         });
     }
 

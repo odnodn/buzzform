@@ -90,7 +90,7 @@ export function applyCustomValidation(
 
         if (result !== true) {
             ctx.addIssue({
-                code: z.ZodIssueCode.custom,
+                code: 'custom',
                 message: typeof result === 'string' ? result : 'Validation failed',
             });
         }

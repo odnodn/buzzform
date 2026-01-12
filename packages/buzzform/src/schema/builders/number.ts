@@ -6,7 +6,7 @@ import { coerceToNumber, makeOptional, applyCustomValidation } from '../helpers'
  * Creates Zod schema for number fields.
  */
 export function createNumberFieldSchema(field: NumberField): z.ZodTypeAny {
-    let numSchema = z.number({ invalid_type_error: 'Must be a number' });
+    let numSchema = z.number({ error: 'Must be a number' });
 
     // Min/max constraints
     if (field.min !== undefined) {

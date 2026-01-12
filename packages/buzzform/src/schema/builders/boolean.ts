@@ -11,7 +11,7 @@ export function createCheckboxFieldSchema(field: CheckboxField): z.ZodTypeAny {
     // Required checkbox must be checked
     if (field.required) {
         schema = z.boolean().refine(val => val === true, {
-            message: 'This field is required',
+            error: 'This field is required',
         });
     }
 
@@ -27,7 +27,7 @@ export function createSwitchFieldSchema(field: SwitchField): z.ZodTypeAny {
     // Required switch must be on
     if (field.required) {
         schema = z.boolean().refine(val => val === true, {
-            message: 'This field is required',
+            error: 'This field is required',
         });
     }
 

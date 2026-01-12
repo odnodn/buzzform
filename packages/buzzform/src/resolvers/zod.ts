@@ -1,9 +1,13 @@
-import type { ZodSchema, ZodError, ZodIssue } from 'zod';
+import { type z } from 'zod';
 import type { Resolver, FieldError, ResolverResult } from '../types';
 
 // =============================================================================
 // ZOD RESOLVER
 // =============================================================================
+
+// Zod v4 types from core
+type ZodIssue = z.core.$ZodIssue;
+type ZodError = z.ZodError;
 
 /**
  * Creates a validation resolver from a Zod schema.
@@ -20,7 +24,7 @@ import type { Resolver, FieldError, ResolverResult } from '../types';
  * import { zodResolver } from '@buildnbuzz/buzzform';
  * 
  * const schema = z.object({
- *   email: z.string().email('Invalid email'),
+ *   email: z.email('Invalid email'),
  *   age: z.number().min(18, 'Must be at least 18'),
  * });
  * 
@@ -30,7 +34,7 @@ import type { Resolver, FieldError, ResolverResult } from '../types';
  * });
  */
 export function zodResolver<TData>(
-    schema: ZodSchema<TData>
+    schema: z.ZodType<TData>
 ): Resolver<TData> {
     return async (values: TData): Promise<ResolverResult<TData>> => {
         try {
@@ -93,22 +97,29 @@ function issuePath(issue: ZodIssue): string {
 
 /**
  * Map Zod issue code to a simpler type string.
+ * Zod v4: Uses string literal codes instead of ZodIssueCode enum.
  */
 function issueType(issue: ZodIssue): string {
     switch (issue.code) {
         case 'invalid_type':
-            if (issue.received === 'undefined') return 'required';
+            if ('received' in issue && issue.received === 'undefined') return 'required';
             return 'type';
         case 'too_small':
-            return issue.type === 'string' ? 'minLength' : 'min';
+            if ('origin' in issue && issue.origin === 'string') return 'minLength';
+            return 'min';
         case 'too_big':
-            return issue.type === 'string' ? 'maxLength' : 'max';
-        case 'invalid_string':
-            return issue.validation?.toString() || 'pattern';
+            if ('origin' in issue && issue.origin === 'string') return 'maxLength';
+            return 'max';
+        case 'invalid_format': {
+            const formatIssue = issue as { format?: string };
+            if (formatIssue.format === 'regex') return 'pattern';
+            if (typeof formatIssue.format === 'string') return formatIssue.format;
+            return 'pattern';
+        }
         case 'custom':
             return 'custom';
         default:
-            return issue.code;
+            return issue.code ?? 'validation';
     }
 }
 
@@ -128,5 +139,5 @@ function isZodError(error: unknown): error is ZodError {
 // RE-EXPORTS FOR CONVENIENCE
 // =============================================================================
 
-export type { ZodSchema } from 'zod';
+export type { ZodType as ZodSchema } from 'zod';
 export { z } from 'zod';

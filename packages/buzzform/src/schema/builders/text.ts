@@ -15,25 +15,25 @@ export function createTextFieldSchema(field: TextField | TextareaField): z.ZodTy
             : field.pattern;
 
         schema = schema.regex(pattern, {
-            message: getPatternErrorMessage(field.pattern),
+            error: getPatternErrorMessage(field.pattern),
         });
     }
 
     // Length constraints
     if (field.minLength) {
         schema = schema.min(field.minLength, {
-            message: `Must be at least ${field.minLength} characters`,
+            error: `Must be at least ${field.minLength} characters`,
         });
     }
     if (field.maxLength) {
         schema = schema.max(field.maxLength, {
-            message: `Must be no more than ${field.maxLength} characters`,
+            error: `Must be no more than ${field.maxLength} characters`,
         });
     }
 
     // Required (for strings, use min(1) instead of just required)
     if (field.required) {
-        schema = schema.min(1, { message: 'This field is required' });
+        schema = schema.min(1, { error: 'This field is required' });
     }
 
     // Trim preprocessing (only for TextField)
@@ -59,23 +59,24 @@ export function createTextFieldSchema(field: TextField | TextareaField): z.ZodTy
  * Creates Zod schema for email fields.
  */
 export function createEmailFieldSchema(field: EmailField): z.ZodTypeAny {
-    let schema = z.string().email({ message: 'Invalid email address' });
+    // Zod v4: Use top-level z.email() instead of deprecated z.string().email()
+    let schema = z.email({ error: 'Invalid email address' });
 
     // Length constraints (rare for email but supported)
     if (field.minLength) {
         schema = schema.min(field.minLength, {
-            message: `Must be at least ${field.minLength} characters`,
+            error: `Must be at least ${field.minLength} characters`,
         });
     }
     if (field.maxLength) {
         schema = schema.max(field.maxLength, {
-            message: `Must be no more than ${field.maxLength} characters`,
+            error: `Must be no more than ${field.maxLength} characters`,
         });
     }
 
     // Required
     if (field.required) {
-        schema = schema.min(1, { message: 'Email is required' });
+        schema = schema.min(1, { error: 'Email is required' });
     }
 
     // Apply custom validation
@@ -96,16 +97,16 @@ export function createPasswordFieldSchema(field: PasswordField): z.ZodTypeAny {
 
     if (field.minLength) {
         schema = schema.min(field.minLength, {
-            message: `Password must be at least ${field.minLength} characters`,
+            error: `Password must be at least ${field.minLength} characters`,
         });
     }
     if (field.maxLength) {
         schema = schema.max(field.maxLength, {
-            message: `Password must be no more than ${field.maxLength} characters`,
+            error: `Password must be no more than ${field.maxLength} characters`,
         });
     }
     if (field.required) {
-        schema = schema.min(1, { message: 'Password is required' });
+        schema = schema.min(1, { error: 'Password is required' });
     }
 
     const finalSchema: z.ZodTypeAny = applyCustomValidation(schema, field, field.name);
