@@ -85,4 +85,9 @@ export type SchemaBuilderMap = {
 /**
  * Infer the TypeScript type from a BuzzForm schema.
  */
-export type InferSchema<T extends z.ZodTypeAny> = z.infer<T>;
+export type InferType<T extends z.ZodTypeAny> = z.infer<T>;
+
+/**
+ * @deprecated Use `InferType` instead. This will be removed in a future version.
+ */
+export type InferSchema<T extends z.ZodTypeAny> = InferType<T>;
