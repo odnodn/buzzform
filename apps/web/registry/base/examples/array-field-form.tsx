@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { createSchema } from "@buildnbuzz/buzzform";
+import { createSchema, InferType } from "@buildnbuzz/buzzform";
 import {
   Form,
   FormContent,
@@ -9,7 +9,7 @@ import {
   FormSubmit,
   FormReset,
   FormActions,
-} from "@/components/buzzform/form";
+} from "@/registry/base/form";
 import {
   Card,
   CardContent,
@@ -167,8 +167,10 @@ const teamSchema = createSchema([
   },
 ]);
 
+type TeamSchema = InferType<typeof teamSchema>;
+
 export default function ArrayFieldExample() {
-  const handleSubmit = async (data: Record<string, unknown>) => {
+  const handleSubmit = async (data: TeamSchema) => {
     await new Promise((r) => setTimeout(r, 1000));
     toast("Project created!", {
       description: (
@@ -192,8 +194,24 @@ export default function ArrayFieldExample() {
           schema={teamSchema}
           onSubmit={handleSubmit}
           defaultValues={{
-            teamMembers: [{ id: "member-1" }],
-            milestones: [{ id: "milestone-1" }, { id: "milestone-2" }],
+            projectName: "New Web App",
+            teamMembers: [
+              {
+                name: "Alice Johnson",
+                email: "alice@example.com",
+                role: "developer",
+                experience: "senior",
+                skills: ["React", "TypeScript"],
+              },
+            ],
+            milestones: [
+              {
+                title: "Project Kickoff",
+                dueDate: new Date(),
+                priority: "high",
+                description: "Initial planning and requirements gathering",
+              },
+            ],
           }}
         >
           <FormContent>

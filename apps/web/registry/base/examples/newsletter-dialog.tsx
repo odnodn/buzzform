@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { createSchema } from "@buildnbuzz/buzzform";
+import { createSchema, InferType } from "@buildnbuzz/buzzform";
 import {
   Form,
   FormContent,
   FormFields,
   FormSubmit,
-} from "@/components/buzzform/form";
+} from "@/registry/base/form";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -36,10 +36,12 @@ const newsletterSchema = createSchema([
   },
 ]);
 
-export function NewsletterDialogExample() {
+type NewsletterSchema = InferType<typeof newsletterSchema>;
+
+export default function NewsletterDialogExample() {
   const [open, setOpen] = useState(false);
 
-  const handleSubmit = async (data: Record<string, unknown>) => {
+  const handleSubmit = async (data: NewsletterSchema) => {
     await new Promise((resolve) => setTimeout(resolve, 800));
     toast("Subscribed!", {
       description: (

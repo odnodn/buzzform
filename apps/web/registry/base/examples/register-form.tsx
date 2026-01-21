@@ -2,21 +2,14 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { createSchema } from "@buildnbuzz/buzzform";
+import { createSchema, InferType } from "@buildnbuzz/buzzform";
 import {
   Form,
   FormContent,
   FormFields,
   FormSubmit,
   FormActions,
-} from "@/components/buzzform/form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+} from "@/registry/base/form";
 import {
   Dialog,
   DialogContent,
@@ -27,32 +20,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
-// Login form with password
-const loginSchema = createSchema([
-  {
-    type: "email",
-    name: "email",
-    label: "Email",
-    placeholder: "you@example.com",
-    required: true,
-    autoComplete: "email",
-  },
-  {
-    type: "password",
-    name: "password",
-    label: "Password",
-    placeholder: "Enter your password",
-    required: true,
-    minLength: 8,
-    autoComplete: "current-password",
-  },
-  {
-    type: "checkbox",
-    name: "rememberMe",
-    label: "Remember me for 30 days",
-  },
-]);
 
 // Registration form with password strength
 const registerSchema = createSchema([
@@ -104,50 +71,12 @@ const registerSchema = createSchema([
   },
 ]);
 
-export function LoginFormCard() {
-  const handleSubmit = async (data: Record<string, unknown>) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast("Welcome back!", {
-      description: (
-        <pre className="mt-2 max-h-48 overflow-auto rounded-md bg-zinc-950 p-3 text-xs">
-          <code>{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
-  };
+type RegisterSchema = InferType<typeof registerSchema>;
 
-  return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle>Sign In</CardTitle>
-        <CardDescription>
-          Secure login with email and password authentication
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form schema={loginSchema} onSubmit={handleSubmit}>
-          <FormContent>
-            <FormFields />
-            <div className="flex items-center justify-between">
-              <Link
-                href="#"
-                className="text-sm text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
-              >
-                Forgot password?
-              </Link>
-            </div>
-            <FormSubmit className="w-full">Sign In</FormSubmit>
-          </FormContent>
-        </Form>
-      </CardContent>
-    </Card>
-  );
-}
-
-export function RegisterFormDialog() {
+export default function RegisterFormDialog() {
   const [open, setOpen] = useState(false);
 
-  const handleSubmit = async (data: Record<string, unknown>) => {
+  const handleSubmit = async (data: RegisterSchema) => {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     toast("Account created!", {
       description: (

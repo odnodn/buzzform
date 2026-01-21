@@ -1,24 +1,22 @@
-export { ContactFormExample } from "./contact-form";
-export { NewsletterDialogExample } from "./newsletter-dialog";
-export { FeedbackSheetExample } from "./feedback-sheet";
-export {
-    LoginFormCard,
-    RegisterFormDialog,
-} from "./auth-forms";
-export { QuickAddPopover } from "./quick-add";
-export { NotificationSettingsCard } from "./notification-settings";
-export { PricingFormCard } from "./pricing-form";
-export { ProductFormCard } from "./product-form";
-export { BlogPostFormCard } from "./blog-post-form";
-export { BookingForm } from "./booking-form";
-export { SupportTicketForm } from "./support-ticket-form";
-export {
-    ProfileUploadForm,
-    DocumentUploadForm,
-    GalleryUploadForm,
-} from "./upload-form";
-export { ContactLayoutForm, CouponLayoutForm } from "./layout-form";
-export { default as GroupFieldExample } from "./group-form";
-export { CollapsibleSettingsForm } from "./collapsible-form";
-export { AccountSettingsForm, CheckoutForm } from "./tabs-form";
-export { default as ArrayFieldExample } from "./array-form";
+export { default as ContactFormExample } from "../../registry/base/examples/contact-form";
+export { default as NewsletterDialogExample } from "../../registry/base/examples/newsletter-dialog";
+export { default as FeedbackSheetExample } from "../../registry/base/examples/feedback-sheet";
+export { default as QuickAddPopover } from "../../registry/base/examples/quick-add";
+export { default as NotificationSettingsCard } from "../../registry/base/examples/notification-settings";
+export { default as LoginFormCard } from "../../registry/base/examples/login-form";
+export { default as RegisterFormDialog } from "../../registry/base/examples/register-form";
+export { default as PricingFormCard } from "../../registry/base/examples/pricing-form";
+export { default as ProductFormCard } from "../../registry/base/examples/product-form";
+export { default as BlogPostFormCard } from "../../registry/base/examples/blog-post-form";
+export { default as BookingForm } from "../../registry/base/examples/booking-form";
+export { default as SupportTicketForm } from "../../registry/base/examples/support-ticket-form";
+export { default as ContactLayoutForm } from "../../registry/base/examples/contact-layout-form";
+export { default as CouponLayoutForm } from "../../registry/base/examples/coupon-layout-form";
+export { default as ProfileUploadForm } from "../../registry/base/examples/profile-upload-form";
+export { default as DocumentUploadForm } from "../../registry/base/examples/document-upload-form";
+export { default as GalleryUploadForm } from "../../registry/base/examples/gallery-upload-form";
+export { default as AccountSettingsForm } from "../../registry/base/examples/account-settings-form";
+export { default as CheckoutForm } from "../../registry/base/examples/checkout-form";
+export { default as ArrayFieldExample } from "../../registry/base/examples/array-field-form";
+export { default as GroupFieldExample } from "../../registry/base/examples/group-field-form";
+export { default as CollapsibleSettingsForm } from "../../registry/base/examples/collapsible-settings-form";

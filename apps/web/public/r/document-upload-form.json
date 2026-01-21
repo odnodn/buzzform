@@ -1,0 +1,23 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "document-upload-form",
+  "title": "Document Upload Form",
+  "description": "Upload documents with progress tracking.",
+  "dependencies": [
+    "sonner"
+  ],
+  "registryDependencies": [
+    "@buzzform/starter",
+    "card",
+    "textarea"
+  ],
+  "files": [
+    {
+      "path": "registry/base/examples/document-upload-form.tsx",
+      "content": "\"use client\";\r\n\r\nimport { createSchema, InferType } from \"@buildnbuzz/buzzform\";\r\nimport { toast } from \"sonner\";\r\nimport {\r\n  Card,\r\n  CardContent,\r\n  CardDescription,\r\n  CardHeader,\r\n  CardTitle,\r\n} from \"@/components/ui/card\";\r\nimport {\r\n  Form,\r\n  FormContent,\r\n  FormFields,\r\n  FormSubmit,\r\n} from \"@/registry/base/form\";\r\n\r\nconst documentSchema = createSchema([\r\n  {\r\n    type: \"upload\",\r\n    name: \"document\",\r\n    label: \"Upload Document\",\r\n    description: \"PDF, Word, or text files (max 10MB)\",\r\n    maxSize: 10 * 1024 * 1024,\r\n    ui: {\r\n      variant: \"dropzone\",\r\n      size: \"xs\",\r\n      accept: \".pdf,.doc,.docx,.txt\",\r\n      showProgress: true,\r\n      dropzoneText: \"Drop your document here\",\r\n    },\r\n  },\r\n  {\r\n    type: \"textarea\",\r\n    name: \"notes\",\r\n    label: \"Additional Notes\",\r\n    placeholder: \"Any notes about this document...\",\r\n    rows: 3,\r\n  },\r\n]);\r\n\r\ntype DocumentSchema = InferType<typeof documentSchema>;\r\n\r\nexport default function DocumentUploadForm() {\r\n  return (\r\n    <Card>\r\n      <CardHeader>\r\n        <CardTitle>Document Upload</CardTitle>\r\n        <CardDescription>Drag-and-drop with progress indicator</CardDescription>\r\n      </CardHeader>\r\n      <CardContent>\r\n        <Form\r\n          schema={documentSchema}\r\n          onSubmit={async (data: DocumentSchema) => {\r\n            console.log(\"Form data:\", data);\r\n            await new Promise((r) => setTimeout(r, 1000));\r\n            toast(\"Document uploaded!\", {\r\n              description: (\r\n                <div className=\"space-y-2\">\r\n                  <p className=\"text-[10px] text-muted-foreground\">\r\n                    Check the console for the full File objects.\r\n                  </p>\r\n                  <pre className=\"max-h-40 overflow-auto rounded-md bg-zinc-950 p-3 text-xs\">\r\n                    <code>{JSON.stringify(data, null, 2)}</code>\r\n                  </pre>\r\n                </div>\r\n              ),\r\n            });\r\n          }}\r\n        >\r\n          <FormContent>\r\n            <FormFields className=\"space-y-4\" />\r\n            <FormSubmit className=\"mt-6 w-full\">Upload Document</FormSubmit>\r\n          </FormContent>\r\n        </Form>\r\n      </CardContent>\r\n    </Card>\r\n  );\r\n}\r\n",
+      "type": "registry:component",
+      "target": "components/buzzform/examples/document-upload-form.tsx"
+    }
+  ],
+  "type": "registry:block"
+}

@@ -12,9 +12,9 @@ import {
   FormContent,
   FormFields,
   FormSubmit,
-} from "@/components/buzzform/form";
+} from "@/registry/base/form";
 import { toast } from "sonner";
-import { createSchema } from "@buildnbuzz/buzzform";
+import { createSchema, InferType } from "@buildnbuzz/buzzform";
 
 // Hotel booking form with date pickers and time selection
 const bookingSchema = createSchema([
@@ -101,7 +101,9 @@ const bookingSchema = createSchema([
   },
 ]);
 
-export function BookingForm() {
+type BookingSchema = InferType<typeof bookingSchema>;
+
+export default function BookingForm() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
@@ -113,14 +115,14 @@ export function BookingForm() {
       <CardContent>
         <Form
           schema={bookingSchema}
-          defaultValues={
-            {
-              checkIn: new Date(),
-              checkOut: new Date(new Date().setDate(new Date().getDate() + 2)),
-              arrivalTime: new Date(),
-            } as Record<string, unknown>
-          }
-          onSubmit={async (data) => {
+          defaultValues={{
+            checkIn: new Date(),
+            checkOut: new Date(new Date().setDate(new Date().getDate() + 2)),
+            arrivalTime: new Date(),
+            adults: 2,
+            roomType: "standard",
+          }}
+          onSubmit={async (data: BookingSchema) => {
             await new Promise((resolve) => setTimeout(resolve, 1000));
             toast("Booking Request Sent!", {
               description: (

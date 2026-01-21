@@ -12,9 +12,9 @@ import {
   FormContent,
   FormFields,
   FormSubmit,
-} from "@/components/buzzform/form";
+} from "@/registry/base/form";
 import { toast } from "sonner";
-import { createSchema } from "@buildnbuzz/buzzform";
+import { createSchema, InferType } from "@buildnbuzz/buzzform";
 import type { ValidationContext } from "@buildnbuzz/buzzform";
 
 const categoryOptions = [
@@ -112,7 +112,7 @@ const ticketSchema = createSchema([
     options: getSubcategories,
     dependencies: ["category"],
     placeholder: "Select subcategory...",
-    disabled: (data) => !data.category,
+    disabled: (data: { category?: string }) => !data.category,
     description: "Options update based on selected category",
     ui: {
       loadingMessage: "Loading subcategories...",
@@ -142,7 +142,9 @@ const ticketSchema = createSchema([
   },
 ]);
 
-export function SupportTicketForm() {
+type TicketSchema = InferType<typeof ticketSchema>;
+
+export default function SupportTicketForm() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
@@ -154,7 +156,7 @@ export function SupportTicketForm() {
       <CardContent>
         <Form
           schema={ticketSchema}
-          onSubmit={async (data) => {
+          onSubmit={async (data: TicketSchema) => {
             await new Promise((resolve) => setTimeout(resolve, 1000));
             toast("Ticket Submitted!", {
               description: (

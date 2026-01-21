@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { createSchema } from "@buildnbuzz/buzzform";
+import { createSchema, InferType } from "@buildnbuzz/buzzform";
 import {
   Form,
   FormContent,
@@ -9,7 +9,7 @@ import {
   FormSubmit,
   FormReset,
   FormActions,
-} from "@/components/buzzform/form";
+} from "@/registry/base/form";
 import {
   Card,
   CardContent,
@@ -56,8 +56,10 @@ const contactSchema = createSchema([
   },
 ]);
 
-export function ContactFormExample() {
-  const handleSubmit = async (data: Record<string, unknown>) => {
+type ContactSchema = InferType<typeof contactSchema>;
+
+export default function ContactFormExample() {
+  const handleSubmit = async (data: ContactSchema) => {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
     toast("Message sent!", {
