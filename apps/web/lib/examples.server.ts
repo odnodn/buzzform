@@ -4,132 +4,31 @@ import path from "path";
 import { getExampleBySlug, type Example } from "./examples";
 
 /**
- * Extract a specific component and its dependencies from a TypeScript file.
- * This extracts:
- * - The "use client" directive if present
- * - Necessary imports
- * - The schema definition used by the component
- * - The component function itself
- */
-function extractComponentCode(fileContent: string, componentName: string): string {
-    const lines = fileContent.split('\n');
-    const result: string[] = [];
-
-    // 1. Add "use client" if present
-    if (lines[0]?.trim() === '"use client";') {
-        result.push('"use client";', '');
-    }
-
-    // 2. Extract imports (everything from start until first non-import line after imports)
-    const importLines: string[] = [];
-    let inImportSection = false;
-    for (const line of lines) {
-        const trimmed = line.trim();
-        if (trimmed.startsWith('import ')) {
-            inImportSection = true;
-            importLines.push(line);
-        } else if (inImportSection && trimmed === '') {
-            // Empty line after imports - continue collecting
-            importLines.push(line);
-        } else if (inImportSection && !trimmed.startsWith('import ')) {
-            // End of import section
-            break;
-        }
-    }
-    result.push(...importLines);
-    if (importLines.length > 0) {
-        result.push('');
-    }
-
-    // 3. Find the schema variable used by this component
-    // Look for pattern: schema={schemaName} in the component
-    const componentStartIndex = fileContent.indexOf(`export function ${componentName}`);
-    if (componentStartIndex === -1) {
-        // Component not found, return entire file as fallback
-        return fileContent;
-    }
-
-    const componentSection = fileContent.substring(componentStartIndex);
-    const schemaMatch = componentSection.match(/schema=\{(\w+)\}/);
-
-    if (schemaMatch) {
-        const schemaName = schemaMatch[1];
-
-        // Find the schema definition
-        const schemaRegex = new RegExp(`const ${schemaName} = createSchema\\([\\s\\S]*?\\]\\);`, 'm');
-        const schemaDefinition = fileContent.match(schemaRegex);
-
-        if (schemaDefinition) {
-            result.push(schemaDefinition[0], '');
-        }
-    }
-
-    // 4. Extract the component function
-    // Find the start of the component
-    const componentRegex = new RegExp(
-        `export function ${componentName}\\([^)]*\\)[^{]*\\{`,
-        's'
-    );
-    const componentMatch = fileContent.match(componentRegex);
-
-    if (!componentMatch) {
-        // Fallback to entire file if we can't parse
-        return fileContent;
-    }
-
-    // Find matching closing brace
-    let braceCount = 0;
-    let componentCode = '';
-    let started = false;
-
-    for (let i = componentStartIndex; i < fileContent.length; i++) {
-        const char = fileContent[i];
-        componentCode += char;
-
-        if (char === '{') {
-            braceCount++;
-            started = true;
-        } else if (char === '}') {
-            braceCount--;
-            if (started && braceCount === 0) {
-                break;
-            }
-        }
-    }
-
-    result.push(componentCode);
-
-    return result.join('\n');
-}
-
-/**
- * Read example source code from the filesystem and extract the specific component.
+ * Read example source code from the filesystem.
  * This is designed to be called from RSC (server components) directly.
  * 
  * @server-only - This file uses Node.js fs module and can only be used server-side.
  */
 export async function getExampleCode(
     filename: string,
-    componentName?: string
+    // ID is no longer needed but kept for signature compatibility if desired, 
+    // though we can remove it if we update callsites. 
+    // In this refactor, we ignore it as files are 1:1.
+    _componentId?: string
 ): Promise<{ content: string | null; error: string | null }> {
-    // Try multiple possible paths to handle different CWDs (monorepo root vs app root)
+    // Path to the new registry location
     const possiblePaths = [
         // If CWD is apps/web
-        path.join(process.cwd(), "components/examples", filename),
+        path.join(process.cwd(), "registry/base/examples", filename),
         // If CWD is monorepo root
-        path.join(process.cwd(), "apps/web/components/examples", filename),
+        path.join(process.cwd(), "apps/web/registry/base/examples", filename),
     ];
 
     for (const filePath of possiblePaths) {
         try {
             const fileContent = await fs.readFile(filePath, "utf-8");
-
-            // If a component name is provided, extract just that component
-            const content = componentName
-                ? extractComponentCode(fileContent, componentName)
-                : fileContent;
-
-            return { content, error: null };
+            const transformedContent = transformIconPlaceholder(fileContent);
+            return { content: transformedContent, error: null };
         } catch {
             // Continue to next path
         }
@@ -139,6 +38,89 @@ export async function getExampleCode(
         content: null,
         error: `Could not find file ${filename}`,
     };
+}
+
+/**
+ * Transforms IconPlaceholder components into direct Hugeicons imports.
+ * This is used for the "View Code" feature to show cleaner code to users.
+ */
+function transformIconPlaceholder(content: string): string {
+    // 1. Find all IconPlaceholder usages and extract metadata
+    const iconMatches = Array.from(content.matchAll(/<IconPlaceholder[\s\S]*?\/>/g));
+    const usedIcons = new Set<string>();
+
+    let transformed = content;
+
+    // 2. Replace each usage with the actual icon component
+    for (const match of iconMatches) {
+        const fullTag = match[0];
+
+        // Extract hugeicons name
+        const nameMatch = fullTag.match(/hugeicons="([^"]+)"/);
+        const iconName = nameMatch?.[1];
+
+        // Extract className (optional)
+        const classMatch = fullTag.match(/className="([^"]+)"/);
+        const className = classMatch?.[1];
+
+        if (iconName) {
+            usedIcons.add(iconName);
+
+            // Reconstruct as HugeiconsIcon wrapper: <HugeiconsIcon icon={IconName} className="..." />
+            let replacement = `<HugeiconsIcon icon={${iconName}}`;
+            if (className) {
+                replacement += ` className="${className}"`;
+            }
+            replacement += " />";
+
+            transformed = transformed.replace(fullTag, replacement);
+        }
+    }
+
+    // 3. Remove IconPlaceholder import
+    transformed = transformed.replace(
+        /import\s*{\s*IconPlaceholder\s*}\s*from\s*"@\/components\/icon-placeholder";\s*/,
+        ""
+    );
+
+    // 4. Add Hugeicons imports if icons were found
+    if (usedIcons.size > 0) {
+        const sortedIcons = Array.from(usedIcons).sort().join(", ");
+
+        // We need two imports: one for icons, one for the wrapper
+        const importsToAdd = [
+            `import { ${sortedIcons} } from "@hugeicons/core-free-icons";`,
+            `import { HugeiconsIcon } from "@hugeicons/react";`
+        ].join("\n");
+
+        // Try to insert after the last import
+        const lastImportRegex = /import.*?from.*?;/g;
+        let lastImportMatch;
+        let match;
+        while ((match = lastImportRegex.exec(transformed)) !== null) {
+            lastImportMatch = match;
+        }
+
+        if (lastImportMatch) {
+            const insertIndex = lastImportMatch.index + lastImportMatch[0].length;
+            transformed =
+                transformed.slice(0, insertIndex) +
+                "\n" + importsToAdd +
+                transformed.slice(insertIndex);
+        } else {
+            // No imports found? Add after "use client" or at top
+            if (transformed.includes('"use client";')) {
+                transformed = transformed.replace('"use client";', '"use client";\n\n' + importsToAdd);
+            } else {
+                transformed = importsToAdd + "\n\n" + transformed;
+            }
+        }
+    }
+
+    // Cleanup extra newlines that might have resulted from removing imports
+    transformed = transformed.replace(/\n\s*\n\s*\n/g, "\n\n");
+
+    return transformed;
 }
 
 /**

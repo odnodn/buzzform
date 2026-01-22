@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { createSchema } from "@buildnbuzz/buzzform";
+import { createSchema, InferType } from "@buildnbuzz/buzzform";
 import {
   Form,
   FormContent,
   FormFields,
   FormSubmit,
-} from "@/components/buzzform/form";
+} from "@/registry/base/form";
 import {
   Popover,
   PopoverContent,
@@ -38,10 +38,12 @@ const quickAddSchema = createSchema([
   },
 ]);
 
-export function QuickAddPopover() {
+type QuickAddSchema = InferType<typeof quickAddSchema>;
+
+export default function QuickAddPopover() {
   const [open, setOpen] = useState(false);
 
-  const handleSubmit = async (data: Record<string, unknown>) => {
+  const handleSubmit = async (data: QuickAddSchema) => {
     await new Promise((resolve) => setTimeout(resolve, 500));
     toast("Task added!", {
       description: (

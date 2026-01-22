@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { createSchema } from "@buildnbuzz/buzzform";
+import { createSchema, InferType } from "@buildnbuzz/buzzform";
 import {
   Form,
   FormContent,
@@ -10,7 +10,7 @@ import {
   FormSubmit,
   FormReset,
   FormActions,
-} from "@/components/buzzform/form";
+} from "@/registry/base/form";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -58,14 +58,16 @@ const feedbackSchema = createSchema([
     name: "email",
     label: "Email (optional)",
     placeholder: "your@email.com",
-    condition: (data: Record<string, unknown>) => data.canContact === true,
+    condition: (data: { canContact?: boolean }) => data.canContact === true,
   },
 ]);
 
-export function FeedbackSheetExample() {
+type FeedbackSchema = InferType<typeof feedbackSchema>;
+
+export default function FeedbackSheetExample() {
   const [open, setOpen] = useState(false);
 
-  const handleSubmit = async (data: Record<string, unknown>) => {
+  const handleSubmit = async (data: FeedbackSchema) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     toast("Thank you!", {
       description: (

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "gallery-upload-form",
+  "title": "Gallery Upload Form",
+  "description": "Upload multiple images for a gallery.",
+  "dependencies": [
+    "sonner"
+  ],
+  "registryDependencies": [
+    "@buzzform/init",
+    "@buzzform/rhf-provider",
+    "@buzzform/upload",
+    "@buzzform/text",
+    "@buzzform/textarea",
+    "card"
+  ],
+  "files": [
+    {
+      "path": "registry/base/examples/gallery-upload-form.tsx",
+      "content": "\"use client\";\r\n\r\nimport { createSchema, InferType } from \"@buildnbuzz/buzzform\";\r\nimport { toast } from \"sonner\";\r\nimport {\r\n  Card,\r\n  CardContent,\r\n  CardDescription,\r\n  CardHeader,\r\n  CardTitle,\r\n} from \"@/components/ui/card\";\r\nimport {\r\n  Form,\r\n  FormContent,\r\n  FormFields,\r\n  FormSubmit,\r\n} from \"@/registry/base/form\";\r\n\r\nconst gallerySchema = createSchema([\r\n  {\r\n    type: \"upload\",\r\n    name: \"images\",\r\n    label: \"Product Images\",\r\n    description: \"Upload up to 6 product images\",\r\n    hasMany: true,\r\n    maxFiles: 6,\r\n    ui: {\r\n      variant: \"gallery\",\r\n      accept: \"image/*\",\r\n      shape: \"rounded\",\r\n      showProgress: true,\r\n    },\r\n  },\r\n]);\r\n\r\ntype GallerySchema = InferType<typeof gallerySchema>;\r\n\r\nexport default function GalleryUploadForm() {\r\n  return (\r\n    <Card>\r\n      <CardHeader>\r\n        <CardTitle>Product Gallery</CardTitle>\r\n        <CardDescription>Multi-file upload with thumbnail grid</CardDescription>\r\n      </CardHeader>\r\n      <CardContent>\r\n        <Form\r\n          schema={gallerySchema}\r\n          onSubmit={async (data: GallerySchema) => {\r\n            console.log(\"Form data:\", data);\r\n            await new Promise((r) => setTimeout(r, 1000));\r\n            toast(\"Images saved!\", {\r\n              description: (\r\n                <div className=\"space-y-2\">\r\n                  <p className=\"text-[10px] text-muted-foreground\">\r\n                    Check the console for the full File objects.\r\n                  </p>\r\n                  <pre className=\"max-h-40 overflow-auto rounded-md bg-zinc-950 p-3 text-xs\">\r\n                    <code>{JSON.stringify(data, null, 2)}</code>\r\n                  </pre>\r\n                </div>\r\n              ),\r\n            });\r\n          }}\r\n        >\r\n          <FormContent>\r\n            <FormFields className=\"space-y-4\" />\r\n            <FormSubmit className=\"mt-6 w-full\">Save Images</FormSubmit>\r\n          </FormContent>\r\n        </Form>\r\n      </CardContent>\r\n    </Card>\r\n  );\r\n}\r\n",
+      "type": "registry:component",
+      "target": "components/buzzform/examples/gallery-upload-form.tsx"
+    }
+  ],
+  "type": "registry:block"
+}

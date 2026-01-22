@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { createSchema } from "@buildnbuzz/buzzform";
+import { createSchema, InferType } from "@buildnbuzz/buzzform";
 import {
   Form,
   FormContent,
@@ -9,7 +9,7 @@ import {
   FormSubmit,
   FormReset,
   FormActions,
-} from "@/components/buzzform/form";
+} from "@/registry/base/form";
 import {
   Card,
   CardContent,
@@ -148,8 +148,10 @@ const registrationSchema = createSchema([
   },
 ]);
 
+type RegistrationSchema = InferType<typeof registrationSchema>;
+
 export default function GroupFieldExample() {
-  const handleSubmit = async (data: Record<string, unknown>) => {
+  const handleSubmit = async (data: RegistrationSchema) => {
     await new Promise((r) => setTimeout(r, 1000));
     toast("Registration complete!", {
       description: (

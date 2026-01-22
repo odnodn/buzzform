@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { createSchema } from "@buildnbuzz/buzzform";
+import { createSchema, InferType } from "@buildnbuzz/buzzform";
 import {
   Form,
   FormContent,
@@ -9,7 +9,7 @@ import {
   FormSubmit,
   FormReset,
   FormActions,
-} from "@/components/buzzform/form";
+} from "@/registry/base/form";
 import {
   Card,
   CardContent,
@@ -67,8 +67,10 @@ const blogPostSchema = createSchema([
   },
 ]);
 
-export function BlogPostFormCard() {
-  const handleSubmit = async (data: Record<string, unknown>) => {
+type BlogPostSchema = InferType<typeof blogPostSchema>;
+
+export default function BlogPostFormCard() {
+  const handleSubmit = async (data: BlogPostSchema) => {
     await new Promise((resolve) => setTimeout(resolve, 500));
     toast("Post draft saved!", {
       description: (

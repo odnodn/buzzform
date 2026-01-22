@@ -1,13 +1,13 @@
 "use client";
 
 import { toast } from "sonner";
-import { createSchema } from "@buildnbuzz/buzzform";
+import { createSchema, InferType } from "@buildnbuzz/buzzform";
 import {
   Form,
   FormContent,
   FormFields,
   FormSubmit,
-} from "@/components/buzzform/form";
+} from "@/registry/base/form";
 import {
   Card,
   CardContent,
@@ -44,12 +44,15 @@ const notificationSettingsSchema = createSchema([
     label: "Weekly digest",
     description: "A summary of your activity sent every Monday",
     defaultValue: true,
-    disabled: (data) => !data.emailNotifications,
+    disabled: (data: { emailNotifications?: boolean }) =>
+      !data.emailNotifications,
   },
 ]);
 
-export function NotificationSettingsCard() {
-  const handleSubmit = async (data: Record<string, unknown>) => {
+type NotificationSettingsSchema = InferType<typeof notificationSettingsSchema>;
+
+export default function NotificationSettingsCard() {
+  const handleSubmit = async (data: NotificationSettingsSchema) => {
     await new Promise((resolve) => setTimeout(resolve, 500));
     toast("Settings saved!", {
       description: (

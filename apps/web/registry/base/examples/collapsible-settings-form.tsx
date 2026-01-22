@@ -1,6 +1,6 @@
 "use client";
 
-import { createSchema } from "@buildnbuzz/buzzform";
+import { createSchema, InferType } from "@buildnbuzz/buzzform";
 import { toast } from "sonner";
 import {
   Card,
@@ -14,7 +14,7 @@ import {
   FormContent,
   FormFields,
   FormSubmit,
-} from "@/components/buzzform/form";
+} from "@/registry/base/form";
 
 const settingsSchema = createSchema([
   {
@@ -72,7 +72,9 @@ const settingsSchema = createSchema([
   },
 ]);
 
-export function CollapsibleSettingsForm() {
+type SettingsSchema = InferType<typeof settingsSchema>;
+
+export default function CollapsibleSettingsForm() {
   return (
     <Card>
       <CardHeader>
@@ -84,7 +86,7 @@ export function CollapsibleSettingsForm() {
       <CardContent>
         <Form
           schema={settingsSchema}
-          onSubmit={async (data) => {
+          onSubmit={async (data: SettingsSchema) => {
             await new Promise((r) => setTimeout(r, 1000));
             toast("Settings saved!", {
               description: (

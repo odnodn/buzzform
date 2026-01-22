@@ -360,7 +360,16 @@
       "type": "registry:ui",
       "title": "Signup Form",
       "description": "A basic signup form using BuzzForm with standard fields like text, email, password, confirm password, select, and checkbox.",
-      "registryDependencies": ["@buzzform/starter"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/text",
+        "@buzzform/password",
+        "@buzzform/select",
+        "@buzzform/checkbox",
+        "card",
+        "button"
+      ],
       "files": [
         {
           "path": "components/examples/signup.tsx",
@@ -394,6 +403,563 @@
         "@buzzform/collapsible",
         "@buzzform/tabs",
         "@buzzform/array"
+      ]
+    },
+    {
+      "name": "login-form",
+      "type": "registry:block",
+      "title": "Login Form",
+      "description": "A standard login card with email and password.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/text",
+        "@buzzform/password",
+        "@buzzform/checkbox",
+        "card",
+        "button",
+        "input",
+        "checkbox"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/login-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/login-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "register-form",
+      "type": "registry:block",
+      "title": "Register Form",
+      "description": "Registration form inside a modal dialog.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/text",
+        "@buzzform/password",
+        "@buzzform/checkbox",
+        "dialog",
+        "button",
+        "input",
+        "checkbox"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/register-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/register-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "contact-form",
+      "type": "registry:block",
+      "title": "Contact Form",
+      "description": "A simple contact form with validation.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/text",
+        "@buzzform/textarea",
+        "card",
+        "button",
+        "input",
+        "textarea"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/contact-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/contact-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "newsletter-dialog",
+      "type": "registry:block",
+      "title": "Newsletter Subscription",
+      "description": "A newsletter subscription form in a dialog.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/text",
+        "@buzzform/checkbox",
+        "dialog",
+        "button",
+        "input",
+        "checkbox"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/newsletter-dialog.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/newsletter-dialog.tsx"
+        }
+      ]
+    },
+    {
+      "name": "feedback-sheet",
+      "type": "registry:block",
+      "title": "Feedback Sheet",
+      "description": "A slide-out sheet for gathering user feedback.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/text",
+        "@buzzform/textarea",
+        "@buzzform/checkbox",
+        "@buzzform/radio",
+        "sheet",
+        "button",
+        "input",
+        "textarea",
+        "checkbox"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/feedback-sheet.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/feedback-sheet.tsx"
+        }
+      ]
+    },
+    {
+      "name": "quick-add",
+      "type": "registry:block",
+      "title": "Quick Add Popover",
+      "description": "A small form for quickly adding items.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/text",
+        "@buzzform/select",
+        "@buzzform/number",
+        "popover",
+        "button",
+        "input",
+        "select"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/quick-add.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/quick-add.tsx"
+        }
+      ]
+    },
+    {
+      "name": "notification-settings",
+      "type": "registry:block",
+      "title": "Notification Settings",
+      "description": "Preferences for email and push notifications.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/switch",
+        "@buzzform/checkbox",
+        "@buzzform/radio",
+        "card",
+        "switch"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/notification-settings.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/notification-settings.tsx"
+        }
+      ]
+    },
+    {
+      "name": "product-form",
+      "type": "registry:block",
+      "title": "Product Form",
+      "description": "A form for creating or editing a product.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/text",
+        "@buzzform/number",
+        "@buzzform/select",
+        "@buzzform/textarea",
+        "@buzzform/switch",
+        "card",
+        "input"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/product-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/product-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "pricing-form",
+      "type": "registry:block",
+      "title": "Pricing Form",
+      "description": "A form for selecting pricing plans.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/radio",
+        "@buzzform/switch",
+        "card",
+        "radio-group"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/pricing-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/pricing-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "blog-post-form",
+      "type": "registry:block",
+      "title": "Blog Post Form",
+      "description": "A comprehensive form for writing blog posts.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/text",
+        "@buzzform/textarea",
+        "@buzzform/upload",
+        "@buzzform/select",
+        "@buzzform/tags",
+        "@buzzform/checkbox",
+        "card",
+        "input",
+        "textarea"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/blog-post-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/blog-post-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "booking-form",
+      "type": "registry:block",
+      "title": "Booking Form",
+      "description": "A multi-step booking wizard.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/date",
+        "@buzzform/select",
+        "@buzzform/textarea",
+        "@buzzform/text",
+        "@buzzform/number",
+        "card",
+        "calendar",
+        "popover",
+        "select",
+        "textarea"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/booking-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/booking-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "support-ticket-form",
+      "type": "registry:block",
+      "title": "Support Ticket Form",
+      "description": "A detailed form for submitting support requests.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/select",
+        "@buzzform/text",
+        "@buzzform/textarea",
+        "@buzzform/upload",
+        "card",
+        "select"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/support-ticket-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/support-ticket-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "contact-layout-form",
+      "type": "registry:block",
+      "title": "Contact Layout Form",
+      "description": "Contact form with a sidebar layout.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/text",
+        "@buzzform/textarea",
+        "@buzzform/select",
+        "card",
+        "input"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/contact-layout-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/contact-layout-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "coupon-layout-form",
+      "type": "registry:block",
+      "title": "Coupon Layout Form",
+      "description": "Coupon creation form with a sidebar layout.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/text",
+        "@buzzform/number",
+        "@buzzform/date",
+        "@buzzform/checkbox",
+        "@buzzform/select",
+        "card",
+        "input",
+        "checkbox"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/coupon-layout-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/coupon-layout-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "profile-upload-form",
+      "type": "registry:block",
+      "title": "Profile Upload Form",
+      "description": "Upload profile picture and details.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/upload",
+        "@buzzform/text",
+        "@buzzform/textarea",
+        "card",
+        "input"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/profile-upload-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/profile-upload-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "document-upload-form",
+      "type": "registry:block",
+      "title": "Document Upload Form",
+      "description": "Upload documents with progress tracking.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/upload",
+        "@buzzform/textarea",
+        "card",
+        "textarea"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/document-upload-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/document-upload-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "gallery-upload-form",
+      "type": "registry:block",
+      "title": "Gallery Upload Form",
+      "description": "Upload multiple images for a gallery.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/upload",
+        "@buzzform/text",
+        "@buzzform/textarea",
+        "card"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/gallery-upload-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/gallery-upload-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "account-settings-form",
+      "type": "registry:block",
+      "title": "Account Settings Form",
+      "description": "Tabbed account settings.",
+      "dependencies": [
+        "sonner",
+        "@hugeicons/react",
+        "@hugeicons/core-free-icons"
+      ],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/tabs",
+        "@buzzform/text",
+        "@buzzform/textarea",
+        "@buzzform/switch",
+        "@buzzform/select",
+        "@buzzform/upload",
+        "card",
+        "tabs",
+        "input",
+        "textarea",
+        "switch",
+        "select"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/account-settings-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/account-settings-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "checkout-form",
+      "type": "registry:block",
+      "title": "Checkout Form",
+      "description": "A multi-step checkout process.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/tabs",
+        "@buzzform/text",
+        "@buzzform/select",
+        "@buzzform/radio",
+        "@buzzform/checkbox",
+        "@buzzform/date",
+        "card",
+        "tabs",
+        "input",
+        "select"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/checkout-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/checkout-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "array-field-form",
+      "type": "registry:block",
+      "title": "Array Field Form",
+      "description": "Dynamic list management using ArrayField.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/array",
+        "@buzzform/text",
+        "@buzzform/select",
+        "@buzzform/number",
+        "@buzzform/textarea",
+        "card",
+        "input",
+        "textarea",
+        "select"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/array-field-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/array-field-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "group-field-form",
+      "type": "registry:block",
+      "title": "Group Field Form",
+      "description": "Demonstrates nested fields using GroupField.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/group",
+        "@buzzform/text",
+        "@buzzform/checkbox",
+        "@buzzform/select",
+        "card",
+        "input",
+        "checkbox"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/group-field-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/group-field-form.tsx"
+        }
+      ]
+    },
+    {
+      "name": "collapsible-settings-form",
+      "type": "registry:block",
+      "title": "Collapsible Settings Form",
+      "description": "Settings organized in collapsible sections.",
+      "dependencies": ["sonner"],
+      "registryDependencies": [
+        "@buzzform/init",
+        "@buzzform/rhf-provider",
+        "@buzzform/collapsible",
+        "@buzzform/switch",
+        "@buzzform/text",
+        "@buzzform/select",
+        "@buzzform/checkbox",
+        "card",
+        "input",
+        "switch",
+        "select",
+        "checkbox"
+      ],
+      "files": [
+        {
+          "path": "registry/base/examples/collapsible-settings-form.tsx",
+          "type": "registry:component",
+          "target": "components/buzzform/examples/collapsible-settings-form.tsx"
+        }
       ]
     }
   ]

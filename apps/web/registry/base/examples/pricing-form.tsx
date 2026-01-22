@@ -1,13 +1,13 @@
 "use client";
 
 import { toast } from "sonner";
-import { createSchema } from "@buildnbuzz/buzzform";
+import { createSchema, InferType } from "@buildnbuzz/buzzform";
 import {
   Form,
   FormContent,
   FormFields,
   FormSubmit,
-} from "@/components/buzzform/form";
+} from "@/registry/base/form";
 import {
   Card,
   CardContent,
@@ -56,8 +56,10 @@ const pricingSchema = createSchema([
   },
 ]);
 
-export function PricingFormCard() {
-  const handleSubmit = async (data: Record<string, unknown>) => {
+type PricingSchema = InferType<typeof pricingSchema>;
+
+export default function PricingFormCard() {
+  const handleSubmit = async (data: PricingSchema) => {
     await new Promise((resolve) => setTimeout(resolve, 500));
     toast("Plan selected!", {
       description: (
