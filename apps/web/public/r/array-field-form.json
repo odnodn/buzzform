@@ -7,7 +7,13 @@
     "sonner"
   ],
   "registryDependencies": [
-    "@buzzform/starter",
+    "@buzzform/init",
+    "@buzzform/rhf-provider",
+    "@buzzform/array",
+    "@buzzform/text",
+    "@buzzform/select",
+    "@buzzform/number",
+    "@buzzform/textarea",
     "card",
     "input",
     "textarea",

@@ -7,7 +7,11 @@
     "sonner"
   ],
   "registryDependencies": [
-    "@buzzform/starter",
+    "@buzzform/init",
+    "@buzzform/rhf-provider",
+    "@buzzform/text",
+    "@buzzform/password",
+    "@buzzform/checkbox",
     "dialog",
     "button",
     "input",

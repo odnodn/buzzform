@@ -9,7 +9,14 @@
     "@hugeicons/core-free-icons"
   ],
   "registryDependencies": [
-    "@buzzform/starter",
+    "@buzzform/init",
+    "@buzzform/rhf-provider",
+    "@buzzform/tabs",
+    "@buzzform/text",
+    "@buzzform/textarea",
+    "@buzzform/switch",
+    "@buzzform/select",
+    "@buzzform/upload",
     "card",
     "tabs",
     "input",

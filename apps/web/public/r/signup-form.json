@@ -4,7 +4,14 @@
   "title": "Signup Form",
   "description": "A basic signup form using BuzzForm with standard fields like text, email, password, confirm password, select, and checkbox.",
   "registryDependencies": [
-    "@buzzform/starter"
+    "@buzzform/init",
+    "@buzzform/rhf-provider",
+    "@buzzform/text",
+    "@buzzform/password",
+    "@buzzform/select",
+    "@buzzform/checkbox",
+    "card",
+    "button"
   ],
   "files": [
     {
