@@ -3,6 +3,7 @@
 import * as React from "react";
 import * as Examples from "@/components/examples";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,8 @@ import { CodeIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import type { Example } from "@/lib/examples";
+import { toast } from "sonner";
+import { Check, Terminal } from "lucide-react";
 
 interface ExampleViewerProps {
   example: Example;
@@ -33,12 +36,15 @@ export function ExampleViewer({ example, code }: ExampleViewerProps) {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 max-w-7xl mx-auto w-full">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex flex-col gap-2">
           <h2 className="text-2xl font-bold tracking-tight">{example.name}</h2>
           <p className="text-muted-foreground">{example.description}</p>
         </div>
-        <CodeDialog code={code} exampleName={example.name} />
+        <div className="flex items-center gap-2">
+          <InstallCommand slug={example.slug} />
+          <CodeDialog code={code} exampleName={example.name} />
+        </div>
       </div>
       <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm bg-background/50 backdrop-blur-[2px] p-4 md:p-8 lg:p-12 min-h-100 md:min-h-125">
         <div className="w-full max-w-3xl mx-auto flex flex-col items-center justify-center [&>div]:w-full">
@@ -46,6 +52,41 @@ export function ExampleViewer({ example, code }: ExampleViewerProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+function InstallCommand({ slug }: { slug: string }) {
+  const [hasCopied, setHasCopied] = React.useState(false);
+
+  React.useEffect(() => {
+    if (hasCopied) {
+      const timeout = setTimeout(() => setHasCopied(false), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [hasCopied]);
+
+  const command = `npx shadcn add https://form.buildnbuzz.com/r/${slug}.json`;
+
+  const onCopy = () => {
+    navigator.clipboard.writeText(command);
+    setHasCopied(true);
+    toast.success("Command copied to clipboard");
+  };
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      className="hidden gap-2 font-mono text-xs md:flex"
+      onClick={onCopy}
+    >
+      {hasCopied ? (
+        <Check className="h-3.5 w-3.5" />
+      ) : (
+        <Terminal className="h-3.5 w-3.5" />
+      )}
+      {command}
+    </Button>
   );
 }
 
@@ -74,11 +115,13 @@ function CodeDialog({ code, exampleName }: CodeDialogProps) {
           <DialogTitle>Component Code</DialogTitle>
           <DialogDescription>Source code for {exampleName}</DialogDescription>
         </DialogHeader>
-        <div className="bg-muted">
+        <div className="flex-1 overflow-hidden bg-muted">
           {code ? (
-            <div className="text-sm p-4">
-              <DynamicCodeBlock lang="tsx" code={code} />
-            </div>
+            <ScrollArea className="h-full">
+              <div className="p-4 text-sm">
+                <DynamicCodeBlock lang="tsx" code={code} />
+              </div>
+            </ScrollArea>
           ) : (
             <div className="p-8 text-center text-muted-foreground">
               No code available
