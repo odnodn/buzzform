@@ -6,12 +6,14 @@ import { useBuilderStore } from "../lib/store";
 import { Container } from "./container";
 import { useDroppable } from "@dnd-kit/core";
 import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { isContainerType } from "../lib/types";
+import { useBuilderFormContext } from "./builder-form-context";
+import { FieldRenderer } from "@/registry/base/fields/render";
 
 export function NodeRenderer({ id }: { id: string }) {
   const node = useBuilderStore((s) => s.nodes[id]);
+  const { form, mode } = useBuilderFormContext();
 
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
@@ -19,7 +21,7 @@ export function NodeRenderer({ id }: { id: string }) {
   const { setNodeRef: setDropRef } = useDroppable({
     id: id + "-dropzone",
     data: {
-      type: node?.type,
+      type: node?.field.type,
     },
   });
 
@@ -30,7 +32,12 @@ export function NodeRenderer({ id }: { id: string }) {
     transition,
   };
 
-  const isContainer = node.type === "group" || node.type === "row";
+  const fieldType = node.field.type;
+  const isContainer = isContainerType(fieldType);
+  const isEditMode = mode === "edit";
+
+  // Compute path for the field
+  const path = "name" in node.field ? node.field.name : id;
 
   return (
     <div
@@ -48,10 +55,6 @@ export function NodeRenderer({ id }: { id: string }) {
         )}
       >
         <div className="flex flex-col gap-3">
-          <Label className="uppercase text-xs text-muted-foreground font-semibold tracking-wider">
-            {node.type}
-          </Label>
-
           {isContainer && (
             <div
               ref={setDropRef}
@@ -74,11 +77,21 @@ export function NodeRenderer({ id }: { id: string }) {
           )}
 
           {!isContainer && (
-            <Input
-              readOnly
-              placeholder={`Enter ${node.type}...`}
-              className="cursor-pointer"
-            />
+            <div className={cn(isEditMode && "pointer-events-none")}>
+              <FieldRenderer
+                field={
+                  isEditMode && "name" in node.field
+                    ? ({
+                        ...node.field,
+                        disabled: true,
+                        readOnly: true,
+                      } as typeof node.field)
+                    : node.field
+                }
+                path={path}
+                form={form}
+              />
+            </div>
           )}
         </div>
       </Card>

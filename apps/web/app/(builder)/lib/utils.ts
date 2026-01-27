@@ -1,4 +1,5 @@
-import { Node } from "./types";
+import type { Node, FieldType } from "./types";
+import { isContainerType } from "./types";
 
 export function getDropLocation(
     nodes: Record<string, Node>,
@@ -6,7 +7,6 @@ export function getDropLocation(
     overId: string,
     position: "before" | "after" | "inside"
 ) {
-    // Root drop
     if (overId === "root") {
         return {
             parentId: null,
@@ -17,18 +17,13 @@ export function getDropLocation(
     const overNode = nodes[overId];
     if (!overNode) return null;
 
-    // Inside container
-    if (
-        position === "inside" &&
-        (overNode.type === "group" || overNode.type === "row")
-    ) {
+    if (position === "inside" && isContainerType(overNode.field.type)) {
         return {
             parentId: overId,
             index: overNode.children.length,
         };
     }
 
-    // Before / after node
     const parentId = overNode.parentId;
     const siblings =
         parentId === null ? rootIds : nodes[parentId].children;
@@ -42,16 +37,15 @@ export function getDropLocation(
 }
 
 export function canDrop(
-    parentType: string | null,
-    childType: string | undefined
+    parentType: FieldType | null,
+    childType: FieldType | undefined
 ) {
     if (!childType) return false;
 
-    // root always ok
     if (parentType === null) return true;
 
     if (parentType === "row") {
-        return childType !== "group" && childType !== "row";
+        return !isContainerType(childType);
     }
 
     if (parentType === "group") {

@@ -1,44 +1,83 @@
 "use client";
 
 import { useDraggable } from "@dnd-kit/core";
-import { NodeType } from "../lib/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import type { FieldType } from "../lib/types";
+import { getSidebarGroups } from "../lib/registry";
+import {
+  Sidebar as ShadcnSidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from "@/components/ui/sidebar";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 
-const items: { type: NodeType; label: string }[] = [
-  { type: "text", label: "Text" },
-  { type: "email", label: "Email" },
-  { type: "password", label: "Password" },
-  { type: "group", label: "Group" },
-  { type: "row", label: "Row" },
-];
+const CATEGORY_LABELS: Record<string, string> = {
+  inputs: "Inputs",
+  selection: "Selection",
+  layout: "Layout",
+};
 
 export function Sidebar() {
+  const groups = getSidebarGroups();
+
   return (
-    <Card className="w-62.5 h-full">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium">Components</CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-2">
-        {items.map((item) => (
-          <SidebarItem key={item.type} {...item} />
+    <ShadcnSidebar>
+      <SidebarContent className="pt-14">
+        {Object.entries(groups).map(([category, items]) => (
+          <SidebarGroup key={category}>
+            <SidebarGroupLabel>
+              {CATEGORY_LABELS[category] ?? category}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {items.map((item) => (
+                  <DraggableSidebarItem
+                    key={item.type}
+                    type={item.type as FieldType}
+                    label={item.label}
+                    icon={item.icon}
+                  />
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         ))}
-      </CardContent>
-    </Card>
+      </SidebarContent>
+      <SidebarRail />
+    </ShadcnSidebar>
   );
 }
 
-function SidebarItem({ type, label }: { type: NodeType; label: string }) {
+function DraggableSidebarItem({
+  type,
+  label,
+  icon,
+}: {
+  type: FieldType;
+  label: string;
+  icon: IconSvgElement;
+}) {
   const { attributes, listeners, setNodeRef } = useDraggable({
     id: `sidebar-${type}`,
     data: { from: "sidebar", type },
   });
 
   return (
-    <div ref={setNodeRef} {...listeners} {...attributes}>
-      <Button variant="outline" className="w-full justify-start cursor-grab">
-        {label}
-      </Button>
-    </div>
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        ref={setNodeRef}
+        {...listeners}
+        {...attributes}
+        className="cursor-grab"
+      >
+        <HugeiconsIcon icon={icon} />
+        <span>{label}</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   );
 }

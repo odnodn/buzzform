@@ -1,14 +1,18 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { nanoid } from 'nanoid';
-import { Node, NodeType } from './types';
+import type { Node, FieldType } from './types';
+import { builderFieldRegistry } from './registry';
 
 type Store = {
     nodes: Record<string, Node>;
     rootIds: string[];
+    selectedId: string | null;
 
-    createNode: (type: NodeType, parentId: string | null, index?: number) => void;
+    createNode: (type: FieldType, parentId: string | null, index?: number) => void;
     moveNode: (id: string, newParentId: string | null, index: number) => void;
+    selectNode: (id: string | null) => void;
+    removeNode: (id: string) => void;
     dropIndicator: {
         parentId: string | null;
         index: number;
@@ -21,14 +25,23 @@ export const useBuilderStore = create<Store>()(
     immer((set) => ({
         nodes: {},
         rootIds: [],
+        selectedId: null,
 
         createNode: (type, parentId, index = 0) => {
             const id = nanoid();
+            const entry = builderFieldRegistry[type];
+            if (!entry) return;
+
+            const name = `${type}_${id.slice(0, 4)}`;
 
             set(state => {
+                const fieldProps = entry.kind === 'data'
+                    ? { ...entry.defaultProps, name }
+                    : { ...entry.defaultProps };
+
                 state.nodes[id] = {
                     id,
-                    type,
+                    field: fieldProps as Node['field'],
                     parentId,
                     children: [],
                 };
@@ -38,6 +51,8 @@ export const useBuilderStore = create<Store>()(
                 } else {
                     state.nodes[parentId].children.splice(index, 0, id);
                 }
+
+                state.selectedId = id;
             });
         },
 
@@ -66,6 +81,35 @@ export const useBuilderStore = create<Store>()(
                 newList.splice(index, 0, id);
             });
         },
+
+        selectNode: (id) => set({ selectedId: id }),
+
+        removeNode: (id) => {
+            set(state => {
+                const node = state.nodes[id];
+                if (!node) return;
+
+                const removeRecursive = (nodeId: string) => {
+                    const n = state.nodes[nodeId];
+                    if (n) {
+                        n.children.forEach(removeRecursive);
+                        delete state.nodes[nodeId];
+                    }
+                };
+
+                const parentId = node.parentId;
+                const list = parentId === null ? state.rootIds : state.nodes[parentId].children;
+                const idx = list.indexOf(id);
+                if (idx !== -1) list.splice(idx, 1);
+
+                removeRecursive(id);
+
+                if (state.selectedId === id) {
+                    state.selectedId = null;
+                }
+            });
+        },
+
         dropIndicator: null,
         setDropIndicator: (value) => set({ dropIndicator: value }),
     }))

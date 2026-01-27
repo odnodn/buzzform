@@ -22,6 +22,11 @@ import {
   isDescendant,
   isInsideContainerPadding,
 } from "../lib/utils";
+import { builderFieldRegistry } from "../lib/registry";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Add01Icon, Move01Icon, TextIcon } from "@hugeicons/core-free-icons";
+import { cn } from "@/lib/utils";
+import { isContainerType } from "../lib/types";
 
 function customCollisionDetection(args: Parameters<CollisionDetection>[0]) {
   // First: prefer items directly under pointer
@@ -50,6 +55,7 @@ export function BuilderDndProvider({
       },
     }),
   );
+
   function handleDragStart(event: DragStartEvent) {
     setActiveId(event.active.id as string);
   }
@@ -66,7 +72,8 @@ export function BuilderDndProvider({
     const activeId = active.id as string;
 
     // Sidebar items don't exist in nodes yet
-    const activeType = active.data.current?.type ?? nodes[activeId]?.type;
+    const activeType =
+      active.data.current?.type ?? nodes[activeId]?.field?.type;
 
     // -----------------------------
     // Clean ID for DropZone
@@ -118,8 +125,9 @@ export function BuilderDndProvider({
       position = "inside";
     } else {
       const overNode = nodes[overId];
+      const overType = overNode?.field?.type;
 
-      if (overNode && (overNode.type === "group" || overNode.type === "row")) {
+      if (overType && isContainerType(overType)) {
         const paddingEl = overElement.querySelector(
           "[data-container-padding]",
         ) as HTMLElement | null;
@@ -141,7 +149,7 @@ export function BuilderDndProvider({
     }
 
     const { parentId } = location;
-    const parentType = parentId ? nodes[parentId]?.type : null;
+    const parentType = parentId ? (nodes[parentId]?.field?.type ?? null) : null;
 
     // -----------------------------
     // 4️⃣ Drop rules (canDrop)
@@ -244,26 +252,71 @@ export function BuilderDndProvider({
       }}
     >
       {children}
-      <DragOverlay>
+      <DragOverlay dropAnimation={null}>
         {activeId ? <DragOverlayItem id={activeId} /> : null}
       </DragOverlay>
     </DndContext>
   );
 }
 
-import { Card } from "@/components/ui/card";
-
 function DragOverlayItem({ id }: { id: string }) {
   const store = useBuilderStore();
   const node = store.nodes[id];
 
-  const type = node?.type ?? "field";
+  // Determine if this is a sidebar drag (new field) or canvas drag (existing field)
+  const isFromSidebar = id.startsWith("sidebar-");
+  const type = isFromSidebar ? id.replace("sidebar-", "") : node?.field?.type;
+  const entry = type
+    ? builderFieldRegistry[type as keyof typeof builderFieldRegistry]
+    : null;
+
+  const icon = entry?.sidebar?.icon ?? TextIcon;
+  const label = entry?.sidebar?.label ?? type ?? "Field";
+
+  // Get field name for existing fields
+  let fieldName: string | undefined;
+  if (!isFromSidebar && node && "name" in node.field) {
+    fieldName = node.field.name;
+  }
 
   return (
-    <Card className="p-4 cursor-grabbing shadow-xl opacity-90 w-[300px]">
-      <div className="uppercase text-xs text-muted-foreground font-semibold tracking-wider">
-        {type}
+    <div
+      className={cn(
+        "bg-card/95 backdrop-blur-md border-2 shadow-2xl rounded-xl p-3 min-w-52",
+        "cursor-grabbing animate-in fade-in-0 zoom-in-95 duration-150",
+        isFromSidebar
+          ? "border-primary/50 shadow-primary/10"
+          : "border-border shadow-black/10",
+      )}
+    >
+      <div className="flex items-center gap-3">
+        {/* Icon container */}
+        <div
+          className={cn(
+            "p-2.5 rounded-lg",
+            isFromSidebar
+              ? "bg-primary/15 text-primary"
+              : "bg-muted text-foreground",
+          )}
+        >
+          <HugeiconsIcon icon={icon} size={20} strokeWidth={1.5} />
+        </div>
+
+        {/* Text content */}
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-semibold text-foreground truncate">
+            {isFromSidebar ? `New ${label}` : (fieldName ?? label)}
+          </div>
+          <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <HugeiconsIcon
+              icon={isFromSidebar ? Add01Icon : Move01Icon}
+              size={10}
+              strokeWidth={2}
+            />
+            <span>{isFromSidebar ? "Adding new field" : "Moving field"}</span>
+          </div>
+        </div>
       </div>
-    </Card>
+    </div>
   );
 }
