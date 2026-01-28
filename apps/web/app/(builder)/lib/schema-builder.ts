@@ -19,6 +19,16 @@ function nodeToField(nodes: Record<string, Node>, id: string): Field | null {
 
     const { field, children } = node;
 
+    // Reorder properties for better readability
+    const { type, name, label, ...rest } = field as unknown as Record<string, unknown>;
+
+    const orderedField = {
+        type,
+        ...(name ? { name } : {}),
+        ...(label ? { label } : {}),
+        ...rest,
+    };
+
     // For container fields, recursively convert children
     if (isContainerType(field.type) && children.length > 0) {
         const nestedFields = children
@@ -28,13 +38,13 @@ function nodeToField(nodes: Record<string, Node>, id: string): Field | null {
         // Attach nested fields to the container
         if ('fields' in field) {
             return {
-                ...field,
+                ...orderedField,
                 fields: nestedFields,
             } as Field;
         }
     }
 
-    return field;
+    return orderedField as Field;
 }
 
 /**

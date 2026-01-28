@@ -1,7 +1,7 @@
 import type { Field, FieldType, DataField } from '@buildnbuzz/buzzform';
 import type { IconSvgElement } from '@hugeicons/react';
 import type { ComponentType } from 'react';
-import type { FieldRendererComponentProps } from '@/registry/base/fields/render';
+
 
 export type Node = {
     id: string;
@@ -28,11 +28,17 @@ export type BuilderFieldSidebar = {
     category: SidebarCategory;
 };
 
+export interface BuilderNodeRendererProps {
+    id: string;
+    field: Field;
+    childrenIds: string[];
+}
+
 export type BuilderFieldRegistryEntry<T extends Field = Field> = {
     kind: 'data' | 'layout';
     sidebar: BuilderFieldSidebar;
     defaultProps: Omit<T, 'name'> & { name?: string };
-    renderer?: ComponentType<FieldRendererComponentProps>;
+    renderer?: ComponentType<BuilderNodeRendererProps>;
     accepts?: FieldType[];
 };
 
