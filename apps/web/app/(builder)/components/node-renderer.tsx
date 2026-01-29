@@ -17,6 +17,15 @@ export function NodeRenderer({ id }: { id: string }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
 
+  const selectNode = useBuilderStore((s) => s.selectNode);
+  const selectedId = useBuilderStore((s) => s.selectedId);
+  const isSelected = selectedId === id;
+
+  const handleSelect = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    selectNode(id);
+  };
+
   if (!node) return null;
 
   const style = {
@@ -54,7 +63,11 @@ export function NodeRenderer({ id }: { id: string }) {
         {...attributes}
         {...listeners}
         data-id={id}
-        className="mb-2 touch-none"
+        onClick={handleSelect}
+        className={cn(
+          "mb-2 touch-none border border-transparent rounded-lg transition-colors",
+          isSelected && "border-primary ring-1 ring-primary/20",
+        )}
       >
         {renderLayoutContent()}
       </div>
@@ -69,9 +82,17 @@ export function NodeRenderer({ id }: { id: string }) {
       {...attributes}
       {...listeners}
       data-id={id}
+      onClick={handleSelect}
       className="mb-2 touch-none"
     >
-      <Card className="relative p-4 cursor-default bg-card">
+      <Card
+        className={cn(
+          "relative p-4 cursor-default bg-card transition-all border",
+          isSelected
+            ? "border-primary ring-1 ring-primary/20"
+            : "border-border",
+        )}
+      >
         <div className={cn(isEditMode && "pointer-events-none")}>
           <FieldRenderer
             field={

@@ -40,6 +40,7 @@ export type BuilderFieldRegistryEntry<T extends Field = Field> = {
     defaultProps: Omit<T, 'name'> & { name?: string };
     renderer?: ComponentType<BuilderNodeRendererProps>;
     accepts?: FieldType[];
+    properties?: Field[];
 };
 
 export type BuilderFieldRegistry = Partial<{

@@ -12,7 +12,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
 } from "@/components/ui/sidebar";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 
@@ -26,8 +25,8 @@ export function Sidebar() {
   const groups = getSidebarGroups();
 
   return (
-    <ShadcnSidebar>
-      <SidebarContent className="pt-14">
+    <ShadcnSidebar className="pt-header">
+      <SidebarContent>
         {Object.entries(groups).map(([category, items]) => (
           <SidebarGroup key={category}>
             <SidebarGroupLabel>
@@ -48,7 +47,6 @@ export function Sidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarRail />
     </ShadcnSidebar>
   );
 }

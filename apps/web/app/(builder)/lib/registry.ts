@@ -22,12 +22,14 @@ import type { BuilderNodeRendererProps } from './types';
 import { RowLayout } from '../components/layouts/row';
 import { GroupLayout } from '../components/layouts/group';
 import { CollapsibleLayout } from '../components/layouts/collapsible';
+import { textFieldProperties } from './properties/text';
 
 export const builderFieldRegistry: BuilderFieldRegistry = {
     text: {
         kind: 'data',
         sidebar: { label: 'Text', icon: TextIcon, category: 'inputs' },
         defaultProps: { type: 'text', label: 'Text Field' },
+        properties: textFieldProperties,
     },
     email: {
         kind: 'data',

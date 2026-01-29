@@ -12,6 +12,7 @@ type Store = {
     createNode: (type: FieldType, parentId: string | null, index?: number) => void;
     moveNode: (id: string, newParentId: string | null, index: number) => void;
     selectNode: (id: string | null) => void;
+    updateNode: (id: string, updates: Partial<Node['field']>) => void;
     removeNode: (id: string) => void;
     dropIndicator: {
         parentId: string | null;
@@ -20,6 +21,34 @@ type Store = {
     setDropIndicator: (value: { parentId: string | null; index: number } | null) => void;
 
 };
+
+/**
+ * Recursively merges updates into the target object.
+ * Preserves nested properties that are not present in the updates.
+ */
+function mergeUpdates<T extends object>(target: T, source: Partial<T>) {
+    const keys = Object.keys(source) as Array<keyof T>;
+    for (const key of keys) {
+        const sourceValue = source[key];
+        const targetValue = target[key];
+
+        // If both are objects (and not arrays), merge recursively
+        if (
+            sourceValue &&
+            typeof sourceValue === 'object' &&
+            !Array.isArray(sourceValue) &&
+            targetValue &&
+            typeof targetValue === 'object' &&
+            !Array.isArray(targetValue)
+        ) {
+            mergeUpdates(targetValue as object, sourceValue as object);
+        }
+        // Otherwise, if source has a value, overwrite target
+        else if (sourceValue !== undefined) {
+            target[key] = sourceValue as T[keyof T];
+        }
+    }
+}
 
 export const useBuilderStore = create<Store>()(
     immer((set) => ({
@@ -83,6 +112,15 @@ export const useBuilderStore = create<Store>()(
         },
 
         selectNode: (id) => set({ selectedId: id }),
+
+        updateNode: (id, updates) => {
+            set(state => {
+                const node = state.nodes[id];
+                if (node) {
+                    mergeUpdates(node.field, updates);
+                }
+            });
+        },
 
         removeNode: (id) => {
             set(state => {
