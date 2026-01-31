@@ -14,6 +14,7 @@ type Store = {
     selectNode: (id: string | null) => void;
     updateNode: (id: string, updates: Partial<Node['field']>) => void;
     removeNode: (id: string) => void;
+    duplicateNode: (id: string) => void;
     dropIndicator: {
         parentId: string | null;
         index: number;
@@ -145,6 +146,71 @@ export const useBuilderStore = create<Store>()(
                 if (state.selectedId === id) {
                     state.selectedId = null;
                 }
+            });
+        },
+
+        duplicateNode: (id) => {
+            set(state => {
+                const originalNode = state.nodes[id];
+                if (!originalNode) return;
+
+                const cloneRecursive = (nodeId: string, newParentId: string | null): string => {
+                    const sourceNode = state.nodes[nodeId];
+                    const newId = nanoid();
+
+                    // Clone field props
+                    const newField = { ...sourceNode.field };
+
+                    // Handle name collision / suffix
+                    if ("name" in newField && typeof newField.name === "string") {
+                        const baseName = newField.name;
+                        let newName = `${baseName}_copy`;
+                        let counter = 1;
+
+                        // Check uniqueness against ALL nodes to be safe
+                        const isNameTaken = (n: string) =>
+                            Object.values(state.nodes).some(node =>
+                                "name" in node.field && node.field.name === n
+                            );
+
+                        while (isNameTaken(newName)) {
+                            newName = `${baseName}_copy_${counter}`;
+                            counter++;
+                        }
+                        (newField as { name: string }).name = newName;
+                    }
+
+                    // Create new node
+                    const newNode: Node = {
+                        id: newId,
+                        field: newField,
+                        parentId: newParentId,
+                        children: [],
+                    };
+
+                    // Add to state
+                    state.nodes[newId] = newNode;
+
+                    // Clone children
+                    newNode.children = sourceNode.children.map(childId =>
+                        cloneRecursive(childId, newId)
+                    );
+
+                    return newId;
+                };
+
+                const newRootId = cloneRecursive(id, originalNode.parentId);
+
+                // Insert into parent list
+                const parentId = originalNode.parentId;
+                const list = parentId === null ? state.rootIds : state.nodes[parentId].children;
+                const originalIndex = list.indexOf(id);
+
+                if (originalIndex !== -1) {
+                    list.splice(originalIndex + 1, 0, newRootId);
+                }
+
+                state.selectedId = newRootId;
             });
         },
 

@@ -3,12 +3,12 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useBuilderStore } from "../lib/store";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { isContainerType } from "../lib/types";
 import { useBuilderFormContext } from "./builder-form-context";
 import { FieldRenderer } from "@/registry/base/fields/render";
 import { builderFieldRegistry } from "../lib/registry";
+import { NodeActionsToolbar } from "./node-actions-toolbar";
 
 export function NodeRenderer({ id }: { id: string }) {
   const node = useBuilderStore((s) => s.nodes[id]);
@@ -18,12 +18,24 @@ export function NodeRenderer({ id }: { id: string }) {
     useSortable({ id });
 
   const selectNode = useBuilderStore((s) => s.selectNode);
+  const removeNode = useBuilderStore((s) => s.removeNode);
+  const duplicateNode = useBuilderStore((s) => s.duplicateNode);
   const selectedId = useBuilderStore((s) => s.selectedId);
   const isSelected = selectedId === id;
 
   const handleSelect = (e: React.MouseEvent) => {
     e.stopPropagation();
     selectNode(id);
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    removeNode(id);
+  };
+
+  const handleDuplicate = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    duplicateNode(id);
   };
 
   if (!node) return null;
@@ -54,7 +66,31 @@ export function NodeRenderer({ id }: { id: string }) {
     return null;
   };
 
-  // For layout containers, render with layout-specific styling
+  const actionToolbar = (
+    <div
+      className={cn(
+        "absolute right-2 top-2 z-20",
+        "transition-all duration-200",
+        isSelected
+          ? "opacity-100 pointer-events-auto"
+          : "opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto",
+      )}
+    >
+      <NodeActionsToolbar
+        onDelete={handleDelete}
+        onDuplicate={handleDuplicate}
+      />
+    </div>
+  );
+
+  const wrapperClasses = cn(
+    "group relative mb-2 touch-none rounded-lg border transition-all hover:p-4",
+    isSelected
+      ? "border-primary ring-1 ring-primary/20 p-4"
+      : "border-transparent hover:border-border/50",
+  );
+
+  // For layout containers
   if (isContainer) {
     return (
       <div
@@ -64,17 +100,15 @@ export function NodeRenderer({ id }: { id: string }) {
         {...listeners}
         data-id={id}
         onClick={handleSelect}
-        className={cn(
-          "mb-2 touch-none border border-transparent rounded-lg transition-colors",
-          isSelected && "border-primary ring-1 ring-primary/20",
-        )}
+        className={wrapperClasses}
       >
+        {isEditMode && actionToolbar}
         {renderLayoutContent()}
       </div>
     );
   }
 
-  // For data fields, render with card wrapper
+  // For data fields
   return (
     <div
       ref={setNodeRef}
@@ -83,32 +117,24 @@ export function NodeRenderer({ id }: { id: string }) {
       {...listeners}
       data-id={id}
       onClick={handleSelect}
-      className="mb-2 touch-none"
+      className={wrapperClasses}
     >
-      <Card
-        className={cn(
-          "relative p-4 cursor-default bg-card transition-all border",
-          isSelected
-            ? "border-primary ring-1 ring-primary/20"
-            : "border-border",
-        )}
-      >
-        <div className={cn(isEditMode && "pointer-events-none")}>
-          <FieldRenderer
-            field={
-              isEditMode && "name" in node.field
-                ? ({
-                    ...node.field,
-                    disabled: true,
-                    readOnly: true,
-                  } as typeof node.field)
-                : node.field
-            }
-            path={path}
-            form={form}
-          />
-        </div>
-      </Card>
+      {isEditMode && actionToolbar}
+      <div className={cn(isEditMode && "pointer-events-none")}>
+        <FieldRenderer
+          field={
+            isEditMode && "name" in node.field
+              ? ({
+                  ...node.field,
+                  disabled: true,
+                  readOnly: true,
+                } as typeof node.field)
+              : node.field
+          }
+          path={path}
+          form={form}
+        />
+      </div>
     </div>
   );
 }
