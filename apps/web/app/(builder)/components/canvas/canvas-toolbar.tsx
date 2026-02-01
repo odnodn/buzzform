@@ -16,6 +16,8 @@ import {
   ComputerIcon,
   Tablet01Icon,
   SmartPhone01Icon,
+  ViewIcon,
+  PencilEdit01Icon,
 } from "@hugeicons/core-free-icons";
 
 interface ViewportOption {
@@ -29,6 +31,8 @@ export function CanvasToolbar() {
   const setViewport = useBuilderStore((state) => state.setViewport);
   const zoom = useBuilderStore((state) => state.zoom);
   const setZoom = useBuilderStore((state) => state.setZoom);
+  const mode = useBuilderStore((state) => state.mode);
+  const setMode = useBuilderStore((state) => state.setMode);
 
   const viewports: ViewportOption[] = [
     { id: "desktop", icon: ComputerIcon, label: "Desktop (100%)" },
@@ -36,9 +40,41 @@ export function CanvasToolbar() {
     { id: "mobile", icon: SmartPhone01Icon, label: "Mobile (375px)" },
   ];
 
+  const isPreview = mode === "preview";
+
   return (
     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 p-1.5 rounded-full border border-border/50 bg-card/80 backdrop-blur-xl shadow-xl shadow-black/5 supports-backdrop-filter:bg-card/40">
       <TooltipProvider delay={0}>
+        {/* Mode Toggle */}
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                variant={isPreview ? "default" : "ghost"}
+                size="icon"
+                onClick={() => setMode(isPreview ? "edit" : "preview")}
+                className={cn(
+                  "h-8 w-8 rounded-full",
+                  !isPreview &&
+                    "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                )}
+              >
+                <HugeiconsIcon
+                  icon={isPreview ? PencilEdit01Icon : ViewIcon}
+                  size={16}
+                />
+              </Button>
+            }
+          ></TooltipTrigger>
+          <TooltipContent side="top" sideOffset={8}>
+            <p className="text-xs font-medium">
+              {isPreview ? "Back to Edit Mode" : "Preview Form"}
+            </p>
+          </TooltipContent>
+        </Tooltip>
+
+        <div className="mx-1.5 h-6 w-px bg-border/50" />
+
         {/* Viewport Toggles */}
         <div className="flex items-center gap-0.5">
           {viewports.map((item) => {

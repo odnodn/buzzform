@@ -8,7 +8,7 @@ import {
 } from "@dnd-kit/sortable";
 import { cn } from "@/lib/utils";
 import { useBuilderStore } from "../../lib/store";
-import { NodeRenderer } from "../node-renderer";
+import { EditableNode } from "../editable-node";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Collapsible,
@@ -81,7 +81,7 @@ export function CollapsibleLayout({
             {childrenIds.map((childId, index) => (
               <div key={childId}>
                 {indicatorIndex === index && <DropLine />}
-                <NodeRenderer id={childId} />
+                <EditableNode id={childId} />
               </div>
             ))}
             {indicatorIndex === childrenIds.length && <DropLine />}

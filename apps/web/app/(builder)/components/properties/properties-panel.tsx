@@ -7,6 +7,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   Empty,
@@ -17,10 +18,17 @@ import {
 } from "@/components/ui/empty";
 import { Settings04Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useEffect } from "react";
 
 export function PropertiesPanel() {
+  const mode = useBuilderStore((state) => state.mode);
   const selectedId = useBuilderStore((state) => state.selectedId);
   const nodes = useBuilderStore((state) => state.nodes);
+  const { setOpen } = useSidebar();
+
+  useEffect(() => {
+    setOpen(mode !== "preview");
+  }, [mode, setOpen]);
 
   const selectedNode = selectedId ? nodes[selectedId] : null;
   const registryEntry = selectedNode
@@ -31,7 +39,7 @@ export function PropertiesPanel() {
   const label = registryEntry?.sidebar.label;
 
   return (
-    <Sidebar side="right" className="pt-header">
+    <Sidebar side="right" className="pt-header" collapsible="offExamples">
       <SidebarHeader className="border-b h-header flex justify-center">
         {selectedNode && registryEntry ? (
           <div className="flex items-center gap-3 w-full">

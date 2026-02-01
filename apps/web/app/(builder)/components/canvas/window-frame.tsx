@@ -2,15 +2,7 @@
 
 import React from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { buttonVariants } from "@/components/ui/button";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { ViewIcon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useBuilderStore } from "../../lib/store";
 
 interface WindowFrameProps {
@@ -22,7 +14,6 @@ export function WindowFrame({ children, className }: WindowFrameProps) {
   const viewport = useBuilderStore((state) => state.viewport);
   const zoom = useBuilderStore((state) => state.zoom);
   const mode = useBuilderStore((state) => state.mode);
-  const setMode = useBuilderStore((state) => state.setMode);
 
   const getViewportWidth = () => {
     switch (viewport) {
@@ -56,25 +47,7 @@ export function WindowFrame({ children, className }: WindowFrameProps) {
         <div className="text-xs text-muted-foreground font-medium flex-1 text-center">
           {mode === "preview" ? "Preview Mode" : "Edit Mode"}
         </div>
-        <div className="w-20 flex justify-end gap-1">
-          <Tooltip>
-            <TooltipTrigger
-              className={cn(
-                buttonVariants({ variant: "ghost", size: "icon" }),
-                "h-7 w-7 text-muted-foreground hover:text-foreground",
-              )}
-              onClick={() => setMode(mode === "edit" ? "preview" : "edit")}
-            >
-              <HugeiconsIcon
-                icon={mode === "edit" ? ViewIcon : PencilEdit02Icon}
-                size={16}
-              />
-            </TooltipTrigger>
-            <TooltipContent side="bottom" align="end">
-              {mode === "edit" ? "Preview Mode" : "Edit Mode"}
-            </TooltipContent>
-          </Tooltip>
-        </div>
+        <div className="w-20 flex justify-end gap-1" />
       </div>
 
       {/* Content Area */}

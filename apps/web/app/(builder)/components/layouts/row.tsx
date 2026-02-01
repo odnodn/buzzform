@@ -7,7 +7,7 @@ import {
 } from "@dnd-kit/sortable";
 import { cn } from "@/lib/utils";
 import { useBuilderStore } from "../../lib/store";
-import { NodeRenderer } from "../node-renderer";
+import { EditableNode } from "../editable-node";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { RowInsertIcon } from "@hugeicons/core-free-icons";
 import type { RowField } from "@buildnbuzz/buzzform";
@@ -66,7 +66,7 @@ export function RowLayout({ id, childrenIds }: RowLayoutProps) {
               >
                 {indicatorIndex === index && <DropLineVertical />}
                 <div className="flex-1 min-w-0">
-                  <NodeRenderer id={childId} />
+                  <EditableNode id={childId} />
                 </div>
               </div>
             ))}

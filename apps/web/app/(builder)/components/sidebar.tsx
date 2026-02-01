@@ -3,6 +3,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import type { FieldType } from "../lib/types";
 import { getSidebarGroups } from "../lib/registry";
+import { useBuilderStore } from "../lib/store";
 import {
   Sidebar as ShadcnSidebar,
   SidebarContent,
@@ -12,8 +13,11 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
+import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 const CATEGORY_LABELS: Record<string, string> = {
   inputs: "Inputs",
@@ -23,9 +27,15 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export function Sidebar() {
   const groups = getSidebarGroups();
+  const mode = useBuilderStore((s) => s.mode);
+  const { setOpen } = useSidebar();
+
+  useEffect(() => {
+    setOpen(mode !== "preview");
+  }, [mode, setOpen]);
 
   return (
-    <ShadcnSidebar className="pt-header">
+    <ShadcnSidebar className="pt-header" collapsible="offExamples">
       <SidebarContent>
         {Object.entries(groups).map(([category, items]) => (
           <SidebarGroup key={category}>
@@ -55,14 +65,17 @@ function DraggableSidebarItem({
   type,
   label,
   icon,
+  disabled = false,
 }: {
   type: FieldType;
   label: string;
   icon: IconSvgElement;
+  disabled?: boolean;
 }) {
   const { attributes, listeners, setNodeRef } = useDraggable({
     id: `sidebar-${type}`,
     data: { from: "sidebar", type },
+    disabled,
   });
 
   return (
@@ -71,7 +84,10 @@ function DraggableSidebarItem({
         ref={setNodeRef}
         {...listeners}
         {...attributes}
-        className="cursor-grab"
+        className={cn(
+          "cursor-grab",
+          disabled && "cursor-not-allowed opacity-60",
+        )}
       >
         <HugeiconsIcon icon={icon} />
         <span>{label}</span>

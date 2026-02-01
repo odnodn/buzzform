@@ -4,8 +4,9 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { NodeRenderer } from "./node-renderer";
+import { EditableNode } from "./editable-node";
 import { useBuilderStore } from "../lib/store";
+import { FormActions, FormSubmit } from "@/registry/base/form";
 
 export function Container({
   childrenIds,
@@ -18,18 +19,32 @@ export function Container({
     s.dropIndicator?.parentId === parentId ? s.dropIndicator.index : null,
   );
 
+  // Only show submit button for root container
+  const isRootContainer = parentId === null;
+
   return (
-    <SortableContext items={childrenIds} strategy={verticalListSortingStrategy}>
-      {childrenIds.map((id, index) => (
-        <div key={id}>
-          {indicatorIndex === index && <DropLine />}
+    <>
+      <SortableContext
+        items={childrenIds}
+        strategy={verticalListSortingStrategy}
+      >
+        {childrenIds.map((id, index) => (
+          <div key={id}>
+            {indicatorIndex === index && <DropLine />}
 
-          <NodeRenderer id={id} />
-        </div>
-      ))}
+            <EditableNode id={id} />
+          </div>
+        ))}
 
-      {indicatorIndex === childrenIds.length && <DropLine />}
-    </SortableContext>
+        {indicatorIndex === childrenIds.length && <DropLine />}
+      </SortableContext>
+
+      {isRootContainer && (
+        <FormActions className="mt-8">
+          <FormSubmit>Submit</FormSubmit>
+        </FormActions>
+      )}
+    </>
   );
 }
 

@@ -4,7 +4,7 @@ import { useRef, useEffect } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { useBuilderStore } from "../lib/store";
 import { Container } from "./container";
-import { BuilderFormProvider, type BuilderMode } from "./builder-form-context";
+import { BuilderFormProvider } from "./builder-form-context";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { WindowFrame } from "./canvas/window-frame";
 import { CanvasToolbar } from "./canvas/canvas-toolbar";
@@ -17,20 +17,32 @@ import {
 } from "@/components/ui/empty";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { DragDropIcon } from "@hugeicons/core-free-icons";
+import { PreviewForm } from "./preview/preview-form";
+import { toast } from "sonner";
 
-interface CanvasProps {
-  mode?: BuilderMode;
-  onSubmit?: (data: Record<string, unknown>) => void | Promise<void>;
-}
+export function Canvas() {
+  const onSubmit = async (data: Record<string, unknown>) => {
+    await new Promise((r) => setTimeout(r, 500));
+    toast("Form Submitted!", {
+      description: (
+        <pre className="mt-2 max-h-72 overflow-auto rounded-md bg-zinc-950 p-3 text-xs text-zinc-100">
+          <code>{JSON.stringify(data, null, 2)}</code>
+        </pre>
+      ),
+      duration: 10000,
+    });
+  };
 
-export function Canvas({ mode = "edit", onSubmit }: CanvasProps) {
+  const mode = useBuilderStore((s) => s.mode);
+  const isPreviewMode = mode === "preview";
   const containerRef = useRef<HTMLDivElement>(null);
   const rootIds = useBuilderStore((s) => s.rootIds);
   const selectNode = useBuilderStore((s) => s.selectNode);
   const zoom = useBuilderStore((state) => state.zoom);
   const setZoom = useBuilderStore((state) => state.setZoom);
 
-  const { setNodeRef } = useDroppable({ id: "root" });
+  // Only use droppable in edit mode
+  const { setNodeRef } = useDroppable({ id: "root", disabled: isPreviewMode });
 
   // Handle Ctrl+Wheel zoom
   useEffect(() => {
@@ -53,7 +65,24 @@ export function Canvas({ mode = "edit", onSubmit }: CanvasProps) {
   }, [zoom, setZoom]);
 
   const handleBackgroundClick = () => {
-    selectNode(null);
+    if (!isPreviewMode) {
+      selectNode(null);
+    }
+  };
+
+  // Render form content based on mode
+  const renderFormContent = () => {
+    if (rootIds.length === 0) {
+      return <EmptyCanvas />;
+    }
+
+    // Preview mode: Pure BuzzForm rendering
+    if (isPreviewMode) {
+      return <PreviewForm />;
+    }
+
+    // Edit mode: Builder with DnD support
+    return <Container childrenIds={rootIds} />;
   };
 
   return (
@@ -69,28 +98,11 @@ export function Canvas({ mode = "edit", onSubmit }: CanvasProps) {
             >
               <WindowFrame>
                 <div
-                  ref={setNodeRef}
+                  ref={isPreviewMode ? undefined : setNodeRef}
                   data-id="root"
                   className="p-8 max-w-2xl mx-auto min-h-full"
                 >
-                  {rootIds.length === 0 ? (
-                    <Empty className="h-full border-0 bg-transparent min-h-60">
-                      <EmptyMedia>
-                        <HugeiconsIcon icon={DragDropIcon} size={24} />
-                      </EmptyMedia>
-                      <EmptyContent className="max-w-70">
-                        <EmptyTitle className="text-sm font-medium">
-                          Form is empty
-                        </EmptyTitle>
-                        <EmptyDescription className="text-xs">
-                          Drag fields from the sidebar and drop them here to
-                          start building your form.
-                        </EmptyDescription>
-                      </EmptyContent>
-                    </Empty>
-                  ) : (
-                    <Container childrenIds={rootIds} />
-                  )}
+                  {renderFormContent()}
                 </div>
               </WindowFrame>
             </div>
@@ -100,3 +112,20 @@ export function Canvas({ mode = "edit", onSubmit }: CanvasProps) {
     </BuilderFormProvider>
   );
 }
+
+const EmptyCanvas = () => {
+  return (
+    <Empty className="h-full border-0 bg-transparent min-h-60">
+      <EmptyMedia>
+        <HugeiconsIcon icon={DragDropIcon} size={24} />
+      </EmptyMedia>
+      <EmptyContent className="max-w-70">
+        <EmptyTitle className="text-sm font-medium">Form is empty</EmptyTitle>
+        <EmptyDescription className="text-xs">
+          Drag fields from the sidebar and drop them here to start building your
+          form.
+        </EmptyDescription>
+      </EmptyContent>
+    </Empty>
+  );
+};

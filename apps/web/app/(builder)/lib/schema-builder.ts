@@ -13,7 +13,7 @@ export function nodesToFields(
     return rootIds.map((id) => nodeToField(nodes, id)).filter(Boolean) as Field[];
 }
 
-function nodeToField(nodes: Record<string, Node>, id: string): Field | null {
+export function nodeToField(nodes: Record<string, Node>, id: string): Field | null {
     const node = nodes[id];
     if (!node) return null;
 
