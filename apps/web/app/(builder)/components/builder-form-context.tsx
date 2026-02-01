@@ -10,7 +10,7 @@ import {
 } from "@buildnbuzz/buzzform";
 import { useBuilderStore } from "../lib/store";
 import { nodesToFields } from "../lib/schema-builder";
-
+import { extractDefaults, generateSchemaKey } from "../lib/properties";
 export type BuilderMode = "edit" | "preview";
 
 interface BuilderFormContextValue {
@@ -52,9 +52,13 @@ function FormProviderInner({
   // Create schema from fields
   const schema = createSchema(fields);
 
+  // Manually extract defaults for the builder canvas
+  const defaultValues = React.useMemo(() => extractDefaults(fields), [fields]);
+
   // Create real form instance
   const form = useForm({
     schema,
+    defaultValues,
     onSubmit: onSubmit ?? (() => {}),
     mode: "onChange",
   }) as unknown as FormAdapter<Record<string, unknown>>;
@@ -83,11 +87,8 @@ export function BuilderFormProvider({
   // Convert nodes to BuzzForm Field[]
   const fields = nodesToFields(nodes, rootIds);
 
-  // Generate a stable key based on field structure to force remount when schema changes
-  const fieldNames = fields
-    .map((f) => ("name" in f ? f.name : f.type))
-    .join(",");
-  const schemaKey = `form-${fields.length}-${fieldNames}`;
+  // Generate a stable key to force form remount when structural changes occur
+  const schemaKey = React.useMemo(() => generateSchemaKey(fields), [fields]);
 
   // Use key to force remount when schema changes - this prevents hook count mismatch
   return (
