@@ -60,15 +60,12 @@ export function RowLayout({ id, childrenIds }: RowLayoutProps) {
             strategy={horizontalListSortingStrategy}
           >
             {childrenIds.map((childId, index) => (
-              <div
-                key={childId}
-                className="flex-1 min-w-0 flex items-center gap-1"
-              >
-                {indicatorIndex === index && <DropLineVertical />}
-                <div className="flex-1 min-w-0">
-                  <EditableNode id={childId} />
-                </div>
-              </div>
+              <>
+                {indicatorIndex === index && (
+                  <DropLineVertical key={`indicator-${index}`} />
+                )}
+                <EditableNode key={childId} id={childId} />
+              </>
             ))}
             {indicatorIndex === childrenIds.length && <DropLineVertical />}
           </SortableContext>

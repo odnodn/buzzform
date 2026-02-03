@@ -67,19 +67,18 @@ export function nodeToField(nodes: Record<string, Node>, id: string): Field | nu
         ...cleanedRest,
     };
 
-    // For container fields, recursively convert children
-    if (isContainerType(field.type) && children.length > 0) {
-        const nestedFields = children
-            .map((childId) => nodeToField(nodes, childId))
-            .filter(Boolean) as Field[];
 
-        // Attach nested fields to the container
-        if ('fields' in field) {
-            return {
-                ...orderedField,
-                fields: nestedFields,
-            } as Field;
-        }
+    if (isContainerType(field.type) && 'fields' in field) {
+        const nestedFields = children.length > 0
+            ? children
+                .map((childId) => nodeToField(nodes, childId))
+                .filter(Boolean) as Field[]
+            : [];
+
+        return {
+            ...orderedField,
+            fields: nestedFields,
+        } as Field;
     }
 
     return orderedField as Field;

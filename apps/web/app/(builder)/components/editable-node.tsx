@@ -32,13 +32,19 @@ export function EditableNode({ id }: { id: string }) {
 
   const isHidden = isDataField(node.field) && node.field.hidden === true;
 
-  const style = {
+  const fieldStyle = "style" in node.field ? node.field.style : undefined;
+  const fieldWidth = fieldStyle?.width;
+
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     ...(isHidden && {
       backgroundImage:
         "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(128,128,128,0.05) 10px, rgba(128,128,128,0.05) 20px)",
     }),
+    ...(fieldWidth && fieldWidth !== "auto"
+      ? { width: fieldWidth, flex: "0 0 auto" }
+      : { flex: "1 1 0%", minWidth: 0 }),
   };
 
   const fieldType = node.field.type;
@@ -80,9 +86,20 @@ export function EditableNode({ id }: { id: string }) {
 
   // Data fields (disabled preview)
   const renderFieldContent = () => {
+    // Override width to 100% so field fills the wrapper (width is applied to wrapper)
+    const styleOverride = fieldStyle
+      ? { ...fieldStyle, width: "100%" }
+      : { width: "100%" };
+
     const fieldWithOverrides = isDataField(node.field)
-      ? { ...node.field, disabled: true, readOnly: true, hidden: false }
-      : { ...node.field, disabled: true, readOnly: true };
+      ? {
+          ...node.field,
+          disabled: true,
+          readOnly: true,
+          hidden: false,
+          style: styleOverride,
+        }
+      : { ...node.field, disabled: true, readOnly: true, style: styleOverride };
 
     return (
       <FieldRenderer
