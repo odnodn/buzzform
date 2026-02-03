@@ -7,9 +7,11 @@ import { cn } from "@/lib/utils";
 import { useBuilderStore } from "../lib/store";
 import { builderFieldRegistry } from "../lib/registry";
 import { NodeActionsToolbar } from "./node-actions-toolbar";
-import { isContainerType } from "../lib/types";
+import { isContainerType, isDataField } from "../lib/types";
 import { FieldRenderer } from "@/registry/base/fields/render";
 import { useFormContext } from "./builder-form-context";
+import type { Field } from "@buildnbuzz/buzzform";
+import { Badge } from "@/components/ui/badge";
 
 // EditableNode: Edit mode wrapper with DnD, selection, and toolbar
 export function EditableNode({ id }: { id: string }) {
@@ -28,9 +30,15 @@ export function EditableNode({ id }: { id: string }) {
 
   if (!node) return null;
 
+  const isHidden = isDataField(node.field) && node.field.hidden === true;
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    ...(isHidden && {
+      backgroundImage:
+        "repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(128,128,128,0.05) 10px, rgba(128,128,128,0.05) 20px)",
+    }),
   };
 
   const fieldType = node.field.type;
@@ -58,8 +66,13 @@ export function EditableNode({ id }: { id: string }) {
   const renderLayoutContent = () => {
     if (entry?.renderer) {
       const Renderer = entry.renderer;
+      const fieldOverrides = isDataField(node.field) ? { hidden: false } : {};
       return (
-        <Renderer id={id} field={node.field} childrenIds={node.children} />
+        <Renderer
+          id={id}
+          field={{ ...node.field, ...fieldOverrides }}
+          childrenIds={node.children}
+        />
       );
     }
     return null;
@@ -67,15 +80,13 @@ export function EditableNode({ id }: { id: string }) {
 
   // Data fields (disabled preview)
   const renderFieldContent = () => {
+    const fieldWithOverrides = isDataField(node.field)
+      ? { ...node.field, disabled: true, readOnly: true, hidden: false }
+      : { ...node.field, disabled: true, readOnly: true };
+
     return (
       <FieldRenderer
-        field={
-          {
-            ...node.field,
-            disabled: true,
-            readOnly: true,
-          } as typeof node.field
-        }
+        field={fieldWithOverrides as Field}
         path={path}
         form={form}
       />
@@ -106,6 +117,7 @@ export function EditableNode({ id }: { id: string }) {
       ? "border-primary/50 ring-2 ring-primary/10 p-2 bg-primary/5"
       : "border-transparent",
     !isSelected && "hover:border-border/40",
+    isHidden && "opacity-60 grayscale border-dashed border-muted-foreground/30",
   );
 
   return (
@@ -123,7 +135,18 @@ export function EditableNode({ id }: { id: string }) {
       {actionToolbar}
 
       {/* Content - disabled pointer events for non-containers */}
-      <div className={cn(!isContainer && "pointer-events-none")}>
+      <div
+        className={cn("relative w-full", !isContainer && "pointer-events-none")}
+      >
+        {isHidden && (
+          <Badge
+            className="absolute bottom-1.5 right-2 z-10 select-none bg-background/80 backdrop-blur-sm"
+            variant="outline"
+          >
+            Hidden
+          </Badge>
+        )}
+
         {isContainer ? renderLayoutContent() : renderFieldContent()}
       </div>
     </div>
