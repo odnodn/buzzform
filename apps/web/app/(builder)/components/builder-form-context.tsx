@@ -71,7 +71,7 @@ export function BuilderFormProvider({
         fields={fields}
         defaultValues={defaultValues}
         onSubmit={onSubmit ?? (() => {})}
-        mode="onChange"
+        mode="onBlur"
         showSubmit={false}
       >
         {children}

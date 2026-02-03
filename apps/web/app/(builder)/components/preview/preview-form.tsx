@@ -10,7 +10,7 @@ import {
 // PreviewForm: Pure BuzzForm rendering with zero builder logic
 export function PreviewForm() {
   return (
-    <FormContent>
+    <FormContent noValidate>
       <FormFields />
       <FormActions className="mt-8">
         <FormSubmit>Submit</FormSubmit>
