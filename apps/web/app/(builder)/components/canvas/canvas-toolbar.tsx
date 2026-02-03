@@ -6,7 +6,7 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { useBuilderStore } from "../../lib/store";
+import { useBuilderStore, useCanUndo, useCanRedo } from "../../lib/store";
 import { Viewport } from "../../lib/types";
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import {
@@ -18,6 +18,8 @@ import {
   SmartPhone01Icon,
   ViewIcon,
   PencilEdit01Icon,
+  UndoIcon,
+  RedoIcon,
 } from "@hugeicons/core-free-icons";
 
 interface ViewportOption {
@@ -33,6 +35,8 @@ export function CanvasToolbar() {
   const setZoom = useBuilderStore((state) => state.setZoom);
   const mode = useBuilderStore((state) => state.mode);
   const setMode = useBuilderStore((state) => state.setMode);
+  const canUndo = useCanUndo();
+  const canRedo = useCanRedo();
 
   const viewports: ViewportOption[] = [
     { id: "desktop", icon: ComputerIcon, label: "Desktop (100%)" },
@@ -45,6 +49,57 @@ export function CanvasToolbar() {
   return (
     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 p-1.5 rounded-full border border-border/50 bg-card/80 backdrop-blur-xl shadow-xl shadow-black/5 supports-backdrop-filter:bg-card/40">
       <TooltipProvider delay={0}>
+        {/* Undo/Redo */}
+        <div className="flex items-center gap-0.5">
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => useBuilderStore.temporal.getState().undo()}
+                  disabled={!canUndo}
+                  className={cn(
+                    "h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                    !canUndo && "opacity-50 cursor-not-allowed",
+                  )}
+                >
+                  <HugeiconsIcon icon={UndoIcon} size={16} />
+                </Button>
+              }
+            ></TooltipTrigger>
+            <TooltipContent side="top" sideOffset={8}>
+              <p className="text-xs font-medium">Undo</p>
+              <p className="text-[10px] text-muted-foreground">Ctrl+Z</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => useBuilderStore.temporal.getState().redo()}
+                  disabled={!canRedo}
+                  className={cn(
+                    "h-8 w-8 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                    !canRedo && "opacity-50 cursor-not-allowed",
+                  )}
+                >
+                  <HugeiconsIcon icon={RedoIcon} size={16} />
+                </Button>
+              }
+            ></TooltipTrigger>
+            <TooltipContent side="top" sideOffset={8}>
+              <p className="text-xs font-medium">Redo</p>
+              <p className="text-[10px] text-muted-foreground">Ctrl+Shift+Z</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+
+        <div className="mx-1.5 h-6 w-px bg-border/50" />
+
         {/* Mode Toggle */}
         <Tooltip>
           <TooltipTrigger

@@ -3,6 +3,7 @@
 import { useRef, useEffect } from "react";
 import { useDroppable } from "@dnd-kit/core";
 import { useBuilderStore } from "../lib/store";
+import { useBuilderKeyboardShortcuts } from "../lib/use-keyboard-shortcuts";
 import { Container } from "./container";
 import { BuilderFormProvider } from "./builder-form-context";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,6 +22,7 @@ import { PreviewForm } from "./preview/preview-form";
 import { toast } from "sonner";
 
 export function Canvas() {
+  useBuilderKeyboardShortcuts();
   const onSubmit = async (data: Record<string, unknown>) => {
     await new Promise((r) => setTimeout(r, 500));
     toast("Form Submitted!", {

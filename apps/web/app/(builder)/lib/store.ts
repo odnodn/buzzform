@@ -1,47 +1,57 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { temporal } from 'zundo';
+import { useStore } from 'zustand';
+import type { TemporalState } from 'zundo';
 import { nanoid } from 'nanoid';
 import type { Node, FieldType, Viewport, BuilderMode } from './types';
 import { builderFieldRegistry } from './registry';
 
-type Store = {
+type BuilderState = {
     nodes: Record<string, Node>;
     rootIds: string[];
     selectedId: string | null;
+    dropIndicator: { parentId: string | null; index: number } | null;
+    mode: BuilderMode;
+    zoom: number;
+    viewport: Viewport;
+};
 
+type BuilderActions = {
     createNode: (type: FieldType, parentId: string | null, index?: number) => void;
     moveNode: (id: string, newParentId: string | null, index: number) => void;
     selectNode: (id: string | null) => void;
     updateNode: (id: string, updates: Partial<Node['field']>) => void;
     removeNode: (id: string) => void;
     duplicateNode: (id: string) => void;
-    dropIndicator: {
-        parentId: string | null;
-        index: number;
-    } | null;
-    setDropIndicator: (value: { parentId: string | null; index: number } | null) => void;
-
-    // Canvas State
-    mode: BuilderMode;
+    setDropIndicator: (value: BuilderState['dropIndicator']) => void;
     setMode: (mode: BuilderMode) => void;
-    zoom: number;
     setZoom: (zoom: number) => void;
-    viewport: Viewport;
     setViewport: (viewport: Viewport) => void;
-
+    clearState: () => void;
 };
 
-/**
- * Recursively merges updates into the target object.
- * Preserves nested properties that are not present in the updates.
- */
+type Store = BuilderState & BuilderActions;
+
+type TrackedState = Pick<BuilderState, 'nodes' | 'rootIds'>;
+
+const INITIAL_STATE: BuilderState = {
+    nodes: {},
+    rootIds: [],
+    selectedId: null,
+    dropIndicator: null,
+    mode: 'edit',
+    zoom: 0.9,
+    viewport: 'desktop',
+};
+
 function mergeUpdates<T extends object>(target: T, source: Partial<T>) {
     const keys = Object.keys(source) as Array<keyof T>;
     for (const key of keys) {
         const sourceValue = source[key];
         const targetValue = target[key];
 
-        // If both are objects (and not arrays), merge recursively
         if (
             sourceValue &&
             typeof sourceValue === 'object' &&
@@ -51,186 +61,234 @@ function mergeUpdates<T extends object>(target: T, source: Partial<T>) {
             !Array.isArray(targetValue)
         ) {
             mergeUpdates(targetValue as object, sourceValue as object);
-        }
-        // Otherwise, if source has a value, overwrite target
-        else if (sourceValue !== undefined) {
+        } else if (sourceValue !== undefined) {
             target[key] = sourceValue as T[keyof T];
         }
     }
 }
 
+let throttleTimeout: ReturnType<typeof setTimeout> | null = null;
+let pendingState: TrackedState | null = null;
+
 export const useBuilderStore = create<Store>()(
-    immer((set) => ({
-        nodes: {},
-        rootIds: [],
-        selectedId: null,
-        mode: 'edit',
-        zoom: 0.9,
-        viewport: 'desktop',
-        collapsedFields: {},
+    persist(
+        temporal(
+            immer((set) => ({
+                ...INITIAL_STATE,
 
-        createNode: (type, parentId, index = 0) => {
-            const id = nanoid();
-            const entry = builderFieldRegistry[type];
-            if (!entry) return;
+                createNode: (type, parentId, index = 0) => {
+                    const id = nanoid();
+                    const entry = builderFieldRegistry[type];
+                    if (!entry) return;
 
-            const name = `${type}_${id.slice(0, 4)}`;
+                    const name = `${type}_${id.slice(0, 4)}`;
 
-            set(state => {
-                const fieldProps = entry.kind === 'data'
-                    ? { ...entry.defaultProps, name }
-                    : { ...entry.defaultProps };
+                    set(state => {
+                        const fieldProps = entry.kind === 'data'
+                            ? { ...entry.defaultProps, name }
+                            : { ...entry.defaultProps };
 
-                state.nodes[id] = {
-                    id,
-                    field: fieldProps as Node['field'],
-                    parentId,
-                    children: [],
-                };
+                        state.nodes[id] = {
+                            id,
+                            field: fieldProps as Node['field'],
+                            parentId,
+                            children: [],
+                        };
 
-                if (parentId === null) {
-                    state.rootIds.splice(index, 0, id);
-                } else {
-                    state.nodes[parentId].children.splice(index, 0, id);
-                }
+                        if (parentId === null) {
+                            state.rootIds.splice(index, 0, id);
+                        } else {
+                            state.nodes[parentId].children.splice(index, 0, id);
+                        }
 
-                state.selectedId = id;
-            });
-        },
+                        state.selectedId = id;
+                    });
+                },
 
-        moveNode: (id, newParentId, index) => {
-            set(state => {
-                const node = state.nodes[id];
+                moveNode: (id, newParentId, index) => {
+                    set(state => {
+                        const node = state.nodes[id];
+                        if (!node) return;
 
-                const oldParentId = node.parentId;
-                const oldList =
-                    oldParentId === null
-                        ? state.rootIds
-                        : state.nodes[oldParentId].children;
+                        const oldParentId = node.parentId;
+                        const oldList = oldParentId === null
+                            ? state.rootIds
+                            : state.nodes[oldParentId].children;
 
-                const oldIndex = oldList.indexOf(id);
-                oldList.splice(oldIndex, 1);
-                if (oldParentId === newParentId && oldIndex < index) {
-                    index -= 1;
-                }
-                node.parentId = newParentId;
+                        const oldIndex = oldList.indexOf(id);
+                        oldList.splice(oldIndex, 1);
 
-                const newList =
-                    newParentId === null
-                        ? state.rootIds
-                        : state.nodes[newParentId].children;
+                        if (oldParentId === newParentId && oldIndex < index) {
+                            index -= 1;
+                        }
 
-                newList.splice(index, 0, id);
-            });
-        },
+                        node.parentId = newParentId;
 
-        selectNode: (id) => set({ selectedId: id }),
+                        const newList = newParentId === null
+                            ? state.rootIds
+                            : state.nodes[newParentId].children;
 
-        updateNode: (id, updates) => {
-            set(state => {
-                const node = state.nodes[id];
-                if (node) {
-                    mergeUpdates(node.field, updates);
-                }
-            });
-        },
+                        newList.splice(index, 0, id);
+                    });
+                },
 
-        removeNode: (id) => {
-            set(state => {
-                const node = state.nodes[id];
-                if (!node) return;
+                selectNode: (id) => set({ selectedId: id }),
 
-                const removeRecursive = (nodeId: string) => {
-                    const n = state.nodes[nodeId];
-                    if (n) {
-                        n.children.forEach(removeRecursive);
-                        delete state.nodes[nodeId];
-                    }
-                };
+                updateNode: (id, updates) => {
+                    set(state => {
+                        const node = state.nodes[id];
+                        if (node) {
+                            mergeUpdates(node.field, updates);
+                        }
+                    });
+                },
 
-                const parentId = node.parentId;
-                const list = parentId === null ? state.rootIds : state.nodes[parentId].children;
-                const idx = list.indexOf(id);
-                if (idx !== -1) list.splice(idx, 1);
+                removeNode: (id) => {
+                    set(state => {
+                        const node = state.nodes[id];
+                        if (!node) return;
 
-                removeRecursive(id);
+                        const removeRecursive = (nodeId: string) => {
+                            const n = state.nodes[nodeId];
+                            if (n) {
+                                n.children.forEach(removeRecursive);
+                                delete state.nodes[nodeId];
+                            }
+                        };
 
-                if (state.selectedId === id) {
-                    state.selectedId = null;
-                }
-            });
-        },
+                        const parentId = node.parentId;
+                        const list = parentId === null ? state.rootIds : state.nodes[parentId].children;
+                        const idx = list.indexOf(id);
+                        if (idx !== -1) list.splice(idx, 1);
 
-        duplicateNode: (id) => {
-            set(state => {
-                const originalNode = state.nodes[id];
-                if (!originalNode) return;
+                        removeRecursive(id);
 
-                const cloneRecursive = (nodeId: string, newParentId: string | null): string => {
-                    const sourceNode = state.nodes[nodeId];
-                    const newId = nanoid();
+                        if (state.selectedId === id) {
+                            state.selectedId = null;
+                        }
+                    });
+                },
 
-                    // Clone field props
-                    const newField = { ...sourceNode.field };
+                duplicateNode: (id) => {
+                    set(state => {
+                        const originalNode = state.nodes[id];
+                        if (!originalNode) return;
 
-                    // Handle name collision / suffix
-                    if ("name" in newField && typeof newField.name === "string") {
-                        const baseName = newField.name;
-                        let newName = `${baseName}_copy`;
-                        let counter = 1;
+                        const cloneRecursive = (nodeId: string, newParentId: string | null): string => {
+                            const sourceNode = state.nodes[nodeId];
+                            const newId = nanoid();
 
-                        // Check uniqueness against ALL nodes to be safe
-                        const isNameTaken = (n: string) =>
-                            Object.values(state.nodes).some(node =>
-                                "name" in node.field && node.field.name === n
+                            const newField = { ...sourceNode.field };
+
+                            if ("name" in newField && typeof newField.name === "string") {
+                                const baseName = newField.name;
+                                let newName = `${baseName}_copy`;
+                                let counter = 1;
+
+                                const isNameTaken = (n: string) =>
+                                    Object.values(state.nodes).some(node =>
+                                        "name" in node.field && node.field.name === n
+                                    );
+
+                                while (isNameTaken(newName)) {
+                                    newName = `${baseName}_copy_${counter}`;
+                                    counter++;
+                                }
+                                (newField as { name: string }).name = newName;
+                            }
+
+                            const newNode: Node = {
+                                id: newId,
+                                field: newField,
+                                parentId: newParentId,
+                                children: [],
+                            };
+
+                            state.nodes[newId] = newNode;
+
+                            newNode.children = sourceNode.children.map(childId =>
+                                cloneRecursive(childId, newId)
                             );
 
-                        while (isNameTaken(newName)) {
-                            newName = `${baseName}_copy_${counter}`;
-                            counter++;
+                            return newId;
+                        };
+
+                        const newRootId = cloneRecursive(id, originalNode.parentId);
+
+                        const parentId = originalNode.parentId;
+                        const list = parentId === null ? state.rootIds : state.nodes[parentId].children;
+                        const originalIndex = list.indexOf(id);
+
+                        if (originalIndex !== -1) {
+                            list.splice(originalIndex + 1, 0, newRootId);
                         }
-                        (newField as { name: string }).name = newName;
+
+                        state.selectedId = newRootId;
+                    });
+                },
+
+                setDropIndicator: (value) => set({ dropIndicator: value }),
+                setMode: (mode) => set({ mode }),
+                setZoom: (zoom) => set({ zoom }),
+                setViewport: (viewport) => set({ viewport }),
+                clearState: () => set(INITIAL_STATE),
+            })),
+            {
+                partialize: (state): TrackedState => ({
+                    nodes: state.nodes,
+                    rootIds: state.rootIds,
+                }),
+                equality: (pastState, currentState) =>
+                    pastState.nodes === currentState.nodes &&
+                    pastState.rootIds === currentState.rootIds,
+                limit: 50,
+                handleSet: (handleSet) => (pastState) => {
+                    if (!pendingState) {
+                        pendingState = pastState as TrackedState;
                     }
-
-                    // Create new node
-                    const newNode: Node = {
-                        id: newId,
-                        field: newField,
-                        parentId: newParentId,
-                        children: [],
-                    };
-
-                    // Add to state
-                    state.nodes[newId] = newNode;
-
-                    // Clone children
-                    newNode.children = sourceNode.children.map(childId =>
-                        cloneRecursive(childId, newId)
-                    );
-
-                    return newId;
-                };
-
-                const newRootId = cloneRecursive(id, originalNode.parentId);
-
-                // Insert into parent list
-                const parentId = originalNode.parentId;
-                const list = parentId === null ? state.rootIds : state.nodes[parentId].children;
-                const originalIndex = list.indexOf(id);
-
-                if (originalIndex !== -1) {
-                    list.splice(originalIndex + 1, 0, newRootId);
-                }
-
-                state.selectedId = newRootId;
-            });
-        },
-
-        dropIndicator: null,
-        setDropIndicator: (value) => set({ dropIndicator: value }),
-
-        setMode: (mode) => set({ mode }),
-        setZoom: (zoom) => set({ zoom }),
-        setViewport: (viewport) => set({ viewport }),
-    }))
+                    if (throttleTimeout) {
+                        clearTimeout(throttleTimeout);
+                    }
+                    throttleTimeout = setTimeout(() => {
+                        if (pendingState) {
+                            handleSet(pendingState);
+                            pendingState = null;
+                        }
+                        throttleTimeout = null;
+                    }, 400);
+                },
+            }
+        ),
+        {
+            name: 'buzzform-builder',
+            storage: createJSONStorage(() => localStorage),
+            partialize: (state) => ({
+                nodes: state.nodes,
+                rootIds: state.rootIds,
+                zoom: state.zoom,
+                viewport: state.viewport,
+            }),
+            version: 1,
+        }
+    )
 );
+
+export function useTemporalStore<T>(
+    selector: (state: TemporalState<TrackedState>) => T
+): T {
+    return useStore(useBuilderStore.temporal, selector);
+}
+
+export const useCanUndo = () =>
+    useTemporalStore((state) => state.pastStates.length > 0);
+
+export const useCanRedo = () =>
+    useTemporalStore((state) => state.futureStates.length > 0);
+
+export function useUndoRedo() {
+    const { undo, redo, clear } = useBuilderStore.temporal.getState();
+    const canUndo = useCanUndo();
+    const canRedo = useCanRedo();
+
+    return { undo, redo, clear, canUndo, canRedo };
+}
