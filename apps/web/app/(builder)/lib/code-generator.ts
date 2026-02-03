@@ -3,8 +3,10 @@ import type { Node } from "./types";
 
 export function generateComponentCode(
   nodes: Record<string, Node>,
-  rootIds: string[]
+  rootIds: string[],
+  formName: string
 ) {
+  const componentName = toComponentName(formName);
   // 1. Get the raw field structure
   const fields = nodesToFields(nodes, rootIds);
 
@@ -22,7 +24,7 @@ const formSchema = createSchema(${schemaString});
 
 type FormData = InferType<typeof formSchema>;
 
-export default function GeneratedForm() {
+export default function ${componentName}() {
   return (
     <div className="container mx-auto min-h-screen flex items-center justify-center">
       <Form
@@ -43,4 +45,26 @@ export default function GeneratedForm() {
     </div>
   );
 }`;
+}
+
+function toComponentName(formName: string) {
+  const normalized = formName
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part[0].toUpperCase() + part.slice(1))
+    .join("");
+
+  let name = normalized || "GeneratedForm";
+
+  if (/^[0-9]/.test(name)) {
+    name = `Form${name}`;
+  }
+
+  if (!name.endsWith("Form")) {
+    name = `${name}Form`;
+  }
+
+  return name;
 }
