@@ -26,6 +26,7 @@ export type BuilderFieldSidebar = {
     label: string;
     icon: IconSvgElement;
     category: SidebarCategory;
+    disabled?: boolean;
 };
 
 export interface BuilderNodeRendererProps {

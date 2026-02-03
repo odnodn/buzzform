@@ -16,6 +16,8 @@ import {
     RowInsertIcon,
     FolderIcon,
     ArrowShrink02Icon,
+    Layout01Icon,
+    Menu01Icon,
 } from '@hugeicons/core-free-icons';
 import type { ComponentType } from 'react';
 import type { BuilderNodeRendererProps } from './types';
@@ -82,6 +84,19 @@ export const builderFieldRegistry: BuilderFieldRegistry = {
         defaultProps: { type: 'datetime', label: 'Datetime' },
         properties: datetimeFieldProperties,
     },
+    tags: {
+        kind: 'data',
+        sidebar: { label: 'Tags', icon: Tag01Icon, category: 'inputs' },
+        defaultProps: { type: 'tags', label: 'Tags' },
+        properties: tagsFieldProperties,
+    },
+    upload: {
+        kind: 'data',
+        sidebar: { label: 'Upload', icon: Upload01Icon, category: 'inputs' },
+        defaultProps: { type: 'upload', label: 'Upload' },
+        properties: uploadFieldProperties,
+    },
+
     select: {
         kind: 'data',
         sidebar: { label: 'Select', icon: ArrowDown01Icon, category: 'selection' },
@@ -120,18 +135,6 @@ export const builderFieldRegistry: BuilderFieldRegistry = {
         defaultProps: { type: 'switch', label: 'Switch' },
         properties: switchFieldProperties,
     },
-    tags: {
-        kind: 'data',
-        sidebar: { label: 'Tags', icon: Tag01Icon, category: 'inputs' },
-        defaultProps: { type: 'tags', label: 'Tags' },
-        properties: tagsFieldProperties,
-    },
-    upload: {
-        kind: 'data',
-        sidebar: { label: 'Upload', icon: Upload01Icon, category: 'inputs' },
-        defaultProps: { type: 'upload', label: 'Upload' },
-        properties: uploadFieldProperties,
-    },
 
     // Layout fields
     row: {
@@ -155,24 +158,37 @@ export const builderFieldRegistry: BuilderFieldRegistry = {
         renderer: CollapsibleLayout as unknown as ComponentType<BuilderNodeRendererProps>,
         properties: collapsibleFieldProperties,
     },
+    tabs: {
+        kind: 'layout',
+        sidebar: { label: 'Tabs', icon: Layout01Icon, category: 'layout', disabled: true },
+        defaultProps: { type: 'tabs', tabs: [] },
+    },
+    array: {
+        kind: 'layout',
+        sidebar: { label: 'Array', icon: Menu01Icon, category: 'layout', disabled: true },
+        defaultProps: { type: 'array', name: 'items', label: 'List', fields: [] },
+    },
 };
 
 export function getRegistryEntry(type: keyof typeof builderFieldRegistry) {
     return builderFieldRegistry[type];
 }
 
-export function getSidebarGroups() {
-    const groups: Record<string, Array<{ type: string; label: string; icon: typeof TextIcon }>> = {};
+export type SidebarItem = {
+    type: string;
+    label: string;
+    icon: typeof TextIcon;
+    disabled?: boolean;
+};
+
+export function getSidebarGroups(): Record<string, SidebarItem[]> {
+    const groups: Record<string, SidebarItem[]> = {};
 
     for (const [type, entry] of Object.entries(builderFieldRegistry)) {
         if (!entry) continue;
-        const category = entry.sidebar.category;
+        const { category, label, icon, disabled } = entry.sidebar;
         if (!groups[category]) groups[category] = [];
-        groups[category].push({
-            type,
-            label: entry.sidebar.label,
-            icon: entry.sidebar.icon,
-        });
+        groups[category].push({ type, label, icon, disabled });
     }
 
     return groups;

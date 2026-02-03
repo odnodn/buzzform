@@ -18,6 +18,7 @@ import {
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
 
 const CATEGORY_LABELS: Record<string, string> = {
   inputs: "Inputs",
@@ -50,6 +51,7 @@ export function Sidebar() {
                     type={item.type as FieldType}
                     label={item.label}
                     icon={item.icon}
+                    disabled={item.disabled}
                   />
                 ))}
               </SidebarMenu>
@@ -78,20 +80,29 @@ function DraggableSidebarItem({
     disabled,
   });
 
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton
-        ref={setNodeRef}
-        {...listeners}
-        {...attributes}
-        className={cn(
-          "cursor-grab",
-          disabled && "cursor-not-allowed opacity-60",
-        )}
-      >
-        <HugeiconsIcon icon={icon} />
-        <span>{label}</span>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
+  const content = (
+    <SidebarMenuButton
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      className={cn(
+        "cursor-grab group relative",
+        disabled && "cursor-not-allowed opacity-50",
+      )}
+      disabled={disabled}
+    >
+      <HugeiconsIcon icon={icon} />
+      <span>{label}</span>
+      {disabled && (
+        <Badge
+          variant="outline"
+          className="ml-auto text-[10px] h-5 px-1.5 py-0 bg-transparent text-muted-foreground border-muted-foreground/40"
+        >
+          Coming Soon
+        </Badge>
+      )}
+    </SidebarMenuButton>
   );
+
+  return <SidebarMenuItem>{content}</SidebarMenuItem>;
 }
