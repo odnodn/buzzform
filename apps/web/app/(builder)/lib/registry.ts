@@ -132,8 +132,10 @@ export const builderFieldRegistry: BuilderFieldRegistry = {
     },
     switch: {
         kind: 'data',
-        sidebar: { label: 'Switch', icon: ToggleOnIcon, category: 'selection' },
-        defaultProps: { type: 'switch', label: 'Switch' },
+        sidebar: { label: 'Switch', icon: ToggleOnIcon, category: 'selection', },
+        defaultProps: {
+            type: 'switch', label: 'Switch', defaultValue: false,
+        },
         properties: switchFieldProperties,
     },
 
