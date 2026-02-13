@@ -107,6 +107,15 @@ export function sanitizeFieldConstraints<T extends Record<string, unknown>>(
     }
   }
 
+  // Array fields: minRows/maxRows
+  if ("minRows" in result && "maxRows" in result) {
+    const min = result.minRows as number | undefined;
+    const max = result.maxRows as number | undefined;
+    if (min !== undefined && max !== undefined && min > max) {
+      delete result.minRows;
+    }
+  }
+
   // Date/datetime fields: minDate/maxDate
   if ("minDate" in result && "maxDate" in result) {
     const min = result.minDate as string | Date | undefined;
