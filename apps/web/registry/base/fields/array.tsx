@@ -87,6 +87,7 @@ interface ArrayRowProps {
   isOpen: boolean;
   onToggle: (index: number) => void;
   canRemove: boolean;
+  canDuplicate: boolean;
   isSortable: boolean;
   isDisabled: boolean;
   isReadOnly: boolean;
@@ -145,6 +146,7 @@ const ArrayRow = React.memo(
     isOpen,
     onToggle,
     canRemove,
+    canDuplicate,
     isSortable,
     isDisabled,
     isReadOnly,
@@ -189,7 +191,7 @@ const ArrayRow = React.memo(
 
     const handleDuplicateClick = (e: React.MouseEvent) => {
       e.stopPropagation();
-      if (!isDisabled && !isReadOnly) {
+      if (canDuplicate && !isDisabled && !isReadOnly) {
         onDuplicate(index);
       }
     };
@@ -287,11 +289,23 @@ const ArrayRow = React.memo(
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 active:scale-95 transition-all"
+                  className={cn(
+                    "h-7 w-7 active:scale-95 transition-all",
+                    (!canDuplicate || isDisabled) &&
+                      "opacity-50 cursor-not-allowed"
+                  )}
                   onClick={handleDuplicateClick}
-                  disabled={isDisabled}
-                  title="Duplicate item"
-                  aria-label="Duplicate item"
+                  disabled={!canDuplicate || isDisabled}
+                  title={
+                    canDuplicate
+                      ? "Duplicate item"
+                      : `Maximum ${field.maxRows} items reached`
+                  }
+                  aria-label={
+                    canDuplicate
+                      ? "Duplicate item"
+                      : `Maximum ${field.maxRows} items reached`
+                  }
                 >
                   <IconPlaceholder
                     lucide="Copy"
@@ -364,6 +378,7 @@ const ArrayRow = React.memo(
       prevProps.index === nextProps.index &&
       prevProps.isOpen === nextProps.isOpen &&
       prevProps.canRemove === nextProps.canRemove &&
+      prevProps.canDuplicate === nextProps.canDuplicate &&
       prevProps.isSortable === nextProps.isSortable &&
       prevProps.isDisabled === nextProps.isDisabled &&
       prevProps.isReadOnly === nextProps.isReadOnly &&
@@ -393,6 +408,7 @@ export const ArrayField = React.forwardRef<
       isDisabled,
       isReadOnly,
       label,
+      error,
     }: ArrayFieldComponentProps,
     ref
   ) => {
@@ -486,6 +502,7 @@ export const ArrayField = React.forwardRef<
       path,
       rows.length
     );
+    const combinedErrorCount = totalErrorCount + (error ? 1 : 0);
 
     const sensors = useSensors(
       useSensor(PointerSensor, {
@@ -554,6 +571,10 @@ export const ArrayField = React.forwardRef<
     };
 
     const handleDuplicate = (index: number) => {
+      if (field.maxRows && rows.length >= field.maxRows) {
+        return;
+      }
+
       const currentValue = rows[index];
       if (currentValue) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -638,6 +659,7 @@ export const ArrayField = React.forwardRef<
                     isOpen={!collapsedRowsMap[row.id]}
                     onToggle={handleToggleRow}
                     canRemove={!field.minRows || rows.length > field.minRows}
+                    canDuplicate={canAddMore}
                     isSortable={isSortable}
                     isDisabled={isDisabled}
                     isReadOnly={isReadOnly}
@@ -721,6 +743,23 @@ export const ArrayField = React.forwardRef<
               />
               Minimum {field.minRows} {field.minRows === 1 ? "item" : "items"}{" "}
               required
+            </div>
+          )}
+
+        {typeof field.maxRows === "number" &&
+          rows.length > field.maxRows &&
+          !error && (
+            <div className="mt-3 text-xs text-destructive flex items-center gap-1.5 px-1 font-medium">
+              <IconPlaceholder
+                lucide="AlertCircle"
+                hugeicons="SecurityBlockIcon"
+                tabler="IconAlertCircle"
+                phosphor="Warning"
+                remixicon="RiAlertLine"
+                className="size-3.5"
+              />
+              Maximum {field.maxRows} {field.maxRows === 1 ? "item" : "items"}{" "}
+              allowed
             </div>
           )}
       </CardContent>
@@ -823,19 +862,27 @@ export const ArrayField = React.forwardRef<
                         {rows.length} {rows.length === 1 ? "item" : "items"}
                       </Badge>
                     )}
-                    {showErrorBadge && totalErrorCount > 0 && (
+                    {showErrorBadge && combinedErrorCount > 0 && (
                       <Badge
                         variant="destructive"
                         className="h-5 px-1.5 text-xs whitespace-nowrap shrink-0"
                       >
-                        {totalErrorCount}{" "}
-                        {totalErrorCount === 1 ? "error" : "errors"}
+                        {combinedErrorCount}{" "}
+                        {combinedErrorCount === 1 ? "error" : "errors"}
                       </Badge>
                     )}
                   </div>
                   {field.description && (
                     <p className="text-xs text-muted-foreground text-left wrap-break-word leading-tight w-full pr-2">
                       {field.description}
+                    </p>
+                  )}
+                  {error && (
+                    <p
+                      role="alert"
+                      className="text-xs text-destructive text-left wrap-break-word leading-tight w-full pr-2"
+                    >
+                      {error}
                     </p>
                   )}
                 </div>
