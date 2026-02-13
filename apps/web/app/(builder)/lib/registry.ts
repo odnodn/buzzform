@@ -26,6 +26,7 @@ import { RowLayout } from "../components/layouts/row";
 import { GroupLayout } from "../components/layouts/group";
 import { CollapsibleLayout } from "../components/layouts/collapsible";
 import { TabsLayout } from "../components/layouts/tabs";
+import { ArrayLayout } from "../components/layouts/array";
 import { textFieldProperties } from "./properties/text";
 import { emailFieldProperties } from "./properties/email";
 import { passwordFieldProperties } from "./properties/password";
@@ -44,6 +45,7 @@ import { rowFieldProperties } from "./properties/row";
 import { groupFieldProperties } from "./properties/group";
 import { collapsibleFieldProperties } from "./properties/collapsible";
 import { tabsFieldProperties } from "./properties/tabs";
+import { arrayFieldProperties } from "./properties/array";
 
 export const builderFieldRegistry: BuilderFieldRegistry = {
   text: {
@@ -217,14 +219,21 @@ export const builderFieldRegistry: BuilderFieldRegistry = {
     properties: tabsFieldProperties,
   },
   array: {
-    kind: "layout",
+    kind: "data",
     sidebar: {
       label: "Array",
       icon: Menu01Icon,
       category: "layout",
-      disabled: true,
     },
-    defaultProps: { type: "array", name: "items", label: "List", fields: [] },
+    defaultProps: {
+      type: "array",
+      name: "items",
+      label: "Array",
+      fields: [],
+      ui: { addLabel: "Add Item", isSortable: true },
+    },
+    renderer: ArrayLayout as unknown as ComponentType<BuilderNodeRendererProps>,
+    properties: arrayFieldProperties,
   },
 };
 

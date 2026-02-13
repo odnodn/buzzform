@@ -69,7 +69,11 @@ export function canDrop(
         return !isContainerType(childType);
     }
 
-    if (parentType === "group" || parentType === "collapsible") {
+    if (
+        parentType === "group" ||
+        parentType === "collapsible" ||
+        parentType === "array"
+    ) {
         return true;
     }
 
