@@ -63,6 +63,7 @@ type BuilderActions = {
   setZoom: (zoom: number) => void;
   setViewport: (viewport: Viewport) => void;
   clearState: () => void;
+  loadDocumentState: (state: Pick<BuilderState, "nodes" | "rootIds" | "formId" | "formName">) => void;
   setSaveStatus: (status: SaveStatus, timestamp?: number) => void;
   setFormName: (name: string) => void;
   setFormId: (id: string) => void;
@@ -552,6 +553,21 @@ export const useBuilderStore = create<Store>()(
           set((state) => {
             Object.assign(state, INITIAL_STATE);
             state.formId = nanoid();
+          });
+          temporal.resume();
+        },
+        loadDocumentState: (documentState) => {
+          const temporal = useBuilderStore.temporal.getState();
+          temporal.pause();
+          temporal.clear();
+          set((state) => {
+            Object.assign(state, INITIAL_STATE);
+            state.nodes = documentState.nodes;
+            state.rootIds = [...documentState.rootIds];
+            state.formId = documentState.formId;
+            state.formName = documentState.formName;
+            state.saveStatus = "saved";
+            state.lastSavedAt = Date.now();
           });
           temporal.resume();
         },
