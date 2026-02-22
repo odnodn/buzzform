@@ -12,6 +12,12 @@ const config = {
   reactStrictMode: true,
   turbopack: {
     root: path.resolve(__dirname, "../../"),
+    ...(isGitHubPages && {
+      // Swap server actions with client-side implementation for static export
+      resolveAlias: {
+        "@/app/(builder)/lib/actions": "@/app/(builder)/lib/actions.client",
+      },
+    }),
   },
   ...(isGitHubPages && {
     output: "export",
