@@ -141,7 +141,7 @@ export const builderFieldRegistry: BuilderFieldRegistry = {
       icon: CheckmarkSquare02Icon,
       category: "selection",
     },
-    defaultProps: { type: "checkbox", label: "Checkbox" },
+    defaultProps: { type: "checkbox", label: "Checkbox", defaultValue: false },
     properties: checkboxFieldProperties,
   },
   "checkbox-group": {
