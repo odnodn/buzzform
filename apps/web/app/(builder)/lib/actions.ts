@@ -1,13 +1,11 @@
-'use server'
-
-import { createClient } from "@/lib/supabase/server"
+import { createClient } from "@/lib/supabase/client"
 
 export async function joinWaitlist(email: string) {
     if (!email || !email.includes('@')) {
         return { error: 'Invalid email address' }
     }
 
-    const supabase = await createClient()
+    const supabase = createClient()
 
     try {
         const { error } = await supabase
