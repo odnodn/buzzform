@@ -23,6 +23,16 @@ export function extractDefaults(fields: Field[]): Record<string, unknown> {
   const defaults: Record<string, unknown> = {};
   for (const field of fields) {
     if ("name" in field && field.name) {
+      // Array values must always be arrays at runtime.
+      if (field.type === "array") {
+        const explicitDefault = (field as unknown as Record<string, unknown>)
+          .defaultValue;
+        defaults[field.name] = Array.isArray(explicitDefault)
+          ? deepClone(explicitDefault)
+          : [];
+        continue;
+      }
+
       if ("defaultValue" in field) {
         // Deep clone to avoid frozen object references from Zustand/immer
         defaults[field.name] = deepClone(
