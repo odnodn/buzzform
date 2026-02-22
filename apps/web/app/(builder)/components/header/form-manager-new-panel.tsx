@@ -15,6 +15,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Add01Icon,
   Alert01Icon,
+  ClipboardIcon,
   File02Icon,
   Upload01Icon,
 } from "@hugeicons/core-free-icons";
@@ -23,6 +24,7 @@ import {
   parseBuilderDocumentJson,
   type BuilderDocumentState,
 } from "../../lib/persistence";
+import { Textarea } from "@/components/ui/textarea";
 import { useBuilderStore } from "../../lib/store";
 import { toast } from "sonner";
 
@@ -112,6 +114,8 @@ export function FormManagerNewPanel({ onDone }: FormManagerNewPanelProps) {
   const [pendingImport, setPendingImport] =
     React.useState<PendingImport | null>(null);
   const [importError, setImportError] = React.useState<string | null>(null);
+  const [showJsonInput, setShowJsonInput] = React.useState(false);
+  const [jsonText, setJsonText] = React.useState("");
 
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const clearState = useBuilderStore((state) => state.clearState);
@@ -121,6 +125,8 @@ export function FormManagerNewPanel({ onDone }: FormManagerNewPanelProps) {
     setIsImporting(false);
     setPendingImport(null);
     setImportError(null);
+    setShowJsonInput(false);
+    setJsonText("");
   }, []);
 
   const handleNewForm = () => {
@@ -138,6 +144,41 @@ export function FormManagerNewPanel({ onDone }: FormManagerNewPanelProps) {
   const handleImportClick = () => {
     if (isImporting) return;
     fileInputRef.current?.click();
+  };
+
+  const handleJsonImport = async () => {
+    if (!jsonText.trim()) return;
+
+    const startedAt = Date.now();
+    setImportError(null);
+    setPendingImport(null);
+    setIsImporting(true);
+
+    try {
+      const document = parseBuilderDocumentJson(jsonText);
+      const importedState = fromBuilderDocument(document);
+      setPendingImport({
+        fileName: "Pasted JSON",
+        formName: importedState.formName,
+        nodeCount: Object.keys(importedState.nodes).length,
+        state: importedState,
+      });
+      setShowJsonInput(false);
+    } catch (error) {
+      const rawMessage =
+        error instanceof Error ? error.message : "Failed to parse JSON.";
+      const message = `Invalid BuzzForm JSON: ${rawMessage}`;
+      setImportError(message);
+      toast.error(message);
+    } finally {
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < MIN_IMPORT_FEEDBACK_MS) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, MIN_IMPORT_FEEDBACK_MS - elapsed),
+        );
+      }
+      setIsImporting(false);
+    }
   };
 
   const handleFileImport = async (
@@ -194,8 +235,43 @@ export function FormManagerNewPanel({ onDone }: FormManagerNewPanelProps) {
             onConfirmImport={handleConfirmImport}
             onClearSelection={resetImportState}
           />
+        ) : showJsonInput ? (
+          <div className="flex w-full flex-1 flex-col gap-4 animate-in fade-in duration-200">
+            <Textarea
+              placeholder="Paste your BuzzForm JSON schema here..."
+              value={jsonText}
+              onChange={(e) => setJsonText(e.target.value)}
+              className="min-h-48 flex-1 font-mono text-sm"
+              autoFocus
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="outline"
+                onClick={resetImportState}
+                disabled={isImporting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleJsonImport}
+                disabled={isImporting || !jsonText.trim()}
+              >
+                {isImporting ? (
+                  <Spinner className="mr-2 size-4" />
+                ) : (
+                  <HugeiconsIcon
+                    icon={ClipboardIcon}
+                    size={16}
+                    className="mr-2"
+                    strokeWidth={2}
+                  />
+                )}
+                {isImporting ? "Validating..." : "Import JSON"}
+              </Button>
+            </div>
+          </div>
         ) : (
-          <div className="grid w-full flex-1 gap-4 sm:grid-cols-2">
+          <div className="grid w-full flex-1 gap-4 sm:grid-cols-3">
             <Card
               className="group flex cursor-pointer flex-col justify-center transition-all duration-200 hover:ring-1 hover:ring-primary/50"
               onClick={handleNewForm}
@@ -241,6 +317,24 @@ export function FormManagerNewPanel({ onDone }: FormManagerNewPanelProps) {
                     ? "Checking JSON before import"
                     : "Restore from .json"}
                 </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card
+              className="group flex cursor-pointer flex-col justify-center transition-all duration-200 hover:ring-1 hover:ring-primary/50"
+              onClick={() => setShowJsonInput(true)}
+            >
+              <CardContent className="flex justify-center pb-2 pt-6">
+                <HugeiconsIcon
+                  icon={ClipboardIcon}
+                  size={32}
+                  strokeWidth={1.5}
+                  className="text-muted-foreground transition-all duration-300 group-hover:scale-110 group-hover:text-primary"
+                />
+              </CardContent>
+              <CardHeader className="justify-center text-center">
+                <CardTitle className="text-lg">Import JSON</CardTitle>
+                <CardDescription>Paste from clipboard</CardDescription>
               </CardHeader>
             </Card>
           </div>
