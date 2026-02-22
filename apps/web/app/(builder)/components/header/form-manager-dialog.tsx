@@ -41,7 +41,8 @@ export function FormManagerDialog() {
         <DialogHeader>
           <DialogTitle>Forms</DialogTitle>
           <DialogDescription>
-            Create a new form, import a file, or open a previously saved form.
+            Create a new form, import a file, paste JSON, or open a previously
+            saved form.
           </DialogDescription>
         </DialogHeader>
 
