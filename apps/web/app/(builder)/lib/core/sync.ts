@@ -140,9 +140,9 @@ function syncFieldValues(
 
             // Array: always preserve rows
             if (field.type === "array") {
-                if (currentVal !== undefined) {
+                if (Array.isArray(currentVal)) {
                     result[name] = currentVal;
-                } else if (defaultVal !== undefined) {
+                } else if (Array.isArray(defaultVal)) {
                     result[name] = defaultVal;
                 } else {
                     result[name] = [];
