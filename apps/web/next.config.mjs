@@ -13,9 +13,10 @@ const config = {
   turbopack: {
     root: path.resolve(__dirname, "../../"),
     ...(isGitHubPages && {
-      // Swap server actions with client-side implementation for static export
+      // Swap server-only modules with static stubs for static export
       resolveAlias: {
         "@/app/(builder)/lib/actions": "@/app/(builder)/lib/actions.client",
+        "@/lib/search-route": "@/lib/search-route.static",
       },
     }),
   },
