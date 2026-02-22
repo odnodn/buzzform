@@ -13,7 +13,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { CloudServerIcon } from "@hugeicons/core-free-icons";
 import { Sparkles } from "lucide-react";
-import { joinWaitlist } from "@/app/(builder)/lib/actions";
+import { joinWaitlist } from "@/app/(builder)/lib/actions.client";
 import { toast } from "sonner";
 import { createSchema, InferType } from "@buildnbuzz/buzzform";
 import {

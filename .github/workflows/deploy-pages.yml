@@ -39,13 +39,12 @@ jobs:
       - name: Build
         run: pnpm build
         env:
-          GITHUB_PAGES: "true"
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: apps/web/out
+          path: apps/webreact/dist
 
   deploy:
     name: Deploy
