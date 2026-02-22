@@ -5,12 +5,19 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const isGitHubPages = process.env.GITHUB_PAGES === "true";
+
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
   turbopack: {
     root: path.resolve(__dirname, "../../"),
   },
+  ...(isGitHubPages && {
+    output: "export",
+    basePath: process.env.BASE_PATH || "",
+    images: { unoptimized: true },
+  }),
 };
 
 const withMDX = createMDX({
