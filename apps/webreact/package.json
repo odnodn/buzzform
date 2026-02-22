@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"pnpm icons:dev\" \"vite\"",
-    "build": "tsc -b && vite build",
+    "build": "vite build && cp dist/index.html dist/404.html",
     "preview": "vite preview",
     "lint": "eslint .",
+    "check-types": "tsc --noEmit",
     "icons:dev": "pnpm dlx tsx --tsconfig ./tsconfig.scripts.json ./scripts/build-icons.ts --watch",
     "icons:build": "pnpm dlx tsx --tsconfig ./tsconfig.scripts.json ./scripts/build-icons.ts",
     "registry:build": "npx shadcn build"
@@ -23,6 +24,7 @@
     "@mdx-js/react": "^3.1.1",
     "@phosphor-icons/react": "^2.1.10",
     "@remixicon/react": "^4.8.0",
+    "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.94.0",
     "@tabler/icons-react": "^3.36.1",
     "class-variance-authority": "^0.7.1",

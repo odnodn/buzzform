@@ -19,9 +19,15 @@ export default defineConfig({
     tailwindcss(),
   ],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "."),
-      "@/components/buzzform": path.resolve(__dirname, "./registry/base"),
-    },
+    alias: [
+      {
+        find: "@/components/buzzform",
+        replacement: path.resolve(__dirname, "./registry/base"),
+      },
+      {
+        find: "@",
+        replacement: path.resolve(__dirname, "."),
+      },
+    ],
   },
 });
