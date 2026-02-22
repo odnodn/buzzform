@@ -24,30 +24,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateComponentCode } from "../lib/code-generator";
 import { toBuilderDocument } from "../lib/persistence";
+import { downloadTextFile, toSafeFileName } from "../lib/utils";
 import { useBuilderStore } from "../lib/store";
 
 const starterCommand =
   "npx shadcn@latest add https://form.buildnbuzz.com/r/starter.json";
-
-function toSafeFileName(input: string): string {
-  const normalized = input.trim().toLowerCase();
-  const slug = normalized
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60);
-
-  return slug || "form";
-}
-
-function downloadTextFile(content: string, fileName: string, mimeType: string) {
-  const blob = new Blob([content], { type: mimeType });
-  const objectUrl = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = objectUrl;
-  anchor.download = fileName;
-  anchor.click();
-  URL.revokeObjectURL(objectUrl);
-}
 
 export function ExportSheet() {
   const [open, setOpen] = React.useState(false);
@@ -88,7 +69,7 @@ export function ExportSheet() {
 
   const downloadJson = React.useCallback(() => {
     if (!documentJson) return;
-    const fileName = `${toSafeFileName(formName)}.buzzform.json`;
+    const fileName = `${toSafeFileName(formName)}.json`;
     downloadTextFile(documentJson, fileName, "application/json");
     toast.success("Builder backup exported");
   }, [documentJson, formName]);
@@ -118,7 +99,8 @@ export function ExportSheet() {
         <SheetHeader className="border-b pr-12">
           <SheetTitle>Export Form</SheetTitle>
           <SheetDescription>
-            Export production-ready TSX for your app, or a BuzzForm file for Builder import.
+            Export production-ready TSX for your app, or a BuzzForm file for
+            Builder import.
           </SheetDescription>
         </SheetHeader>
 
@@ -193,7 +175,8 @@ export function ExportSheet() {
                     BuzzForm file
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Keep this as your editable BuzzForm source file to back up, share, and continue work later in BuzzForm Builder.
+                    Keep this as your editable BuzzForm source file to back up,
+                    share, and continue work later in BuzzForm Builder.
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
                     <Button
@@ -212,9 +195,9 @@ export function ExportSheet() {
                   </div>
                 </div>
 
-                  <div className="[&_figure]:my-0!">
-                    <DynamicCodeBlock lang="json" code={documentJson} />
-                  </div>
+                <div className="[&_figure]:my-0!">
+                  <DynamicCodeBlock lang="json" code={documentJson} />
+                </div>
               </div>
             </ScrollArea>
           </TabsContent>

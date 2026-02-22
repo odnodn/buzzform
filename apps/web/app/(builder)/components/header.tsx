@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { useBuilderStore } from "../lib/store";
 
 import { SaveIndicator } from "./header/save-indicator";
-import { NewFormDialog } from "./header/new-form-dialog";
+import { FormManagerDialog } from "./header/form-manager-dialog";
 import { FormName } from "./header/form-name";
 import { CloudSaveDialog } from "./header/cloud-save-dialog";
 
@@ -46,7 +46,7 @@ export function SiteHeader() {
             <ThemeToggle />
             <CloudSaveDialog />
             <ExportSheet />
-            <NewFormDialog />
+            <FormManagerDialog />
           </div>
         </div>
       </div>
