@@ -1,5 +1,6 @@
 import type { ZodError } from "zod";
 import type { Node } from "../types";
+import type { OutputConfig } from "@buildnbuzz/buzzform";
 import {
   CURRENT_BUILDER_DOCUMENT_SCHEMA_VERSION,
   CURRENT_BUILDER_VERSION,
@@ -16,6 +17,7 @@ export interface BuilderDocumentState {
   rootIds: string[];
   formId: string;
   formName: string;
+  outputConfig?: OutputConfig;
 }
 
 export interface CreateBuilderDocumentOptions {
@@ -42,9 +44,11 @@ export function toBuilderDocument(
 
   return {
     schemaVersion: CURRENT_BUILDER_DOCUMENT_SCHEMA_VERSION,
-    builderVersion: normalizeString(options.builderVersion) ?? CURRENT_BUILDER_VERSION,
+    builderVersion:
+      normalizeString(options.builderVersion) ?? CURRENT_BUILDER_VERSION,
     formId: state.formId,
     formName: state.formName,
+    outputConfig: state.outputConfig,
     nodes: toDocumentNodes(state.nodes),
     rootIds: [...state.rootIds],
     createdAt,
@@ -60,6 +64,7 @@ export function fromBuilderDocument(
   return {
     formId: validated.formId,
     formName: validated.formName,
+    outputConfig: validated.outputConfig,
     nodes: toStateNodes(validated.nodes),
     rootIds: [...validated.rootIds],
   };
@@ -172,7 +177,9 @@ function toStateNodes(
       parentId: node.parentId,
       parentSlot: node.parentSlot,
       children: [...node.children],
-      ...(node.tabChildren ? { tabChildren: cloneTabChildren(node.tabChildren) } : {}),
+      ...(node.tabChildren
+        ? { tabChildren: cloneTabChildren(node.tabChildren) }
+        : {}),
     };
   }
 
@@ -210,7 +217,9 @@ function toBuilderDocumentType(parsed: ParsedBuilderDocument): BuilderDocument {
       parentId: node.parentId,
       parentSlot: node.parentSlot,
       children: [...node.children],
-      ...(node.tabChildren ? { tabChildren: cloneTabChildren(node.tabChildren) } : {}),
+      ...(node.tabChildren
+        ? { tabChildren: cloneTabChildren(node.tabChildren) }
+        : {}),
     };
   }
 
@@ -219,6 +228,7 @@ function toBuilderDocumentType(parsed: ParsedBuilderDocument): BuilderDocument {
     builderVersion: parsed.builderVersion,
     formId: parsed.formId,
     formName: parsed.formName,
+    outputConfig: parsed.outputConfig,
     nodes,
     rootIds: [...parsed.rootIds],
     createdAt: parsed.createdAt,
